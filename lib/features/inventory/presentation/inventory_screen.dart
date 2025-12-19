@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+import '../../../services/database_service.dart';
+import '../data/ingredient.dart';
+
+class InventoryScreen extends StatelessWidget {
+  const InventoryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 实例化数据库服务
+    final DatabaseService db = DatabaseService();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text('My Fridge Inventory', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
+      // 使用 StreamBuilder 实现实时数据更新
+      body: StreamBuilder<List<Ingredient>>(
+        stream: db.getInventoryStream(),
+        builder: (context, snapshot) {
+          // 1. 处理加载状态
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // 2. 处理错误
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          // 3. 处理空数据
+          final items = snapshot.data ?? [];
+          if (items.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          // 4. 展示数据列表
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final isExpired = item.isExpired;
+
+              return Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isExpired ? Colors.red.shade50 : Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.kitchen,
+                      color: isExpired ? Colors.red : Colors.green,
+                    ),
+                  ),
+                  title: Row(
+                    children: [
+                      Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 8),
+                      // 显示分类标签
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(item.category, style: TextStyle(fontSize: 10, color: Colors.blue.shade700)),
+                      ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(isExpired ? 'Expired' : 'Fresh', 
+                           style: TextStyle(color: isExpired ? Colors.red : Colors.green, fontSize: 12)),
+                      if (item.calories != null)
+                        Text(item.calories!, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('${item.quantity} ${item.unit}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(
+                        "Exp: ${item.expirationDate.toString().split(' ')[0]}",
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox, size: 64, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          const Text("Your fridge is empty", style: TextStyle(color: Colors.grey, fontSize: 18)),
+          const Text("Scan or add food from the home screen", style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
