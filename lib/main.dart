@@ -7,6 +7,7 @@ import 'features/inventory/presentation/inventory_screen.dart';
 
 import '../widgets/login/loginform_widget.dart';
 import '../widgets/login/registrationform_widget.dart';
+import '../features/profile/presentation/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,21 +33,25 @@ class NutriScanApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
+        //initialData: FirebaseAuth.instance.currentUser, // 关键
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          
-          // 如果已登录，进入主导航壳子，而不是直接进入输入页面
+
+          // 已登录
           if (snapshot.hasData) {
             return const MainNavigation();
           }
 
-          return const AuthScreen(); 
+          // 未登录
+          return const AuthScreen();
         },
       ),
+
     );
   }
 }
@@ -66,7 +71,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const InventoryScreen(), // 默认展示冰箱库存
     const HomeScreen(),      // 这里的 HomeScreen 实际上是你的“添加食物”功能
-    const Center(child: Text("Profile & Recipes Page")), // 预留的设置或食谱页
+    ProfileScreen(), // 预留的设置或食谱页
   ];
 
   @override

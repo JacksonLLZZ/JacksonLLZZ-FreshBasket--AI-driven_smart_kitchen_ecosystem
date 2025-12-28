@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: DropdownButtonFormField<String>(
                           initialValue: _selectedUnit,
                           decoration: const InputDecoration(labelText: "Unit"),
-                          items: ['g', 'ml', 'pcs', 'cup', 'oz'].map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+                          items: ['g', 'ml'].map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
                           onChanged: (v) => setState(() => _selectedUnit = v!),
                         ),
                       ),
