@@ -12,7 +12,12 @@
           "package_name": "com.example.dima_project"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "7061147228-n31nmfoc1bcsrt2b99unnp4h0ji0bm8i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5LIazfqRWua9pYoMsAHSpaf52ba1mWPk"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "7061147228-n31nmfoc1bcsrt2b99unnp4h0ji0bm8i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -31,7 +41,20 @@
           "package_name": "kitchen.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "7061147228-27bo1cb22tqf6o5ciddl7h993q094sa2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kitchen.app",
+            "certificate_hash": "254c33b7e6716c124237b0bf083fdf87a801cedd"
+          }
+        },
+        {
+          "client_id": "7061147228-n31nmfoc1bcsrt2b99unnp4h0ji0bm8i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5LIazfqRWua9pYoMsAHSpaf52ba1mWPk"
@@ -39,7 +62,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "7061147228-n31nmfoc1bcsrt2b99unnp4h0ji0bm8i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

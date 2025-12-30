@@ -3,11 +3,36 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../features/inventory/data/ingredient.dart';
 
 class DatabaseService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
   static const String _appId = "nutriscan-app-v1";
+  FirebaseFirestore get _db => FirebaseFirestore.instance;
+
   String? get _uid => FirebaseAuth.instance.currentUser?.uid;
 
-  // --- 用户资料逻辑 ---
+  // theme related methods
+  Future<void> updateTheme(String themeName) async {
+    final uid = _uid;
+    if (uid == null) return;
+    await _db.collection('artifacts').doc(_appId).collection('users').doc(uid).set({
+      'theme': themeName,
+      'updated_at': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+  
+  Stream<String> watchThemeSelection() {
+  return getUserProfileStream().map((snapshot) {
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        return data['theme'] ?? 'Default';
+      }
+      return 'Default';
+    });
+  }
+  //get user profile stream
+    Stream<DocumentSnapshot> getUserProfileStream() {
+    final uid = _uid;
+    if (uid == null) return const Stream.empty();
+    return _db.collection('artifacts').doc(_appId).collection('users').doc(uid).snapshots();
+  }
 
   Future<bool> userDocExists() async {
     final uid = _uid;

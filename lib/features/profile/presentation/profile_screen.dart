@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart'; 
 import '../../../services/database_service.dart';
+import '../../../core/constants/theme.dart';
+// 导入 main.dart 以访问 allowAnonymousLogin 全局变量
+import '../../../main.dart'; 
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,73 +16,72 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final DatabaseService _db = DatabaseService();
   
-  // Edamam 支持的常见健康标签/过敏原列表
   final List<String> _allAllergens = [
-    'Gluten-Free',
-    'Peanut-Free',
-    'Tree-Nut-Free',
-    'Dairy-Free',
-    'Egg-Free',
-    'Soy-Free',
-    'Fish-Free',
-    'Shellfish-Free',
-    'Pork-Free',
-    'Vegan',
-    'Vegetarian',
-    'Low-Sugar',
+    'Gluten-Free', 'Peanut-Free', 'Tree-Nut-Free', 'Dairy-Free', 
+    'Egg-Free', 'Soy-Free', 'Fish-Free', 'Shellfish-Free', 
+    'Pork-Free', 'Vegan', 'Vegetarian', 'Low-Sugar',
   ];
+
+  final Map<String, Color> _seasonalThemes = {
+    'Spring': AppTheme.springColor,
+    'Summer': AppTheme.summerColor,
+    'Autumn': AppTheme.autumnColor,
+    'Winter': AppTheme.winterColor,
+  };
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return const Scaffold(body: Center(child: Text("Please login")));
+    final bool isGuest = user?.isAnonymous ?? true;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text("My Profile", style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text("Account & Settings", style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('artifacts')
-            .doc("nutriscan-app-v1") 
-            .collection('users')
-            .doc(user.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}"));
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+      body: StreamBuilder<Map<String, dynamic>>(
+        stream: _db.getUserProfileStream().map((snapshot) {
+          if (snapshot.exists) {
+            return snapshot.data() as Map<String, dynamic>? ?? {};
           }
-
-          final profileData = snapshot.data?.data() as Map<String, dynamic>?;
-          final List<String> userAllergens = List<String>.from(profileData?['allergens'] ?? []);
+          return {};
+        }),
+        builder: (context, snapshot) {
+          final data = snapshot.data ?? {};
+          final currentTheme = data['theme'] ?? 'Default';
+          final List<String> userAllergens = List<String>.from(data['allergens'] ?? []);
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 个人基本信息展示
-                _buildHeader(user, profileData),
+                // 1. Identity Area
+                isGuest 
+                  ? _buildGuestLoginCard() 
+                  : _buildHeader(user, data), 
+                
                 const SizedBox(height: 32),
                 
-                // 数据统计展示 (冰箱库存数量等)
+                // 2. Seasonal Themes
+                const Text("App Appearance", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                _buildThemeSelector(currentTheme),
+                const SizedBox(height: 32),
+
+                // 3. Fridge Statistics
                 _buildStatsSection(_db),
                 const SizedBox(height: 32),
 
-                // 过敏原与饮食偏好设置
-                const Text("Dietary & Allergies", 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                // 4. Dietary Profile
+                const Text("Health Profile", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 _buildAllergySection(userAllergens),
                 const SizedBox(height: 48),
                 
-                // 退出登录按钮
-                _buildLogoutButton(),
+                // 5. Logout Button (Only for registered users)
+                if (!isGuest) _buildLogoutButton(),
                 const SizedBox(height: 20),
               ],
             ),
@@ -89,23 +91,113 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader(User? user, Map<String, dynamic>? profile) {
-    return Center(
+  // Guest mode card with login trigger
+  Widget _buildGuestLoginCard() {
+    final primaryColor = Theme.of(context).primaryColor;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [primaryColor, primaryColor.withOpacity(0.8)]),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+      ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.blueAccent.withOpacity(0.1),
-            child: const Icon(Icons.person, size: 50, color: Colors.blueAccent),
-          ),
+          const Icon(Icons.cloud_off_outlined, color: Colors.white, size: 40),
           const SizedBox(height: 16),
-          Text(
-            profile?['username'] ?? "NutriScan User",
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          const Text(
+            "Guest Mode",
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Text(user?.email ?? "no-email@provided.com", style: const TextStyle(color: Colors.grey)),
+          const SizedBox(height: 8),
+          const Text(
+            "Sign in to manage and sync your fridge across all your devices.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () async {
+              // Important: Break the guest loop before signing out
+              allowAnonymousLogin.value = false; 
+              await FirebaseAuth.instance.signOut();
+              // AuthWrapper in main.dart will now show AuthPage instead of AutoLoginSplash
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: primaryColor,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(double.infinity, 45),
+            ),
+            child: const Text("Sign In / Register", style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildThemeSelector(String currentTheme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, 
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: _seasonalThemes.entries.map((entry) {
+          final isSelected = currentTheme == entry.key;
+          return GestureDetector(
+            onTap: () => _db.updateTheme(entry.key),
+            child: Column(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    color: entry.value,
+                    shape: BoxShape.circle,
+                    border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+                    boxShadow: isSelected ? [BoxShadow(color: entry.value.withOpacity(0.4), blurRadius: 10)] : [],
+                  ),
+                  child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                ),
+                const SizedBox(height: 8),
+                Text(entry.key, style: TextStyle(
+                  fontSize: 12, 
+                  color: isSelected ? entry.value : Colors.grey[600],
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                )),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildHeader(User? user, Map<String, dynamic> profile) {
+    final primaryColor = Theme.of(context).primaryColor;
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 35,
+          backgroundColor: primaryColor.withOpacity(0.1),
+          child: Icon(Icons.person_rounded, size: 40, color: primaryColor),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(profile['username'] ?? "Nutri User", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(user?.email ?? "Email account", style: const TextStyle(color: Colors.grey, fontSize: 14)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -114,134 +206,132 @@ class _ProfileScreenState extends State<ProfileScreen> {
       stream: db.getInventoryStream(),
       builder: (context, snapshot) {
         final count = snapshot.data?.length ?? 0;
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem("In Fridge", count.toString()),
-              Container(width: 1, height: 40, color: Colors.grey.shade200),
-              _buildStatItem("Health Labels", "Active"),
-            ],
-          ),
+        return Row(
+          children: [
+            _buildStatCard("Fridge Items", count.toString(), Icons.kitchen_outlined),
+            const SizedBox(width: 16),
+            _buildStatCard("Kitchen Status", "Active", Icons.eco_outlined),
+          ],
         );
       },
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-      ],
+  Widget _buildStatCard(String label, String value, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white, 
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 24),
+            const SizedBox(height: 12),
+            Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildAllergySection(List<String> userAllergens) {
+  Widget _buildAllergySection(List<String> allergens) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: userAllergens.isEmpty 
-              ? [const Text("No specific allergies set.", style: TextStyle(color: Colors.grey, fontSize: 14))]
-              : userAllergens.map((label) => Chip(
-                  label: Text(label, style: const TextStyle(fontSize: 12, color: Colors.white)),
-                  backgroundColor: Colors.orangeAccent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                )).toList(),
-          ),
-          const SizedBox(height: 16),
+          if (allergens.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text("No allergies set.", style: TextStyle(color: Colors.grey, fontSize: 13)),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: allergens.map((a) => Chip(
+                label: Text(a, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                backgroundColor: Colors.orangeAccent,
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+              )).toList(),
+            ),
           TextButton.icon(
-            onPressed: () => _showAllergenPicker(userAllergens),
+            onPressed: () => _showAllergenPicker(allergens),
             icon: const Icon(Icons.edit_note, size: 20),
-            label: const Text("Manage Allergens"),
+            label: const Text("Update Health Preferences"),
           ),
         ],
       ),
     );
   }
 
-  void _showAllergenPicker(List<String> currentAllergens) {
-    List<String> tempSelected = List.from(currentAllergens);
-    
+  void _showAllergenPicker(List<String> current) {
+    List<String> temp = List.from(current);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (BuildContext modalContext) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              height: MediaQuery.of(context).size.height * 0.7,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Manage Your Allergies", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8,
-                        children: _allAllergens.map((allergen) {
-                          final isSelected = tempSelected.contains(allergen);
-                          return FilterChip(
-                            label: Text(allergen),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setModalState(() {
-                                if (selected) {
-                                  tempSelected.add(allergen);
-                                } else {
-                                  tempSelected.remove(allergen);
-                                
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        height: MediaQuery.of(context).size.height * 0.65,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: StatefulBuilder(
+          builder: (ctx, setModalState) => Column(
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 20),
+              const Text("Health & Allergies", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8,
+                    children: _allAllergens.map((a) => FilterChip(
+                      label: Text(a),
+                      selected: temp.contains(a),
+                      onSelected: (s) => setModalState(() => s ? temp.add(a) : temp.remove(a)),
+                      selectedColor: Colors.orangeAccent.withOpacity(0.2),
+                      checkmarkColor: Colors.orangeAccent,
+                    )).toList(),
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await _db.updateAllergens(tempSelected);
-                        if (mounted) {
-                          Navigator.of(modalContext).pop(); 
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text("Save Preferences", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            );
-          },
-        );
-      },
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await _db.updateAllergens(temp);
+                    if (mounted) Navigator.pop(ctx);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child: const Text("Save Preferences", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -249,13 +339,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () => FirebaseAuth.instance.signOut(),
-        icon: const Icon(Icons.logout, color: Colors.red),
-        label: const Text("Logout", style: TextStyle(color: Colors.red)),
+        onPressed: () async {
+          // Logic: When signing out of a REAL account, reset to Guest mode
+          allowAnonymousLogin.value = true; 
+          await FirebaseAuth.instance.signOut();
+        },
+        icon: const Icon(Icons.logout_rounded),
+        label: const Text("Sign Out", style: TextStyle(fontWeight: FontWeight.bold)),
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.red),
+          foregroundColor: Colors.red,
+          side: BorderSide(color: Colors.red.withOpacity(0.3)),
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
     );

@@ -1,22 +1,60 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme => ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          primary: const Color(0xFF2563EB),
+  // 定义四季主题的静态颜色常量，方便在 ProfileScreen 中引用
+  static const Color springColor = Color(0xFF10B981);
+  static const Color summerColor = Color(0xFF0EA5E9);
+  static const Color autumnColor = Color(0xFFF59E0B);
+  static const Color winterColor = Color(0xFF6366F1);
+  static const Color defaultBlue = Color(0xFF2563EB);
+
+  // 根据主题名称获取对应的 ThemeData
+  static ThemeData getTheme(String themeName) {
+    switch (themeName) {
+      case 'Spring':
+        return _buildTheme(springColor);
+      case 'Summer':
+        return _buildTheme(summerColor);
+      case 'Autumn':
+        return _buildTheme(autumnColor);
+      case 'Winter':
+        return _buildTheme(winterColor);
+      default:
+        return lightTheme;
+    }
+  }
+
+  static ThemeData get lightTheme => _buildTheme(defaultBlue);
+
+  static ThemeData _buildTheme(Color seedColor) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seedColor,
+        primary: seedColor,
+      ),
+      appBarTheme: AppBarTheme(
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: seedColor,
+        titleTextStyle: TextStyle(
+          color: seedColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: Colors.white,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-      );
+      ),
+    );
+  }
 }

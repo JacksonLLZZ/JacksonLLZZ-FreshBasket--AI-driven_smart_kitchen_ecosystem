@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedUnit = 'g';
   String _selectedCategory = 'Meat';
 
-  // 拟定的大类列表
+  // categories list
   final List<String> _categories = [
     'Meat', 'Fruit', 'Vegetable', 'Dairy', 'Grain', 'Seafood', 'Drink', 'Snack'
   ];
@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isProcessing = false;
   Ingredient? _result;
 
-  // 执行计算
+  // calculate nutrition
   void _calculate() async {
     final name = _nameController.text.trim();
     final qty = double.tryParse(_qtyController.text) ?? 0.0;
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // 执行保存
+  // execute save
   void _save() async {
     if (_result == null) return;
     await _db.saveIngredient(_result!);
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(title: const Text("NutriScan AI", style: TextStyle(fontWeight: FontWeight.bold))),
+      appBar: AppBar(title: const Text("NutriScan", style: TextStyle(fontWeight: FontWeight.bold))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text("Add Food Item", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
             const SizedBox(height: 20),
             
-            // 输入卡片
+            // input form
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 30),
 
-            // 结果卡片
+            
             if (_result != null)
               Container(
                 padding: const EdgeInsets.all(24),

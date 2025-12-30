@@ -1,162 +1,264 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'core/constants/theme.dart';
-import 'features/home/home_screen.dart';
+import 'services/database_service.dart';
+import 'features/home/home_screen.dart'; 
 import 'features/inventory/presentation/inventory_screen.dart';
+import 'features/profile/presentation/profile_screen.dart';
+import 'firebase_options.dart';
+import 'widgets/login/loginform_widget.dart';
+import 'widgets/login/registrationform_widget.dart';
 
-import '../widgets/login/loginform_widget.dart';
-import '../widgets/login/registrationform_widget.dart';
-import '../features/profile/presentation/profile_screen.dart';
+/// Global state to control the authentication flow
+/// true: App will automatically log in as Guest (shows AutoLoginSplash)
+/// false: App will stay on the manual login/register screen (shows AuthPage)
+final ValueNotifier<bool> allowAnonymousLogin = ValueNotifier<bool>(true);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
   try {
-    await Firebase.initializeApp();
-    debugPrint("Firebase initialized successfully");
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
-    debugPrint("Firebase initialization error: $e");
+    debugPrint("Firebase initialization failed: $e");
   }
-
   runApp(const NutriScanApp());
 }
 
-class NutriScanApp extends StatelessWidget {
+class NutriScanApp extends StatefulWidget {
   const NutriScanApp({super.key});
+
+  @override
+  State<NutriScanApp> createState() => _NutriScanAppState();
+}
+
+class _NutriScanAppState extends State<NutriScanApp> {
+  String _currentTheme = 'Default';
+  final DatabaseService _db = DatabaseService();
+  StreamSubscription? _themeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initAuthListener();
+  }
+
+  void _initAuthListener() {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      _themeSubscription?.cancel();
+      if (user != null) {
+        _themeSubscription = _db.getUserProfileStream().listen((snapshot) {
+          if (snapshot.exists) {
+            final data = snapshot.data() as Map<String, dynamic>?;
+            final themeName = data?['theme'] ?? 'Default';
+            if (mounted && _currentTheme != themeName) {
+              setState(() => _currentTheme = themeName);
+            }
+          }
+        });
+      } else {
+        if (mounted) setState(() => _currentTheme = 'Default');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _themeSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NutriScan',
-      theme: AppTheme.lightTheme,
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        //initialData: FirebaseAuth.instance.currentUser, // 关键
-        builder: (context, snapshot) {
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          // 已登录
-          if (snapshot.hasData) {
-            return const MainNavigation();
-          }
-
-          // 未登录
-          return const AuthScreen();
-        },
-      ),
-
+      theme: AppTheme.getTheme(_currentTheme),
+      home: const AuthWrapper(),
     );
   }
 }
 
-/// 主导航壳子：处理底部导航逻辑
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+/// AuthWrapper: The "Traffic Controller" of the app
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: allowAnonymousLogin,
+      builder: (context, allowAnonymous, _) {
+        return StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            
+            final user = snapshot.data;
+
+            // 1. If user is logged in (Guest OR Registered) -> Go to App
+            if (user != null) {
+              return const MainNavigation();
+            }
+
+            // 2. If NO user & Auto-Guest is enabled -> Show Guest Interface (AutoLoginSplash)
+            if (allowAnonymous) {
+              return const AutoLoginSplash();
+            }
+
+            // 3. If NO user & Auto-Guest is disabled -> Show Manual Login Interface (AuthPage)
+            return const AuthPage();
+          },
+        );
+      },
+    );
+  }
 }
 
-class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
+/// GUEST INTERFACE (AutoLoginSplash)
+/// This is what users see when they first open the app or when they log out to Guest mode.
+class AutoLoginSplash extends StatefulWidget {
+  const AutoLoginSplash({super.key});
+  @override
+  State<AutoLoginSplash> createState() => _AutoLoginSplashState();
+}
 
-  // 页面列表：将登录后的功能模块化
-  final List<Widget> _pages = [
-    const InventoryScreen(), // 默认展示冰箱库存
-    const HomeScreen(),      // 这里的 HomeScreen 实际上是你的“添加食物”功能
-    ProfileScreen(), // 预留的设置或食谱页
-  ];
+class _AutoLoginSplashState extends State<AutoLoginSplash> {
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _handleLogin();
+  }
+
+  Future<void> _handleLogin() async {
+    try {
+      if (mounted) setState(() => _errorMessage = null);
+      // Wait a moment for visual effect
+      await Future.delayed(const Duration(milliseconds: 1500));
+      await FirebaseAuth.instance.signInAnonymously();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().contains('admin-restricted-operation')
+              ? "Guest mode is disabled. Please sign in manually."
+              : "Connection error. Please check your internet.";
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        selectedItemColor: const Color(0xFF2563EB),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.kitchen),
-            label: "Fridge",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: "Add Food",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.restaurant_menu, size: 80, color: Colors.blueAccent),
+            const SizedBox(height: 24),
+            const Text("NutriScan", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Text(_errorMessage ?? "Preparing your smart kitchen...", style: const TextStyle(color: Colors.grey)),
+            const SizedBox(height: 48),
+            if (_errorMessage == null)
+              const CircularProgressIndicator(strokeWidth: 2.5)
+            else
+              ElevatedButton(
+                onPressed: () {
+                  // If guest fails, let user go to manual login
+                  allowAnonymousLogin.value = false;
+                }, 
+                child: const Text("Sign In Manually"),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// 授权页面容器：用于切换显示你的 LoginFormWidget 和 RegistrationFormWidget
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+/// MANUAL LOGIN INTERFACE (AuthPage)
+/// This is what users see when they click "Sign In / Register" in Profile.
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<AuthPage> createState() => _AuthPageState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
-  bool isLogin = true;
-
-  void toggleView() {
-    setState(() => isLogin = !isLogin);
-  }
+class _AuthPageState extends State<AuthPage> {
+  bool showLogin = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(isLogin ? "Welcome Back" : "Create Account"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => allowAnonymousLogin.value = true, // Go back to Guest mode splash
+        ),
+        title: Text(showLogin ? "Sign In" : "Register"),
         elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: Column(
           children: [
-            const Icon(Icons.restaurant_menu, size: 80, color: Colors.blueAccent),
-            const SizedBox(height: 32),
+            const SizedBox(height: 40),
+            const Icon(Icons.account_circle_outlined, size: 60, color: Colors.blueAccent),
+            const SizedBox(height: 20),
             
-            // 这里替换为你真实的 Widget
-            isLogin 
-               ? const LoginForm()
-               : const RegistrationForm(),
-
-            const SizedBox(height: 16),
+            // Your uploaded widgets
+            showLogin ? const LoginForm() : const RegistrationForm(),
             
             TextButton(
-              onPressed: toggleView,
-              child: Text(
-                isLogin 
-                  ? "Don't have an account? Register now" 
-                  : "Already have an account? Login here",
-                style: const TextStyle(color: Colors.blueAccent),
-              ),
+              onPressed: () => setState(() => showLogin = !showLogin),
+              child: Text(showLogin ? "Create an account" : "Already have an account? Sign In"),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
+  int _currentIndex = 0;
+  final List<Widget> _pages = [
+    const InventoryScreen(), 
+    const HomeScreen(), 
+    const ProfileScreen()
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey[400],
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.kitchen_outlined), label: "Fridge"),
+          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: "Add Food"),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+        ],
       ),
     );
   }

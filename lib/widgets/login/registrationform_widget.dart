@@ -2,7 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kitchen/features/home/home_screen.dart';
+//import 'package:kitchen/features/home/home_screen.dart';
 import 'package:kitchen/services/database_service.dart';
 
 class RegistrationForm extends StatefulWidget {
@@ -24,12 +24,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
     _email.dispose();
     _password.dispose();
     super.dispose();
-  }
-
-  void _navigateToHome() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+  
   }
 
   void _showLoading() {
@@ -86,7 +81,6 @@ class _RegistrationFormState extends State<RegistrationForm> {
       );
 
       _hideLoading();
-      _navigateToHome();
     } on FirebaseAuthException catch (e) {
       _hideLoading();
       _showError(e.message ?? 'Registration failed');
