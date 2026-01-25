@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // 定义四季主题的静态颜色常量，方便在 ProfileScreen 中引用
-  static const Color springColor = Color(0xFF10B981);
-  static const Color summerColor = Color(0xFF0EA5E9);
-  static const Color autumnColor = Color(0xFFF59E0B);
-  static const Color winterColor = Color(0xFF6366F1);
-  static const Color defaultBlue = Color(0xFF2563EB);
-
+// A fresh, grassy green (less neon)
+  static const Color springColor = Color(0xFF81C784); 
+  
+  // Soft Coral/Pinkish Red
+  static const Color summerColor = Color(0xFFE57373); 
+  
+  // Apricot/Creamy Orange
+  static const Color autumnColor = Color(0xFFFFB74D); 
+  
+  // Sky Blue
+  static const Color winterColor = Color(0xFF64B5F6);
+  
+  // Renamed to Purple to match reality
+  static const Color defaultColor = Color.fromARGB(255, 137, 97, 11);
+  
   // 根据主题名称获取对应的 ThemeData
   static ThemeData getTheme(String themeName) {
     switch (themeName) {
@@ -24,7 +33,7 @@ class AppTheme {
     }
   }
 
-  static ThemeData get lightTheme => _buildTheme(defaultBlue);
+  static ThemeData get lightTheme => _buildTheme(defaultColor);
 
   static ThemeData _buildTheme(Color seedColor) {
     return ThemeData(

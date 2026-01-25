@@ -35,7 +35,7 @@ class NutritionService {
       }
     }
   } catch (e) {
-    print("Edamam API Error: $e");
+    //print("Edamam API Error: $e");
   }
   return null;
   }

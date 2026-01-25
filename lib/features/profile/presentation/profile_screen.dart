@@ -5,6 +5,8 @@ import '../../../services/database_service.dart';
 import '../../../core/constants/theme.dart';
 // 导入 main.dart 以访问 allowAnonymousLogin 全局变量
 import '../../../main.dart'; 
+import 'package:kitchen/core/constants/app_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -28,6 +30,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Autumn': AppTheme.autumnColor,
     'Winter': AppTheme.winterColor,
   };
+
+  String _seasonIconPath(String season) {
+        switch (season) {
+          case 'Spring':
+            return AppIcons.spring;
+          case 'Summer':
+            return AppIcons.summer;
+          case 'Autumn':
+            return AppIcons.autumn;
+          case 'Winter':
+            return AppIcons.winter;
+          default:
+            return AppIcons.summer;
+        }
+      
+}
 
   @override
   Widget build(BuildContext context) {
@@ -97,9 +115,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [primaryColor, primaryColor.withOpacity(0.8)]),
+        gradient: LinearGradient(colors: [primaryColor, primaryColor.withValues(alpha: 204)]),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+        boxShadow: [BoxShadow(color: primaryColor.withValues(alpha: 76), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Column(
         children: [
@@ -143,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 26)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -154,15 +172,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: 50, height: 50,
-                  decoration: BoxDecoration(
-                    color: entry.value,
-                    shape: BoxShape.circle,
-                    border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
-                    boxShadow: isSelected ? [BoxShadow(color: entry.value.withOpacity(0.4), blurRadius: 10)] : [],
+                    duration: const Duration(milliseconds: 300),
+              width: 56,
+              height: 56,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? entry.value : Colors.grey.withValues(alpha: 73),
+                  width: isSelected ? 2.5 : 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 13),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(
+                  _seasonIconPath(entry.key),
+                  fit: BoxFit.contain,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? entry.value : Colors.grey.withValues(alpha: 77),
+                    BlendMode.srcIn,
                   ),
-                  child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                ),
+
+                  if (isSelected)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: entry.value,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.check, size: 12, color: Colors.white),
+                      ),
+                    ),
+                ],
+              ),
                 ),
                 const SizedBox(height: 8),
                 Text(entry.key, style: TextStyle(
@@ -184,8 +240,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         CircleAvatar(
           radius: 35,
-          backgroundColor: primaryColor.withOpacity(0.1),
-          child: Icon(Icons.person_rounded, size: 40, color: primaryColor),
+          backgroundColor: primaryColor.withValues(alpha: 26),
+          child: ClipOval(
+            child: Image.asset(
+              'lib/core/constants/icon/chef_profile.png',
+              width: 450,
+              height: 450,
+              fit: BoxFit.cover,
+            ),
+),
+
         ),
         const SizedBox(width: 20),
         Expanded(
@@ -224,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: BoxDecoration(
           color: Colors.white, 
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 25)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: Text(a),
                       selected: temp.contains(a),
                       onSelected: (s) => setModalState(() => s ? temp.add(a) : temp.remove(a)),
-                      selectedColor: Colors.orangeAccent.withOpacity(0.2),
+                      selectedColor: Colors.orangeAccent.withValues(alpha: 55),
                       checkmarkColor: Colors.orangeAccent,
                     )).toList(),
                   ),
@@ -317,7 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     await _db.updateAllergens(temp);
-                    if (mounted) Navigator.pop(ctx);
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -348,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         label: const Text("Sign Out", style: TextStyle(fontWeight: FontWeight.bold)),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
-          side: BorderSide(color: Colors.red.withOpacity(0.3)),
+          side: BorderSide(color: Colors.red.withValues(alpha: 77)),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),

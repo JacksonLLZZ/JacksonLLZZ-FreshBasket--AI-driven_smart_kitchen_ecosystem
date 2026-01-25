@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # --- 图标与矢量图 (保留并升级) ---
+  flutter_svg: ^2.0.10
 
   # --- 核心 UI 与工具 ---
   cupertino_icons: ^1.0.2
@@ -70,7 +72,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-
+    - assets/icons/
+    - assets/data/season_foods.json
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

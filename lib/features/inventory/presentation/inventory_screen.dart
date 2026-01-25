@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../services/database_service.dart';
 import '../data/ingredient.dart';
+import 'package:kitchen/core/constants/app_icons.dart';
+import 'package:kitchen/core/constants/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
@@ -32,7 +35,7 @@ class InventoryScreen extends StatelessWidget {
           // 3. 处理空数据
           final items = snapshot.data ?? [];
           if (items.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
           // 4. 展示数据列表
@@ -108,12 +111,20 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox, size: 64, color: Colors.grey.shade300),
+          
+          SvgPicture.asset(
+            AppIcons.fridgeSvg,
+            width: 96,
+            height: 96,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+
+          ),
           const SizedBox(height: 16),
           const Text("Your fridge is empty", style: TextStyle(color: Colors.grey, fontSize: 18)),
           const Text("Scan or add food from the home screen", style: TextStyle(color: Colors.grey)),

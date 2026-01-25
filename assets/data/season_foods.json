@@ -1,0 +1,573 @@
+[
+  {
+    "id": "veg_asparagus",
+    "name": "Asparagus",
+    "aliases": ["asparagus"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "green"]
+  },
+  {
+    "id": "veg_artichoke",
+    "name": "Artichoke",
+    "aliases": ["artichoke", "artichokes"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh", "mediterranean"]
+  },
+  {
+    "id": "veg_peas",
+    "name": "Peas",
+    "aliases": ["peas", "green peas", "peas (fresh)"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 4,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_fava_beans",
+    "name": "Fava Beans",
+    "aliases": ["fava beans", "broad beans"],
+    "seasons": ["spring"],
+    "category": "Legume",
+    "default_shelf_life_days": 4,
+    "tags": ["fresh", "protein"]
+  },
+  {
+    "id": "veg_spinach",
+    "name": "Spinach",
+    "aliases": ["spinach", "baby spinach"],
+    "seasons": ["spring", "autumn"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 4,
+    "tags": ["leafy", "green"]
+  },
+  {
+    "id": "veg_arugula",
+    "name": "Arugula",
+    "aliases": ["arugula", "rocket", "rocket salad"],
+    "seasons": ["spring", "autumn"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 4,
+    "tags": ["leafy", "mediterranean"]
+  },
+  {
+    "id": "veg_radishes",
+    "name": "Radishes",
+    "aliases": ["radish", "radishes"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_spring_onion",
+    "name": "Spring Onion",
+    "aliases": ["spring onion", "spring onions", "scallion", "scallions", "green onion", "green onions"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh", "aromatic"]
+  },
+  {
+    "id": "veg_new_potatoes",
+    "name": "New Potatoes",
+    "aliases": ["new potatoes", "baby potatoes", "potatoes (new)"],
+    "seasons": ["spring"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 14,
+    "tags": ["staple"]
+  },
+  {
+    "id": "veg_green_beans",
+    "name": "Green Beans",
+    "aliases": ["green beans", "string beans"],
+    "seasons": ["spring", "summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 6,
+    "tags": ["fresh", "green"]
+  },
+  {
+    "id": "fruit_strawberries",
+    "name": "Strawberries",
+    "aliases": ["strawberry", "strawberries"],
+    "seasons": ["spring", "summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 3,
+    "tags": ["fresh", "sweet"]
+  },
+  {
+    "id": "fruit_cherries",
+    "name": "Cherries",
+    "aliases": ["cherry", "cherries"],
+    "seasons": ["spring", "summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 4,
+    "tags": ["fresh", "sweet"]
+  },
+  {
+    "id": "fruit_apricots",
+    "name": "Apricots",
+    "aliases": ["apricot", "apricots"],
+    "seasons": ["spring", "summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "sweet"]
+  },
+
+  {
+    "id": "veg_tomatoes",
+    "name": "Tomatoes",
+    "aliases": ["tomato", "tomatoes", "cherry tomatoes", "roma tomatoes"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "mediterranean"]
+  },
+  {
+    "id": "veg_zucchini",
+    "name": "Zucchini",
+    "aliases": ["zucchini", "courgette", "courgettes"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 6,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_bell_pepper",
+    "name": "Bell Pepper",
+    "aliases": ["bell pepper", "bell peppers", "sweet pepper", "sweet peppers", "red pepper", "yellow pepper"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_eggplant",
+    "name": "Eggplant",
+    "aliases": ["eggplant", "aubergine"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 6,
+    "tags": ["fresh", "mediterranean"]
+  },
+  {
+    "id": "veg_cucumber",
+    "name": "Cucumber",
+    "aliases": ["cucumber", "cucumbers"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_sweet_corn",
+    "name": "Sweet Corn",
+    "aliases": ["sweet corn", "corn", "corn on the cob"],
+    "seasons": ["summer"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 3,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_basil",
+    "name": "Basil",
+    "aliases": ["basil", "fresh basil"],
+    "seasons": ["summer"],
+    "category": "Herb",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "aromatic", "mediterranean"]
+  },
+  {
+    "id": "veg_mint",
+    "name": "Mint",
+    "aliases": ["mint", "fresh mint"],
+    "seasons": ["spring", "summer"],
+    "category": "Herb",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "aromatic"]
+  },
+  {
+    "id": "fruit_watermelon",
+    "name": "Watermelon",
+    "aliases": ["watermelon"],
+    "seasons": ["summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 7,
+    "tags": ["sweet"]
+  },
+  {
+    "id": "fruit_peaches",
+    "name": "Peaches",
+    "aliases": ["peach", "peaches"],
+    "seasons": ["summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh", "sweet"]
+  },
+  {
+    "id": "fruit_plums",
+    "name": "Plums",
+    "aliases": ["plum", "plums"],
+    "seasons": ["summer"],
+    "category": "Fruit",
+    "default_shelf_life_days": 6,
+    "tags": ["fresh", "sweet"]
+  },
+  {
+    "id": "fruit_figs",
+    "name": "Figs",
+    "aliases": ["fig", "figs"],
+    "seasons": ["summer", "autumn"],
+    "category": "Fruit",
+    "default_shelf_life_days": 3,
+    "tags": ["fresh", "sweet", "mediterranean"]
+  },
+
+  {
+    "id": "veg_pumpkin",
+    "name": "Pumpkin",
+    "aliases": ["pumpkin"],
+    "seasons": ["autumn"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "veg_butternut_squash",
+    "name": "Butternut Squash",
+    "aliases": ["butternut squash", "squash"],
+    "seasons": ["autumn"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "veg_mushrooms",
+    "name": "Mushrooms",
+    "aliases": ["mushroom", "mushrooms", "button mushrooms"],
+    "seasons": ["autumn"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 5,
+    "tags": ["fresh"]
+  },
+  {
+    "id": "veg_fennel",
+    "name": "Fennel",
+    "aliases": ["fennel", "fennel bulb"],
+    "seasons": ["autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 10,
+    "tags": ["mediterranean"]
+  },
+  {
+    "id": "veg_beetroot",
+    "name": "Beetroot",
+    "aliases": ["beetroot", "beets", "beet"],
+    "seasons": ["autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 14,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "veg_leek",
+    "name": "Leeks",
+    "aliases": ["leek", "leeks"],
+    "seasons": ["autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 10,
+    "tags": ["winter"]
+  },
+  {
+    "id": "fruit_apples",
+    "name": "Apples",
+    "aliases": ["apple", "apples"],
+    "seasons": ["autumn", "winter"],
+    "category": "Fruit",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "fruit_pears",
+    "name": "Pears",
+    "aliases": ["pear", "pears"],
+    "seasons": ["autumn"],
+    "category": "Fruit",
+    "default_shelf_life_days": 10,
+    "tags": ["sweet"]
+  },
+  {
+    "id": "nut_chestnuts",
+    "name": "Chestnuts",
+    "aliases": ["chestnut", "chestnuts"],
+    "seasons": ["autumn"],
+    "category": "Nut",
+    "default_shelf_life_days": 14,
+    "tags": ["seasonal"]
+  },
+  {
+    "id": "fruit_grapes",
+    "name": "Grapes",
+    "aliases": ["grape", "grapes"],
+    "seasons": ["autumn"],
+    "category": "Fruit",
+    "default_shelf_life_days": 7,
+    "tags": ["fresh", "sweet"]
+  },
+
+  {
+    "id": "veg_cabbage",
+    "name": "Cabbage",
+    "aliases": ["cabbage", "green cabbage"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "veg_cauliflower",
+    "name": "Cauliflower",
+    "aliases": ["cauliflower"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 10,
+    "tags": ["winter"]
+  },
+  {
+    "id": "veg_broccoli",
+    "name": "Broccoli",
+    "aliases": ["broccoli"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["green", "winter"]
+  },
+  {
+    "id": "veg_brussels_sprouts",
+    "name": "Brussels Sprouts",
+    "aliases": ["brussels sprouts", "brussel sprouts"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["winter"]
+  },
+  {
+    "id": "veg_kale",
+    "name": "Kale",
+    "aliases": ["kale"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 7,
+    "tags": ["leafy", "winter"]
+  },
+  {
+    "id": "veg_carrots",
+    "name": "Carrots",
+    "aliases": ["carrot", "carrots"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life", "staple"]
+  },
+  {
+    "id": "veg_parsnips",
+    "name": "Parsnips",
+    "aliases": ["parsnip", "parsnips"],
+    "seasons": ["winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 14,
+    "tags": ["long_life"]
+  },
+  {
+    "id": "veg_sweet_potato",
+    "name": "Sweet Potato",
+    "aliases": ["sweet potato", "sweet potatoes"],
+    "seasons": ["autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 21,
+    "tags": ["long_life", "staple"]
+  },
+  {
+    "id": "fruit_oranges",
+    "name": "Oranges",
+    "aliases": ["orange", "oranges"],
+    "seasons": ["winter"],
+    "category": "Fruit",
+    "default_shelf_life_days": 21,
+    "tags": ["citrus"]
+  },
+  {
+    "id": "fruit_lemons",
+    "name": "Lemons",
+    "aliases": ["lemon", "lemons"],
+    "seasons": ["winter"],
+    "category": "Fruit",
+    "default_shelf_life_days": 21,
+    "tags": ["citrus", "staple"]
+  },
+  {
+    "id": "fruit_mandarins",
+    "name": "Mandarins",
+    "aliases": ["mandarin", "mandarins", "clementine", "clementines"],
+    "seasons": ["winter"],
+    "category": "Fruit",
+    "default_shelf_life_days": 14,
+    "tags": ["citrus"]
+  },
+  {
+    "id": "fruit_kiwi",
+    "name": "Kiwi",
+    "aliases": ["kiwi", "kiwifruit"],
+    "seasons": ["winter"],
+    "category": "Fruit",
+    "default_shelf_life_days": 10,
+    "tags": ["fresh"]
+  },
+
+  {
+    "id": "staple_milk",
+    "name": "Milk",
+    "aliases": ["milk", "whole milk", "skim milk", "low fat milk", "semi-skimmed milk"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Dairy",
+    "default_shelf_life_days": 7,
+    "tags": ["staple"]
+  },
+  {
+    "id": "staple_eggs",
+    "name": "Eggs",
+    "aliases": ["egg", "eggs"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Protein",
+    "default_shelf_life_days": 21,
+    "tags": ["staple"]
+  },
+  {
+    "id": "staple_yogurt",
+    "name": "Yogurt",
+    "aliases": ["yogurt", "yoghurt", "plain yogurt", "greek yogurt"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Dairy",
+    "default_shelf_life_days": 10,
+    "tags": ["staple"]
+  },
+  {
+    "id": "staple_cheese",
+    "name": "Cheese",
+    "aliases": ["cheese", "parmesan", "mozzarella", "pecorino", "cheddar"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Dairy",
+    "default_shelf_life_days": 14,
+    "tags": ["staple"]
+  },
+  {
+    "id": "staple_rice",
+    "name": "Rice",
+    "aliases": ["rice", "white rice", "brown rice"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Grain",
+    "default_shelf_life_days": 180,
+    "tags": ["staple", "long_life"]
+  },
+  {
+    "id": "staple_pasta",
+    "name": "Pasta",
+    "aliases": ["pasta", "spaghetti", "penne", "fusilli"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Grain",
+    "default_shelf_life_days": 365,
+    "tags": ["staple", "long_life"]
+  },
+  {
+    "id": "staple_bread",
+    "name": "Bread",
+    "aliases": ["bread", "whole wheat bread", "white bread"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Grain",
+    "default_shelf_life_days": 5,
+    "tags": ["staple"]
+  },
+  {
+    "id": "staple_olive_oil",
+    "name": "Olive Oil",
+    "aliases": ["olive oil", "extra virgin olive oil"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Pantry",
+    "default_shelf_life_days": 365,
+    "tags": ["staple", "long_life", "mediterranean"]
+  },
+  {
+    "id": "staple_salt",
+    "name": "Salt",
+    "aliases": ["salt", "sea salt", "table salt"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Pantry",
+    "default_shelf_life_days": 3650,
+    "tags": ["staple", "long_life"]
+  },
+  {
+    "id": "staple_black_pepper",
+    "name": "Black Pepper",
+    "aliases": ["black pepper", "pepper"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Pantry",
+    "default_shelf_life_days": 1825,
+    "tags": ["staple", "long_life"]
+  },
+  {
+    "id": "staple_garlic",
+    "name": "Garlic",
+    "aliases": ["garlic", "garlic cloves"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 30,
+    "tags": ["staple", "aromatic", "long_life"]
+  },
+  {
+    "id": "staple_onion",
+    "name": "Onion",
+    "aliases": ["onion", "onions", "yellow onion", "red onion"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Vegetable",
+    "default_shelf_life_days": 30,
+    "tags": ["staple", "aromatic", "long_life"]
+  },
+  {
+    "id": "staple_canned_tomatoes",
+    "name": "Canned Tomatoes",
+    "aliases": ["canned tomatoes", "tinned tomatoes", "tomato puree", "passata"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Pantry",
+    "default_shelf_life_days": 730,
+    "tags": ["staple", "long_life", "mediterranean"]
+  },
+  {
+    "id": "staple_chickpeas",
+    "name": "Chickpeas",
+    "aliases": ["chickpeas", "garbanzo beans", "canned chickpeas"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Legume",
+    "default_shelf_life_days": 730,
+    "tags": ["staple", "long_life", "protein"]
+  },
+  {
+    "id": "staple_lentils",
+    "name": "Lentils",
+    "aliases": ["lentils", "red lentils", "green lentils"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Legume",
+    "default_shelf_life_days": 365,
+    "tags": ["staple", "long_life", "protein"]
+  },
+  {
+    "id": "staple_tuna",
+    "name": "Canned Tuna",
+    "aliases": ["tuna", "canned tuna", "tinned tuna"],
+    "seasons": ["spring", "summer", "autumn", "winter"],
+    "category": "Protein",
+    "default_shelf_life_days": 730,
+    "tags": ["staple", "long_life"]
+  }
+]

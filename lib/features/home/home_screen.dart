@@ -2,6 +2,39 @@ import 'package:flutter/material.dart';
 import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
+import 'package:kitchen/features/shopping_list/presentation/shopping_list_screen.dart';
+import '../../../core/utils/season_helper.dart';
+import '../../../core/constants/theme.dart';
+
+String _seasonLabel(String season) {
+  switch (season) {
+    case 'spring':
+      return 'Spring';
+    case 'summer':
+      return 'Summer';
+    case 'autumn':
+      return 'Autumn';
+    case 'winter':
+      return 'Winter';
+    default:
+      return season;
+  }
+}
+
+String _seasonMessage(String season) {
+  switch (season) {
+    case 'spring':
+      return 'Fresh greens and light proteins are in season.';
+    case 'summer':
+      return 'Hydrating fruits and quick salads are perfect now.';
+    case 'autumn':
+      return 'Warm soups and hearty vegetables are great choices.';
+    case 'winter':
+      return 'Root vegetables and high-protein staples work well.';
+    default:
+      return 'Seasonal picks curated for you.';
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   
   String _selectedUnit = 'g';
   String _selectedCategory = 'Meat';
-
+  
   // categories list
   final List<String> _categories = [
     'Meat', 'Fruit', 'Vegetable', 'Dairy', 'Grain', 'Seafood', 'Drink', 'Snack'
@@ -79,16 +112,113 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+      final theme = Theme.of(context);
+      final primary = theme.primaryColor;
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(title: const Text("NutriScan", style: TextStyle(fontWeight: FontWeight.bold))),
+      appBar: AppBar(title: const Text("Smart Fridge", style: TextStyle(fontWeight: FontWeight.bold))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Add Food Item", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-            const SizedBox(height: 20),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Seasonal recommendation card
+        Builder(builder: (context) {
+          final season = SeasonHelper.getCurrentSeason(hemisphere: Hemisphere.northern);
+          final seasonText = _seasonLabel(season);
+          final message = _seasonMessage(season);
+
+          final theme = Theme.of(context);
+          final primary = theme.colorScheme.primary;
+
+          return Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface, // 比 Colors.white 更“主题化”
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(Icons.local_florist_outlined, color: primary),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "It's $seasonText now",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "Based on the season, we recommend in-season groceries for your shopping list.\n$message",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          height: 1.35,
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ShoppingListScreen()),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                          ),
+                          icon: const Icon(Icons.shopping_cart_outlined, size: 18),
+                          label: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                              child: Text(
+                                "View seasonal picks",
+                                maxLines: 1,
+                                overflow: TextOverflow.visible,
+                            style: TextStyle(fontWeight: FontWeight.w700,fontSize: 12,),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+}),
+
+      const SizedBox(height: 18),
+
+      const Text(
+        "Add Food Item",
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+      ),
+      const SizedBox(height: 20),
+
             
             // input form
             Container(
@@ -96,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 13), blurRadius: 10)],
               ),
               child: Column(
                 children: [
@@ -140,7 +270,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _isProcessing ? null : _calculate,
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), foregroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+),
+
                       child: _isProcessing 
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                         : const Text("Calculate Calories", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -159,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 77)),
                 ),
                 child: Column(
                   children: [
