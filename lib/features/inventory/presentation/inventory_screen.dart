@@ -4,6 +4,7 @@ import '../data/ingredient.dart';
 import 'package:kitchen/core/constants/app_icons.dart';
 import 'package:kitchen/core/constants/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../recipes/presentation/recipe_detail_screen.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
@@ -39,10 +40,12 @@ class InventoryScreen extends StatelessWidget {
           }
 
           // 4. 展示数据列表
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
+          return Stack(
+            children: [
+              ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
               final item = items[index];
               final isExpired = item.isExpired;
 
@@ -105,6 +108,34 @@ class InventoryScreen extends StatelessWidget {
                 ),
               );
             },
+          ),
+          // 悬浮的探索按钮
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                if (items.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Add some ingredients first!')),
+                  );
+                  return;
+                }
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => RecipeDetailScreen(ingredients: items),
+                  ),
+                );
+              },
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              icon: const Icon(Icons.restaurant_menu),
+              label: const Text(
+                'Explore Recipes',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
           );
         },
       ),
