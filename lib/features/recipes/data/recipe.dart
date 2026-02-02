@@ -26,6 +26,13 @@ class Recipe {
   final int missedIngredientCount;
   final List<RecipeIngredient> usedIngredients;
   final List<RecipeIngredient> missedIngredients;
+  
+  // TheMealDB 独有字段（Spoonacular 为 null）
+  final String? instructions;  // 烹饪步骤说明
+  final String? category;      // 分类（如 Chicken, Dessert）
+  final String? area;          // 地区（如 Japanese, Italian）
+  final String? tags;          // 标签（逗号分隔）
+  final String? youtubeUrl;    // YouTube 视频链接
 
   Recipe({
     required this.id,
@@ -35,6 +42,11 @@ class Recipe {
     required this.missedIngredientCount,
     required this.usedIngredients,
     required this.missedIngredients,
+    this.instructions,
+    this.category,
+    this.area,
+    this.tags,
+    this.youtubeUrl,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -54,6 +66,11 @@ class Recipe {
               ?.map((e) => RecipeIngredient.fromJson(e))
               .toList() ??
           [],
+      instructions: json['instructions'],
+      category: json['category'],
+      area: json['area'],
+      tags: json['tags'],
+      youtubeUrl: json['youtubeUrl'],
     );
   }
 
@@ -66,6 +83,11 @@ class Recipe {
       'missedIngredientCount': missedIngredientCount,
       'usedIngredients': usedIngredients.map((e) => e.toJson()).toList(),
       'missedIngredients': missedIngredients.map((e) => e.toJson()).toList(),
+      'instructions': instructions,
+      'category': category,
+      'area': area,
+      'tags': tags,
+      'youtubeUrl': youtubeUrl,
     };
   }
 }

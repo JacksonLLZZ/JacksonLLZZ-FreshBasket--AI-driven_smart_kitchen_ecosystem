@@ -5,6 +5,7 @@ import '../data/recipe.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'recipe_info_screen.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -26,23 +27,47 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   int _currentPage = 0; // 当前页码（0-9代表第1-10个食谱）
 
   // 用于跟踪选中的食材
-  late Map<String, bool> _selectedIngredients;
+  Map<String, bool> _selectedIngredients = {};
+
+  // API 源相关
+  String _currentApiSource = 'Spoonacular';
 
   @override
   void initState() {
     super.initState();
-    // 初始化所有食材为选中状态
-    _selectedIngredients = {
-      for (var ingredient in widget.ingredients) ingredient.id: true,
-    };
-    // 自动加载缓存（如果存在）
-    _autoLoadCache();
+    _initializeScreen();
   }
 
-  // 生成缓存key（基于所有食材ID，而不是选中的食材）
+  Future<void> _initializeScreen() async {
+    // 读取当前 API 源
+    final prefs = await SharedPreferences.getInstance();
+    final apiSource = prefs.getString('api_source') ?? 'Spoonacular';
+
+    // 根据 API 源初始化食材选择状态
+    if (apiSource == 'Free') {
+      // Free Recipe API: 默认全不选
+      _selectedIngredients = {
+        for (var ingredient in widget.ingredients) ingredient.id: false,
+      };
+    } else {
+      // Spoonacular API: 默认全选
+      _selectedIngredients = {
+        for (var ingredient in widget.ingredients) ingredient.id: true,
+      };
+    }
+
+    setState(() {
+      _currentApiSource = apiSource;
+    });
+
+    // 自动加载缓存（如果存在）
+    await _autoLoadCache();
+  }
+
+  // 生成缓存key（基于 API 源和所有食材ID）
   String _getCacheKey() {
     final allIds = widget.ingredients.map((e) => e.id).toList()..sort();
-    return 'recipes_cache_${allIds.join('_')}';
+    return 'recipes_cache_${_currentApiSource}_${allIds.join('_')}';
   }
 
   // 自动加载缓存（如果存在）
@@ -157,9 +182,28 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
 
     try {
-      final recipes = await _service.generateCombinedRecipes(
-        selectedIngredients,
-      );
+      List<Recipe> recipes;
+
+      // 根据 API 源调用不同的接口
+      if (_currentApiSource == 'Free') {
+        // 使用 TheMealDB API - 只支持单个食材
+        if (selectedIngredients.length != 1) {
+          throw Exception('Free Recipe API only supports ONE ingredient');
+        }
+        
+        final ingredient = selectedIngredients.first.name;
+        debugPrint('Using Free Recipe API with ingredient: $ingredient');
+        recipes = await _service.generateRecipesFromMealDb(ingredient);
+        
+      } else if (_currentApiSource == 'Gemini') {
+        // TODO: 调用 Gemini API
+        debugPrint('Using Gemini API - Placeholder');
+        recipes = await _service.generateCombinedRecipes(selectedIngredients);
+      } else {
+        // Spoonacular API（默认）
+        debugPrint('Using Spoonacular API');
+        recipes = await _service.generateCombinedRecipes(selectedIngredients);
+      }
 
       if (recipes.isEmpty) {
         setState(() {
@@ -254,6 +298,37 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    // API 源提示（如果是 Free Recipe API）
+                    if (_currentApiSource == 'Free') ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: Colors.orange.shade700,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Free API: Select only ONE main ingredient',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -264,6 +339,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           label: Text(ingredient.name),
                           selected: isSelected,
                           onSelected: (selected) {
+                            // Free Recipe API 限制：最多只能选择一个
+                            if (_currentApiSource == 'Free' && selected) {
+                              final selectedCount = _selectedIngredients.values
+                                  .where((v) => v == true)
+                                  .length;
+                              if (selectedCount >= 1) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Free Recipe API only allows ONE main ingredient',
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                return;
+                              }
+                            }
                             setState(() {
                               _selectedIngredients[ingredient.id] = selected;
                             });
@@ -548,128 +640,140 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   Widget _buildRecipeCard(Recipe recipe) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 食谱图片
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: CachedNetworkImage(
-              imageUrl: recipe.image,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                height: 200,
-                color: Colors.grey.shade200,
-                child: const Center(child: CircularProgressIndicator()),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecipeInfoScreen(recipe: recipe),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 食谱图片
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
-              errorWidget: (context, url, error) => Container(
+              child: CachedNetworkImage(
+                imageUrl: recipe.image,
+                width: double.infinity,
                 height: 200,
-                color: Colors.grey.shade300,
-                child: const Icon(
-                  Icons.restaurant,
-                  size: 64,
-                  color: Colors.grey,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 200,
+                  color: Colors.grey.shade200,
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 200,
+                  color: Colors.grey.shade300,
+                  child: const Icon(
+                    Icons.restaurant,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // 食谱信息
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 标题
-                Text(
-                  recipe.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // 使用的食材
-                if (recipe.usedIngredients.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: Colors.green.shade600,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Using ${recipe.usedIngredientCount} ingredient${recipe.usedIngredientCount > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  ...recipe.usedIngredients.map(
-                    (ing) => Padding(
-                      padding: const EdgeInsets.only(left: 24, top: 2),
-                      child: Text(
-                        '• ${ing.name}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
+            // 食谱信息
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 标题
+                  Text(
+                    recipe.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-
-                // 缺少的食材
-                if (recipe.missedIngredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.shopping_cart,
-                        color: Colors.orange.shade600,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Need ${recipe.missedIngredientCount} more ingredient${recipe.missedIngredientCount > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.orange.shade700,
+
+                  // 使用的食材
+                  if (recipe.usedIngredients.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.green.shade600,
+                          size: 18,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  ...recipe.missedIngredients.map(
-                    (ing) => Padding(
-                      padding: const EdgeInsets.only(left: 24, top: 2),
-                      child: Text(
-                        '• ${ing.name}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
+                        const SizedBox(width: 6),
+                        Text(
+                          'Using ${recipe.usedIngredientCount} ingredient${recipe.usedIngredientCount > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ...recipe.usedIngredients.map(
+                      (ing) => Padding(
+                        padding: const EdgeInsets.only(left: 24, top: 2),
+                        child: Text(
+                          '• ${ing.name}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
+
+                  // 缺少的食材
+                  if (recipe.missedIngredients.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.shopping_cart,
+                          color: Colors.orange.shade600,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Need ${recipe.missedIngredientCount} more ingredient${recipe.missedIngredientCount > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ...recipe.missedIngredients.map(
+                      (ing) => Padding(
+                        padding: const EdgeInsets.only(left: 24, top: 2),
+                        child: Text(
+                          '• ${ing.name}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
