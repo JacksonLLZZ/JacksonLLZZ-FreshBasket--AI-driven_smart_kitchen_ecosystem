@@ -12,6 +12,10 @@ class RecipeIngredient {
       image: json['image'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'original': original, 'image': image};
+  }
 }
 
 class Recipe {
@@ -51,5 +55,17 @@ class Recipe {
               .toList() ??
           [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'image': image,
+      'usedIngredientCount': usedIngredientCount,
+      'missedIngredientCount': missedIngredientCount,
+      'usedIngredients': usedIngredients.map((e) => e.toJson()).toList(),
+      'missedIngredients': missedIngredients.map((e) => e.toJson()).toList(),
+    };
   }
 }

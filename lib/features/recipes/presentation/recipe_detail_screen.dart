@@ -3,6 +3,8 @@ import '../../../services/nutrition_service.dart';
 import '../../inventory/data/ingredient.dart';
 import '../data/recipe.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class RecipeDetailScreen extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -17,6 +19,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   List<Recipe> _recipes = [];
   bool _loading = false;
   String? _errorMessage;
+  bool _loadedFromCache = false; // 是否从缓存加载
+  double _cacheOpacity = 0.0; // 缓存提示的透明度
 
   // 分页相关
   int _currentPage = 0; // 当前页码（0-9代表第1-10个食谱）
@@ -31,6 +35,99 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     _selectedIngredients = {
       for (var ingredient in widget.ingredients) ingredient.id: true,
     };
+    // 自动加载缓存（如果存在）
+    _autoLoadCache();
+  }
+
+  // 生成缓存key（基于所有食材ID，而不是选中的食材）
+  String _getCacheKey() {
+    final allIds = widget.ingredients.map((e) => e.id).toList()..sort();
+    return 'recipes_cache_${allIds.join('_')}';
+  }
+
+  // 自动加载缓存（如果存在）
+  Future<void> _autoLoadCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = _getCacheKey();
+      final cachedData = prefs.getString(cacheKey);
+
+      if (cachedData != null) {
+        // 发现缓存，自动加载
+        final Map<String, dynamic> cacheMap = json.decode(cachedData);
+        final List<dynamic> recipesJson = cacheMap['recipes'];
+        final Map<String, dynamic> selectedIngredientsJson =
+            cacheMap['selectedIngredients'] ?? {};
+
+        final recipes = recipesJson
+            .map((json) => Recipe.fromJson(json))
+            .toList();
+
+        if (mounted) {
+          setState(() {
+            _recipes = recipes;
+            _currentPage = 0;
+            _loadedFromCache = true;
+            // 恢复之前选中的食材状态
+            if (selectedIngredientsJson.isNotEmpty) {
+              _selectedIngredients = selectedIngredientsJson.map(
+                (key, value) => MapEntry(key, value as bool),
+              );
+            }
+          });
+
+          // 渐入动画
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              setState(() {
+                _cacheOpacity = 1.0;
+              });
+            }
+          });
+
+          // 2秒后开始渐出
+          Future.delayed(const Duration(milliseconds: 3000), () {
+            if (mounted) {
+              setState(() {
+                _cacheOpacity = 0.0;
+              });
+            }
+          });
+
+          // 2.5秒后完全隐藏
+          Future.delayed(const Duration(milliseconds: 3500), () {
+            if (mounted) {
+              setState(() {
+                _loadedFromCache = false;
+              });
+            }
+          });
+        }
+      }
+      // 如果没有缓存，保持空状态，不做任何处理
+    } catch (e) {
+      debugPrint('Error loading cache: $e');
+      // 如果加载缓存失败，静默处理，保持空状态
+    }
+  }
+
+  // 保存到缓存
+  Future<void> _saveToCache(List<Recipe> recipes) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = _getCacheKey();
+      final jsonList = recipes.map((recipe) => recipe.toJson()).toList();
+
+      // 同时保存食谱和选中的食材状态
+      final cacheData = {
+        'recipes': jsonList,
+        'selectedIngredients': _selectedIngredients,
+      };
+
+      await prefs.setString(cacheKey, json.encode(cacheData));
+    } catch (e) {
+      debugPrint('Failed to save cache: $e');
+    }
   }
 
   // 获取选中的食材列表
@@ -56,20 +153,28 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       _errorMessage = null;
       _recipes = [];
       _currentPage = 0; // 重置页码
+      _loadedFromCache = false;
     });
 
     try {
       final recipes = await _service.generateCombinedRecipes(
         selectedIngredients,
       );
-      setState(() {
-        _recipes = recipes;
-        _loading = false;
-      });
 
       if (recipes.isEmpty) {
         setState(() {
+          _recipes = [];
+          _loading = false;
           _errorMessage = 'No recipes found for the selected ingredients.';
+        });
+      } else {
+        // 先保存到缓存
+        await _saveToCache(recipes);
+        // 然后更新 UI
+        setState(() {
+          _recipes = recipes;
+          _loading = false;
+          _loadedFromCache = false; // 明确标记这是新搜索的结果
         });
       }
     } catch (e) {
@@ -109,97 +214,199 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ),
         elevation: 0,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // 食材选择区域
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+          // 主要内容区域
+          Column(
+            children: [
+              // 食材选择区域
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.kitchen, color: Colors.blue.shade700, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Select Ingredients (${_getSelectedIngredients.length}/${widget.ingredients.length})',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade900,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.kitchen,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Select Ingredients (${_getSelectedIngredients.length}/${widget.ingredients.length})',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: widget.ingredients.map((ingredient) {
+                        final isSelected =
+                            _selectedIngredients[ingredient.id] ?? false;
+                        return FilterChip(
+                          label: Text(ingredient.name),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedIngredients[ingredient.id] = selected;
+                            });
+                          },
+                          selectedColor: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.2),
+                          checkmarkColor: Theme.of(context).primaryColor,
+                          backgroundColor: Colors.grey.shade100,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.shade700,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _loading ? null : _searchRecipes,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        icon: _loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.search, size: 20),
+                        label: Text(
+                          _loading ? 'Searching...' : 'Find Recipes',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: widget.ingredients.map((ingredient) {
-                    final isSelected =
-                        _selectedIngredients[ingredient.id] ?? false;
-                    return FilterChip(
-                      label: Text(ingredient.name),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedIngredients[ingredient.id] = selected;
-                        });
-                      },
-                      selectedColor: Colors.blue.shade100,
-                      checkmarkColor: Colors.blue.shade700,
-                      backgroundColor: Colors.grey.shade100,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: _loading ? null : _searchRecipes,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+              ),
+
+              // 结果展示区域
+              Expanded(child: _buildResultsArea()),
+            ],
+          ),
+
+          // 顶部缓存提示（悬浮层）
+          if (_loadedFromCache)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedOpacity(
+                opacity: _cacheOpacity,
+                duration: const Duration(milliseconds: 500),
+                child: Material(
+                  elevation: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                    icon: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.search),
-                    label: Text(
-                      _loading ? 'Searching...' : 'Find Recipes',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).primaryColor.withOpacity(0.15),
+                          Theme.of(context).primaryColor.withOpacity(0.08),
+                        ],
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            Icons.cached,
+                            size: 18,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Loaded from cache',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Tap "Find Recipes" to refresh',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-
-          // 结果展示区域
-          Expanded(child: _buildResultsArea()),
         ],
       ),
     );
