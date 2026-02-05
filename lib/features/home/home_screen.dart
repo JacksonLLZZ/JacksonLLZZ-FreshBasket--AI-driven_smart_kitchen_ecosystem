@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
@@ -168,6 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 显示扫描选项菜单
   void _showScanOptions() {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -197,20 +201,88 @@ class _HomeScreenState extends State<HomeScreen> {
                 subtitle: const Text('Use camera to scan product barcode'),
                 onTap: () async {
                   Navigator.pop(context);
-                  final barcode = await Navigator.push<String>(
-                    context,
+                  final barcode = await navigator.push<String>(
                     MaterialPageRoute(
                       builder: (context) => const BarcodeScannerScreen(),
                     ),
                   );
                   if (barcode != null && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Scanned: $barcode'),
-                        duration: const Duration(seconds: 2),
+                    // 显示加载提示
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Searching product...'),
+                        duration: Duration(seconds: 1),
                       ),
                     );
-                    // TODO: 根据条形码查询产品信息并填充表单
+
+                    // 调用 OpenFoodFacts API 获取产品信息
+                    final productInfo = await _nutrition.getProductByBarcode(
+                      barcode,
+                    );
+
+                    if (productInfo != null && mounted) {
+                      final foodName = productInfo['product_name'] ?? 'Unknown';
+
+                      // 自动填充到 food name 栏
+                      setState(() {
+                        _nameController.text = foodName;
+                      });
+
+                      // 复制到剪贴板
+                      await Clipboard.setData(ClipboardData(text: foodName));
+
+                      // 显示底部消息框
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Product found and copied!',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      foodName,
+                                      style: const TextStyle(fontSize: 13),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.green[700],
+                          duration: const Duration(seconds: 3),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    } else if (mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Product not found in OpenFoodFacts database',
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
                   }
                 },
               ),
@@ -228,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     source: ImageSource.gallery,
                   );
                   if (image != null && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       SnackBar(
                         content: Text('Selected: ${image.name}'),
                         duration: const Duration(seconds: 2),

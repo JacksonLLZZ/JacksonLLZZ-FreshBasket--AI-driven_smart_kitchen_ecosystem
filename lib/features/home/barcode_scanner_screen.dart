@@ -46,12 +46,16 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         children: [
           MobileScanner(
             controller: controller,
-            onDetect: (BarcodeCapture capture) {
+            onDetect: (BarcodeCapture capture) async {
               final List<Barcode> barcodes = capture.barcodes;
               for (final barcode in barcodes) {
                 if (barcode.rawValue != null) {
+                  // 停止相机
+                  await controller.stop();
                   // 返回扫描结果
-                  Navigator.pop(context, barcode.rawValue);
+                  if (mounted) {
+                    Navigator.pop(context, barcode.rawValue);
+                  }
                   return;
                 }
               }
