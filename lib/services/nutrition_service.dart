@@ -163,7 +163,7 @@ class NutritionService {
       }
       
       // 限制返回数量，避免请求过多
-      final mealsToFetch = meals.take(10).toList();
+      final mealsToFetch = meals.take(2).toList();
       
       // 步骤2: 并发获取每个菜谱的详细信息
       List<Recipe> recipes = [];

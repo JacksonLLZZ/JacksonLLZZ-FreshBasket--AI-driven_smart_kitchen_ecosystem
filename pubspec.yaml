@@ -75,6 +75,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/data/season_foods.json
+    - assets/data/ingredients_list.csv
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

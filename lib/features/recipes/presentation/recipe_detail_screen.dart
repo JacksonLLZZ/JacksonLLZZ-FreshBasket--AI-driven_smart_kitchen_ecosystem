@@ -190,11 +190,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         if (selectedIngredients.length != 1) {
           throw Exception('Free Recipe API only supports ONE ingredient');
         }
-        
+
         final ingredient = selectedIngredients.first.name;
         debugPrint('Using Free Recipe API with ingredient: $ingredient');
         recipes = await _service.generateRecipesFromMealDb(ingredient);
-        
       } else if (_currentApiSource == 'Gemini') {
         // TODO: 调用 Gemini API
         debugPrint('Using Gemini API - Placeholder');
@@ -332,49 +331,59 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: widget.ingredients.map((ingredient) {
-                        final isSelected =
-                            _selectedIngredients[ingredient.id] ?? false;
-                        return FilterChip(
-                          label: Text(ingredient.name),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            // Free Recipe API 限制：最多只能选择一个
-                            if (_currentApiSource == 'Free' && selected) {
-                              final selectedCount = _selectedIngredients.values
-                                  .where((v) => v == true)
-                                  .length;
-                              if (selectedCount >= 1) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Free Recipe API only allows ONE main ingredient',
+                      children: () {
+                        // 按名称去重，相同名称只保留第一个
+                        final uniqueIngredients = <String, Ingredient>{};
+                        for (var ingredient in widget.ingredients) {
+                          if (!uniqueIngredients.containsKey(ingredient.name)) {
+                            uniqueIngredients[ingredient.name] = ingredient;
+                          }
+                        }
+                        return uniqueIngredients.values.map((ingredient) {
+                          final isSelected =
+                              _selectedIngredients[ingredient.id] ?? false;
+                          return FilterChip(
+                            label: Text(ingredient.name),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              // Free Recipe API 限制：最多只能选择一个
+                              if (_currentApiSource == 'Free' && selected) {
+                                final selectedCount = _selectedIngredients
+                                    .values
+                                    .where((v) => v == true)
+                                    .length;
+                                if (selectedCount >= 1) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Free Recipe API only allows ONE main ingredient',
+                                      ),
+                                      duration: Duration(seconds: 2),
                                     ),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                                return;
+                                  );
+                                  return;
+                                }
                               }
-                            }
-                            setState(() {
-                              _selectedIngredients[ingredient.id] = selected;
-                            });
-                          },
-                          selectedColor: Theme.of(
-                            context,
-                          ).primaryColor.withOpacity(0.2),
-                          checkmarkColor: Theme.of(context).primaryColor,
-                          backgroundColor: Colors.grey.shade100,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey.shade700,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                        );
-                      }).toList(),
+                              setState(() {
+                                _selectedIngredients[ingredient.id] = selected;
+                              });
+                            },
+                            selectedColor: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.2),
+                            checkmarkColor: Theme.of(context).primaryColor,
+                            backgroundColor: Colors.grey.shade100,
+                            labelStyle: TextStyle(
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey.shade700,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          );
+                        }).toList();
+                      }(),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(

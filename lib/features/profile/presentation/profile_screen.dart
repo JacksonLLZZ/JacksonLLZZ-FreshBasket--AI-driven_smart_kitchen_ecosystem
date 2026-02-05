@@ -539,7 +539,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                   _buildApiSourceOption('Spoonacular', currentSource),
                   _buildApiSourceOption('Free Recipe', currentSource),
-                  _buildApiSourceOption('Gemini (Coming Soon)', currentSource),
                   const SizedBox(height: 8),
                   Text(
                     "Current: $currentSource API",

@@ -123,8 +123,6 @@ class DatabaseService {
       'name': item.name,
       'quantity': item.quantity,
       'unit': item.unit,
-      'category': item.category,
-      'calories': item.calories,
       'expiration_date': Timestamp.fromDate(item.expirationDate),
       'created_at': FieldValue.serverTimestamp(),
     });
@@ -148,19 +146,14 @@ class DatabaseService {
               name: data['name'] ?? '',
               quantity: (data['quantity'] ?? 0).toDouble(),
               unit: data['unit'] ?? '',
-              category: data['category'] ?? 'Other',
               expirationDate: (data['expiration_date'] as Timestamp).toDate(),
-              calories: data['calories'],
             );
           }).toList();
         });
   }
 
   /// 检查是否存在相似的食材
-  Future<Ingredient?> findSimilarIngredient(
-    String name,
-    String category,
-  ) async {
+  Future<Ingredient?> findSimilarIngredient(String name) async {
     final uid = _uid;
     if (uid == null) return null;
 
@@ -171,7 +164,6 @@ class DatabaseService {
           .collection('users')
           .doc(uid)
           .collection('inventory')
-          .where('category', isEqualTo: category)
           .get();
 
       for (var doc in snapshot.docs) {
@@ -184,9 +176,7 @@ class DatabaseService {
             name: data['name'] ?? '',
             quantity: (data['quantity'] ?? 0).toDouble(),
             unit: data['unit'] ?? '',
-            category: data['category'] ?? 'Other',
             expirationDate: (data['expiration_date'] as Timestamp).toDate(),
-            calories: data['calories'],
           );
         }
       }

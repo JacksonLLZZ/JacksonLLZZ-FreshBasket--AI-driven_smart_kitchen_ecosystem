@@ -324,25 +324,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               fontSize: 16,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // 显示分类标签
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              item.category,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       subtitle: Column(
@@ -356,14 +337,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          if (item.calories != null)
-                            Text(
-                              item.calories!,
-                              style: const TextStyle(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
                         ],
                       ),
                       trailing: _isSelectionMode
@@ -481,10 +454,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       );
                     },
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    icon: const Icon(Icons.restaurant_menu),
+                    icon: const Icon(
+                      Icons.restaurant_menu,
+                      color: Colors.white,
+                    ),
                     label: const Text(
                       'Explore Recipes',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

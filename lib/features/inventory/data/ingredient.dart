@@ -5,31 +5,25 @@ class Ingredient {
   final String name;
   final double quantity;
   final String unit;
-  final String category;
   final DateTime expirationDate;
-  final String? calories;
 
   const Ingredient({
     required this.id,
     required this.name,
     required this.quantity,
     required this.unit,
-    required this.category,
     required this.expirationDate,
-    this.calories,
   });
 
   // 获取是否过期
   bool get isExpired => DateTime.now().isAfter(expirationDate);
 
-  // 工厂方法：将 API 结果转换为模型对象
-  factory Ingredient.fromApi({
+  // 工厂方法：创建新的食材对象
+  factory Ingredient.create({
     required String name,
     required double qty,
     required String unit,
-    required String category,
-    required int calories,
-    DateTime? expirationDate, // 新增可选参数
+    DateTime? expirationDate,
   }) {
     return Ingredient(
       id:
@@ -38,11 +32,8 @@ class Ingredient {
       name: name,
       quantity: qty,
       unit: unit,
-      category: category,
-      // 使用自定义日期或默认 7 天后过期
       expirationDate:
           expirationDate ?? DateTime.now().add(const Duration(days: 7)),
-      calories: "$calories kcal",
     );
   }
 }
