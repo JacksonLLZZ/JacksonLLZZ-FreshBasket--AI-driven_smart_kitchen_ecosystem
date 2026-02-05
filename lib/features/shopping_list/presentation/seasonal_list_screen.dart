@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kitchen/core/utils/season_helper.dart';
 import '../../recipes/data/seasonal_catalog_repository.dart'; // 按你实际文件名改
-import '../domain/recommendation_service.dart';             // 按你实际文件名改
+import '../domain/recommendation_service.dart'; // 按你实际文件名改
 import '../domain/seasonal_food.dart';
+import '../../../services/database_service.dart';
+import '../../shopping_cart/data/shopping_item.dart';
 
 class SeasonalListScreen extends StatefulWidget {
   const SeasonalListScreen({super.key});
@@ -14,9 +16,11 @@ class SeasonalListScreen extends StatefulWidget {
 class _SeasonalListScreenState extends State<SeasonalListScreen> {
   late final SeasonalCatalogRepository _repo;
   late final RecommendationService _service;
+  final DatabaseService _db = DatabaseService();
 
   late Future<List<SeasonalFood>> _future;
   final TextEditingController _searchController = TextEditingController();
+  List<ShoppingItem> _cartItems = [];
 
   final Hemisphere _hemisphere = Hemisphere.northern;
 
@@ -25,12 +29,29 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
     super.initState();
 
     // 关键：assetPath 和你 repo 默认一致即可；如果你想显式传参也可以
-    _repo = SeasonalCatalogRepository(assetPath: 'assets/data/season_foods.json');
+    _repo = SeasonalCatalogRepository(
+      assetPath: 'assets/data/season_foods.json',
+    );
     _service = RecommendationService(_repo);
 
     _future = _service.getSeasonalPicks(hemisphere: _hemisphere);
 
     _searchController.addListener(_onSearchChanged);
+
+    // 监听购物车变化
+    _db.getShoppingCartStream().listen((items) {
+      if (mounted) {
+        setState(() {
+          _cartItems = items;
+        });
+      }
+    });
+  }
+
+  bool _isInCart(String foodName) {
+    return _cartItems.any(
+      (item) => item.name.toLowerCase() == foodName.toLowerCase(),
+    );
   }
 
   void _onSearchChanged() {
@@ -66,10 +87,7 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
       appBar: AppBar(
         title: const Text('Seasonal List'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
         ],
       ),
       body: Column(
@@ -86,7 +104,8 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
                   }
                   if (snapshot.hasError) {
                     return _ErrorState(
-                      message: 'Failed to load seasonal picks:\n${snapshot.error}',
+                      message:
+                          'Failed to load seasonal picks:\n${snapshot.error}',
                       onRetry: _refresh,
                     );
                   }
@@ -101,7 +120,11 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                     itemCount: items.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) => _SeasonalFoodTile(food: items[index]),
+                    itemBuilder: (context, index) => _SeasonalFoodTile(
+                      food: items[index],
+                      isInCart: _isInCart(items[index].name),
+                      db: _db,
+                    ),
                   );
                 },
               ),
@@ -129,7 +152,10 @@ class _SearchBar extends StatelessWidget {
           prefixIcon: const Icon(Icons.search),
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 14,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
@@ -141,30 +167,71 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _SeasonalFoodTile extends StatelessWidget {
-  const _SeasonalFoodTile({required this.food});
+  const _SeasonalFoodTile({
+    required this.food,
+    required this.isInCart,
+    required this.db,
+  });
 
   final SeasonalFood food;
+  final bool isInCart;
+  final DatabaseService db;
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = '${food.category} • shelf life ${food.defaultShelfLifeDays} days';
+    final subtitle =
+        '${food.category} • shelf life ${food.defaultShelfLifeDays} days';
 
     return Material(
       color: Colors.white,
       elevation: 1,
       borderRadius: BorderRadius.circular(16),
       child: ListTile(
-        title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle),
-        trailing: IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          onPressed: () {
-            // MVP：先占位。下一步接入真正的 ShoppingListRepository 持久化。
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Added "${food.name}" (TODO: persist)')),
-            );
-          },
+        title: Text(
+          food.name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
+        subtitle: Text(subtitle),
+        trailing: isInCart
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(
+                  Icons.check_circle,
+                  color: Colors.green.shade600,
+                  size: 24,
+                ),
+              )
+            : IconButton(
+                icon: const Icon(Icons.add_shopping_cart),
+                onPressed: () async {
+                  final item = ShoppingItem.create(
+                    name: food.name,
+                    amount: 'As needed',
+                  );
+                  try {
+                    await db.addToShoppingCart(item);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('"${food.name}" added to cart'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to add: ${e.toString()}'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
       ),
     );
   }
@@ -200,10 +267,7 @@ class _ErrorState extends StatelessWidget {
           children: [
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),
