@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../features/inventory/data/ingredient.dart';
+import '../features/shopping_cart/data/shopping_item.dart';
 import '../core/utils/food_validator.dart';
 
 class DatabaseService {
@@ -338,6 +339,92 @@ class DatabaseService {
       await batch.commit();
     } catch (e) {
       debugPrint('Error deleting multiple ingredients: $e');
+      rethrow;
+    }
+  }
+
+  // ==================== Shopping Cart Methods ====================
+
+  /// 添加商品到购物车
+  Future<void> addToShoppingCart(ShoppingItem item) async {
+    final uid = _uid;
+    if (uid == null) return;
+
+    try {
+      await _db
+          .collection('artifacts')
+          .doc(_appId)
+          .collection('users')
+          .doc(uid)
+          .collection('shopping_cart')
+          .add(item.toFirestore());
+    } catch (e) {
+      debugPrint('Error adding to shopping cart: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取购物车商品流
+  Stream<List<ShoppingItem>> getShoppingCartStream() {
+    final uid = _uid;
+    if (uid == null) return const Stream.empty();
+
+    return _db
+        .collection('artifacts')
+        .doc(_appId)
+        .collection('users')
+        .doc(uid)
+        .collection('shopping_cart')
+        .orderBy('addedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => ShoppingItem.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  /// 从购物车删除商品
+  Future<void> removeFromShoppingCart(String itemId) async {
+    final uid = _uid;
+    if (uid == null) return;
+
+    try {
+      await _db
+          .collection('artifacts')
+          .doc(_appId)
+          .collection('users')
+          .doc(uid)
+          .collection('shopping_cart')
+          .doc(itemId)
+          .delete();
+    } catch (e) {
+      debugPrint('Error removing from shopping cart: $e');
+      rethrow;
+    }
+  }
+
+  /// 清空购物车
+  Future<void> clearShoppingCart() async {
+    final uid = _uid;
+    if (uid == null) return;
+
+    try {
+      final snapshot = await _db
+          .collection('artifacts')
+          .doc(_appId)
+          .collection('users')
+          .doc(uid)
+          .collection('shopping_cart')
+          .get();
+
+      final batch = _db.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint('Error clearing shopping cart: $e');
       rethrow;
     }
   }

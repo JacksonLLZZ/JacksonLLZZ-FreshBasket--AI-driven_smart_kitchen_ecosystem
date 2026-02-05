@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../shopping_list/presentation/seasonal_list_screen.dart';
 import '../../../core/utils/season_helper.dart';
 import '../../../main.dart'; // 导入以访问 currentTheme
+import '../../../services/database_service.dart';
+import '../data/shopping_item.dart';
 
 String _seasonLabel(String season) {
   switch (season) {
@@ -33,8 +35,15 @@ String _seasonMessage(String season) {
   }
 }
 
-class ShoppingCartScreen extends StatelessWidget {
+class ShoppingCartScreen extends StatefulWidget {
   const ShoppingCartScreen({super.key});
+
+  @override
+  State<ShoppingCartScreen> createState() => _ShoppingCartScreenState();
+}
+
+class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
+  final DatabaseService _db = DatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +183,220 @@ class ShoppingCartScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // 购物车商品列表
+            const Text(
+              "Shopping List",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            StreamBuilder<List<ShoppingItem>>(
+              stream: _db.getShoppingCartStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  );
+                }
+
+                final items = snapshot.data ?? [];
+
+                if (items.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 64,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Your cart is empty',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Add items from recipe suggestions',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    // 清空按钮
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Clear Cart'),
+                              content: const Text(
+                                'Are you sure you want to remove all items?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text(
+                                    'Clear',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true && mounted) {
+                            await _db.clearShoppingCart();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Cart cleared'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.delete_sweep),
+                        label: const Text('Clear All'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 商品列表
+                    ...items.map((item) {
+                      final theme = Theme.of(context);
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.shopping_bag_outlined,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.amount,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              color: Colors.red.shade400,
+                              onPressed: () async {
+                                await _db.removeFromShoppingCart(item.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('"${item.name}" removed'),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
                 );
               },
             ),

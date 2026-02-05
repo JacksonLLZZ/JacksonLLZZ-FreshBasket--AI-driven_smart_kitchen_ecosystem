@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Text(
-                                      'Product found and copied!',
+                                      'Product found and filled!',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -349,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Text(
-                                        'Ingredient recognized and copied!',
+                                        'Ingredient recognized and filled!',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
