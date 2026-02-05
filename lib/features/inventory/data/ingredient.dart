@@ -29,15 +29,19 @@ class Ingredient {
     required String unit,
     required String category,
     required int calories,
+    DateTime? expirationDate, // 新增可选参数
   }) {
     return Ingredient(
-      id: DateTime.now().millisecondsSinceEpoch.toString() + Random().nextInt(100).toString(),
+      id:
+          DateTime.now().millisecondsSinceEpoch.toString() +
+          Random().nextInt(100).toString(),
       name: name,
       quantity: qty,
       unit: unit,
       category: category,
-      // 默认设置为 7 天后过期
-      expirationDate: DateTime.now().add(const Duration(days: 7)),
+      // 使用自定义日期或默认 7 天后过期
+      expirationDate:
+          expirationDate ?? DateTime.now().add(const Duration(days: 7)),
       calories: "$calories kcal",
     );
   }
