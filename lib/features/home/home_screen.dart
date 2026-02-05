@@ -483,14 +483,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     onSelected: (String selection) {
-                      _nameController.text = selection;
+                      setState(() {
+                        _nameController.text = selection;
+                      });
                     },
                     fieldViewBuilder:
                         (context, controller, focusNode, onFieldSubmitted) {
+                          // 将_nameController的值同步到Autocomplete的controller
+                          if (_nameController.text != controller.text) {
+                            controller.text = _nameController.text;
+                            controller.selection = TextSelection.fromPosition(
+                              TextPosition(offset: controller.text.length),
+                            );
+                          }
+
                           // 同步两个controller
                           controller.addListener(() {
-                            _nameController.text = controller.text;
+                            if (_nameController.text != controller.text) {
+                              _nameController.text = controller.text;
+                            }
                           });
+
                           return TextField(
                             controller: controller,
                             focusNode: focusNode,
