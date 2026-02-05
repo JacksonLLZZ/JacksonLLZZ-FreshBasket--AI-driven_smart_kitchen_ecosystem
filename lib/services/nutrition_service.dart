@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 import '../features/inventory/data/ingredient.dart';
 import '../features/recipes/data/recipe.dart';
 
@@ -17,6 +19,16 @@ class NutritionService {
   // TheMealDB API 基础 URL
   static const String _mealDbBaseUrl =
       'https://www.themealdb.com/api/json/v1/1';
+
+  // 百度AI凭据（需要替换为实际的API Key和Secret Key）
+  static const String _baiduApiKey = 'GyFqwrowPr1KvLxnKgbx5OAT';
+  static const String _baiduSecretKey = 'xcJuRquUcNOmT89otQUeKJwlxzr0OqRK';
+  String? _baiduAccessToken;
+  DateTime? _tokenExpireTime;
+
+  // 百度翻译API凭据
+  static const String _baiduTranslateAppId = '20240925002160847';
+  static const String _baiduTranslateSecretKey = 'H2BTnS1u61HgQPFZTegW';
 
   // 常见调味料和基础食材黑名单（过滤缺失食材时使用）
   static const Set<String> _commonPantryItems = {
@@ -342,5 +354,177 @@ class NutritionService {
       tags: mealDetail['strTags'],
       youtubeUrl: mealDetail['strYoutube'],
     );
+  }
+
+  // 获取百度AI Access Token
+  Future<String?> _getBaiduAccessToken() async {
+    // 如果token存在且未过期，直接返回
+    if (_baiduAccessToken != null &&
+        _tokenExpireTime != null &&
+        DateTime.now().isBefore(_tokenExpireTime!)) {
+      return _baiduAccessToken;
+    }
+
+    try {
+      final response = await _dio.post(
+        'https://aip.baidubce.com/oauth/2.0/token',
+        queryParameters: {
+          'grant_type': 'client_credentials',
+          'client_id': _baiduApiKey,
+          'client_secret': _baiduSecretKey,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data['access_token'] != null) {
+        _baiduAccessToken = response.data['access_token'];
+        // Token有效期通常为30天，这里设置为29天以确保安全
+        _tokenExpireTime = DateTime.now().add(const Duration(days: 29));
+        return _baiduAccessToken;
+      }
+    } catch (e) {
+      debugPrint('Error getting Baidu access token: $e');
+    }
+    return null;
+  }
+
+  // 生成MD5签名
+  String _generateMD5(String input) {
+    return md5.convert(utf8.encode(input)).toString();
+  }
+
+  // 使用百度翻译API将中文翻译为英文
+  Future<String?> _translateToEnglish(String chineseText) async {
+    try {
+      final salt = DateTime.now().millisecondsSinceEpoch.toString();
+      final sign = _generateMD5(
+        '$_baiduTranslateAppId$chineseText$salt$_baiduTranslateSecretKey',
+      );
+
+      final response = await _dio.get(
+        'https://fanyi-api.baidu.com/api/trans/vip/translate',
+        queryParameters: {
+          'q': chineseText,
+          'from': 'zh',
+          'to': 'en',
+          'appid': _baiduTranslateAppId,
+          'salt': salt,
+          'sign': sign,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        // 检查是否有错误
+        if (response.data['error_code'] != null) {
+          debugPrint(
+            'Translation error: ${response.data['error_code']} - ${response.data['error_msg']}',
+          );
+          return null;
+        }
+
+        final transResult = response.data['trans_result'];
+        if (transResult != null &&
+            transResult is List &&
+            transResult.isNotEmpty) {
+          return transResult[0]['dst'] as String?;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error translating text: $e');
+    }
+    return null;
+  }
+
+  // 识别图片中的食材
+  Future<Map<String, dynamic>> recognizeIngredientFromImage(
+    String base64Image,
+  ) async {
+    try {
+      final accessToken = await _getBaiduAccessToken();
+      if (accessToken == null) {
+        return {
+          'success': false,
+          'error': 'Failed to get authentication token',
+        };
+      }
+
+      final response = await _dio.post(
+        'https://aip.baidubce.com/rest/2.0/image-classify/v1/classify/ingredient',
+        queryParameters: {'access_token': accessToken},
+        options: Options(
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        ),
+        data: {
+          'image': base64Image, // Dio 会自动进行 URL 编码
+          'top_num': 20, // 获取更多结果以处理"非果蔬食材"情况
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        // 检查是否有错误信息
+        if (response.data['error_code'] != null) {
+          final errorCode = response.data['error_code'];
+          final errorMsg = response.data['error_msg'] ?? 'Unknown error';
+
+          String userFriendlyMsg;
+          switch (errorCode) {
+            case 216015:
+              userFriendlyMsg = 'Invalid image format. Please use JPG/PNG';
+              break;
+            case 216201:
+              userFriendlyMsg = 'No ingredient detected in the image';
+              break;
+            case 110:
+              userFriendlyMsg = 'Authentication failed. Please try again';
+              break;
+            case 17:
+              userFriendlyMsg = 'Daily request limit exceeded';
+              break;
+            case 216630:
+              userFriendlyMsg = 'Image is too large (max 4MB)';
+              break;
+            default:
+              userFriendlyMsg = 'Error $errorCode: $errorMsg';
+          }
+
+          return {'success': false, 'error': userFriendlyMsg};
+        }
+
+        final result = response.data['result'];
+        if (result != null && result is List && result.isNotEmpty) {
+          // 遍历结果，跳过"非果蔬食材"
+          for (var item in result) {
+            final ingredientName = item['name'] as String?;
+            final score = item['score'];
+
+            if (ingredientName != null && ingredientName != '非果蔬食材') {
+              // 翻译成英文
+              final englishName = await _translateToEnglish(ingredientName);
+
+              return {
+                'success': true,
+                'name': englishName ?? ingredientName, // 如果翻译失败，使用原始中文名
+                'original_name': ingredientName, // 保留原始中文名
+                'score': score,
+              };
+            }
+          }
+
+          // 如果所有结果都是"非果蔬食材"
+          return {
+            'success': false,
+            'error': 'No vegetable or fruits detected in the image',
+          };
+        }
+
+        return {'success': false, 'error': 'No ingredient found in the image'};
+      }
+
+      return {
+        'success': false,
+        'error': 'API request failed (status: ${response.statusCode})',
+      };
+    } catch (e) {
+      return {'success': false, 'error': 'Network error: ${e.toString()}'};
+    }
   }
 }

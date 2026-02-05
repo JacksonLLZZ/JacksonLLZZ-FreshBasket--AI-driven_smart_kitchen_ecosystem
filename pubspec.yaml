@@ -51,6 +51,7 @@ dependencies:
   shared_preferences: ^2.2.2      # 本地缓存存储
   mobile_scanner: ^5.2.3          # 条形码/二维码扫描
   image_picker: ^1.1.2            # 从相册/相机选择图片
+  crypto: ^3.0.3                  # MD5签名生成（百度翻译API）
   
 dev_dependencies:
   flutter_test:

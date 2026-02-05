@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
@@ -300,13 +302,113 @@ class _HomeScreenState extends State<HomeScreen> {
                     source: ImageSource.gallery,
                   );
                   if (image != null && mounted) {
+                    // 显示加载提示
                     scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Selected: ${image.name}'),
-                        duration: const Duration(seconds: 2),
+                      const SnackBar(
+                        content: Text('Recognizing ingredient...'),
+                        duration: Duration(seconds: 2),
                       ),
                     );
-                    // TODO: 处理选择的图片（OCR识别/图像识别等）
+
+                    try {
+                      // 读取图片并转换为base64
+                      final bytes = await File(image.path).readAsBytes();
+                      final base64Image = base64Encode(bytes);
+
+                      // 调用百度AI识别API
+                      final result = await _nutrition
+                          .recognizeIngredientFromImage(base64Image);
+
+                      if (result['success'] == true && mounted) {
+                        final ingredientName = result['name'] as String;
+
+                        // 自动填充到 food name 栏
+                        setState(() {
+                          _nameController.text = ingredientName;
+                        });
+
+                        // 复制到剪贴板
+                        await Clipboard.setData(
+                          ClipboardData(text: ingredientName),
+                        );
+
+                        // 显示成功消息
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        'Ingredient recognized and copied!',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        ingredientName,
+                                        style: const TextStyle(fontSize: 13),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: Colors.green[700],
+                            duration: const Duration(seconds: 3),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        );
+                      } else if (mounted) {
+                        final errorMsg =
+                            result['error'] ?? 'Could not recognize ingredient';
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(child: Text(errorMsg)),
+                              ],
+                            ),
+                            backgroundColor: Colors.red[700],
+                            duration: const Duration(seconds: 4),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Error: ${e.toString()}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
                   }
                 },
               ),
