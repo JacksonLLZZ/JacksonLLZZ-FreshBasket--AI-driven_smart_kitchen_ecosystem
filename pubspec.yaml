@@ -49,6 +49,8 @@ dependencies:
   firebase_core: ^4.3.0
   firebase_auth: ^6.1.3
   shared_preferences: ^2.2.2      # 本地缓存存储
+  mobile_scanner: ^5.2.3          # 条形码/二维码扫描
+  image_picker: ^1.1.2            # 从相册/相机选择图片
   
 dev_dependencies:
   flutter_test:

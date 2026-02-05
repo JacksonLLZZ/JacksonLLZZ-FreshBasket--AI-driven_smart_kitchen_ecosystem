@@ -3,6 +3,8 @@ import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
 import '../../../services/ingredient_list_service.dart';
+import 'barcode_scanner_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final NutritionService _nutrition = NutritionService();
   final DatabaseService _db = DatabaseService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   final _nameController = TextEditingController();
   final _qtyController = TextEditingController();
@@ -163,6 +166,86 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  // 显示扫描选项菜单
+  void _showScanOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.qr_code_scanner, size: 28),
+                title: const Text(
+                  'Scan Barcode',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                subtitle: const Text('Use camera to scan product barcode'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final barcode = await Navigator.push<String>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BarcodeScannerScreen(),
+                    ),
+                  );
+                  if (barcode != null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Scanned: $barcode'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    // TODO: 根据条形码查询产品信息并填充表单
+                  }
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.photo_library, size: 28),
+                title: const Text(
+                  'Choose from Gallery',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                subtitle: const Text('Select an image from your gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? image = await _imagePicker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (image != null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Selected: ${image.name}'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    // TODO: 处理选择的图片（OCR识别/图像识别等）
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -174,6 +257,13 @@ class _HomeScreenState extends State<HomeScreen> {
           "Smart Fridge",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Scan or Upload',
+            onPressed: _showScanOptions,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
