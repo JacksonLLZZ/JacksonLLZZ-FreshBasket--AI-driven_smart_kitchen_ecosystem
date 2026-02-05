@@ -2,11 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart'; 
+//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'core/constants/theme.dart';
 import 'services/database_service.dart';
-import 'features/home/home_screen.dart'; 
+import 'features/home/home_screen.dart';
 import 'features/inventory/presentation/inventory_screen.dart';
+import 'features/shopping_cart/presentation/shopping_cart_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'firebase_options.dart';
 import 'widgets/login/loginform_widget.dart';
@@ -16,6 +17,9 @@ import 'widgets/login/registrationform_widget.dart';
 /// true: App will automatically log in as Guest (shows AutoLoginSplash)
 /// false: App will stay on the manual login/register screen (shows AuthPage)
 final ValueNotifier<bool> allowAnonymousLogin = ValueNotifier<bool>(true);
+
+/// Global state for current theme selection
+final ValueNotifier<String> currentTheme = ValueNotifier<String>('Default');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,11 +61,15 @@ class _NutriScanAppState extends State<NutriScanApp> {
             final themeName = data?['theme'] ?? 'Default';
             if (mounted && _currentTheme != themeName) {
               setState(() => _currentTheme = themeName);
+              currentTheme.value = themeName; // 更新全局状态
             }
           }
         });
       } else {
-        if (mounted) setState(() => _currentTheme = 'Default');
+        if (mounted) {
+          setState(() => _currentTheme = 'Default');
+          currentTheme.value = 'Default'; // 更新全局状态
+        }
       }
     });
   }
@@ -96,9 +104,11 @@ class AuthWrapper extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
             }
-            
+
             final user = snapshot.data;
 
             // 1. If user is logged in (Guest OR Registered) -> Go to App
@@ -161,11 +171,21 @@ class _AutoLoginSplashState extends State<AutoLoginSplash> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.restaurant_menu, size: 80, color: Colors.blueAccent),
+            const Icon(
+              Icons.restaurant_menu,
+              size: 80,
+              color: Colors.blueAccent,
+            ),
             const SizedBox(height: 24),
-            const Text("NutriScan", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+            const Text(
+              "NutriScan",
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
-            Text(_errorMessage ?? "Preparing your smart kitchen...", style: const TextStyle(color: Colors.grey)),
+            Text(
+              _errorMessage ?? "Preparing your smart kitchen...",
+              style: const TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 48),
             if (_errorMessage == null)
               const CircularProgressIndicator(strokeWidth: 2.5)
@@ -174,7 +194,7 @@ class _AutoLoginSplashState extends State<AutoLoginSplash> {
                 onPressed: () {
                   // If guest fails, let user go to manual login
                   allowAnonymousLogin.value = false;
-                }, 
+                },
                 child: const Text("Sign In Manually"),
               ),
           ],
@@ -203,7 +223,8 @@ class _AuthPageState extends State<AuthPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => allowAnonymousLogin.value = true, // Go back to Guest mode splash
+          onPressed: () =>
+              allowAnonymousLogin.value = true, // Go back to Guest mode splash
         ),
         title: Text(showLogin ? "Sign In" : "Register"),
         elevation: 0,
@@ -213,15 +234,23 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            const Icon(Icons.account_circle_outlined, size: 60, color: Colors.blueAccent),
+            const Icon(
+              Icons.account_circle_outlined,
+              size: 60,
+              color: Colors.blueAccent,
+            ),
             const SizedBox(height: 20),
-            
+
             // Your uploaded widgets
             showLogin ? const LoginForm() : const RegistrationForm(),
-            
+
             TextButton(
               onPressed: () => setState(() => showLogin = !showLogin),
-              child: Text(showLogin ? "Create an account" : "Already have an account? Sign In"),
+              child: Text(
+                showLogin
+                    ? "Create an account"
+                    : "Already have an account? Sign In",
+              ),
             ),
           ],
         ),
@@ -239,9 +268,10 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    const InventoryScreen(), 
-    const HomeScreen(), 
-    const ProfileScreen()
+    const InventoryScreen(),
+    const HomeScreen(),
+    const ShoppingCartScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -255,9 +285,22 @@ class _MainNavigationState extends State<MainNavigation> {
         unselectedItemColor: Colors.grey[400],
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.kitchen_outlined), label: "Fridge"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: "Add Food"),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.kitchen_outlined),
+            label: "Fridge",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle_outline),
+            label: "Add Food",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart_outlined),
+            label: "Cart",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: "Profile",
+          ),
         ],
       ),
     );
