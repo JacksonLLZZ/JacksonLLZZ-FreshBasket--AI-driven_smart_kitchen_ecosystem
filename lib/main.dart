@@ -9,6 +9,7 @@ import 'features/home/home_screen.dart';
 import 'features/inventory/presentation/inventory_screen.dart';
 import 'features/shopping_cart/presentation/shopping_cart_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
+import 'features/assistant/presentation/assistant_screen.dart';
 import 'firebase_options.dart';
 import 'widgets/login/loginform_widget.dart';
 import 'widgets/login/registrationform_widget.dart';
@@ -269,6 +270,7 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const InventoryScreen(),
+    const AssistantScreen(),
     const HomeScreen(),
     const ShoppingCartScreen(),
     const ProfileScreen(),
@@ -288,6 +290,10 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.kitchen_outlined),
             label: "Fridge",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.smart_toy_outlined),
+            label: "AI Assistant",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle_outline),

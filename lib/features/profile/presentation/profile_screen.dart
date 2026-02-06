@@ -41,6 +41,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Winter': AppTheme.winterColor,
   };
 
+  String _geminiApiKey = '';
+  bool _isApiKeyValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadApiKey();
+  }
+
+  Future<void> _loadApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = prefs.getString('gemini_api_key');
+    if (key != null) {
+      setState(() {
+        _geminiApiKey = key;
+        _isApiKeyValid = key.isNotEmpty;
+      });
+    }
+  }
+
+  Future<void> _saveApiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('gemini_api_key', key);
+    setState(() {
+      _geminiApiKey = key;
+      _isApiKeyValid = key.isNotEmpty;
+    });
+  }
+
   String _seasonIconPath(String season) {
     switch (season) {
       case 'Spring':
@@ -547,6 +576,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "AI Assistant API",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.smart_toy_outlined),
+                    title: const Text('Gemini API Configuration'),
+                    subtitle: _isApiKeyValid
+                        ? const Text('API key is configured ✓', style: TextStyle(color: Colors.green))
+                        : const Text('API key not configured', style: TextStyle(color: Colors.orange)),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Gemini API Key'),
+                          content: TextField(
+                            controller: TextEditingController(text: _geminiApiKey),
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your Gemini API key',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              _geminiApiKey = value;
+                            },
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                _saveApiKey(_geminiApiKey);
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Save'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
