@@ -15,10 +15,13 @@ import 'seasonal_food_test.dart' as seasonal_food_test;
 import 'food_validator_test.dart' as food_validator_test;
 import 'season_helper_test.dart' as season_helper_test;
 import 'ingredient_list_service_test.dart' as ingredient_list_service_test;
+import 'theme_test.dart' as theme_test;
 
 // 服务类测试
 import 'nutrition_service_test.dart' as nutrition_service_test;
 import 'database_service_test.dart' as database_service_test;
+import 'assistant_service_test.dart' as assistant_service_test;
+import 'gemini_service_test.dart' as gemini_service_test;
 
 // 边界案例测试
 import 'ingredient_edge_cases_test.dart' as ingredient_edge_cases_test;
@@ -35,11 +38,14 @@ void main() {
     food_validator_test.main();
     season_helper_test.main();
     ingredient_list_service_test.main();
+    theme_test.main();
   });
 
   group('服务类测试', () {
     nutrition_service_test.main();
     database_service_test.main();
+    assistant_service_test.main();
+    gemini_service_test.main();
   });
 
   group('边界案例测试', () {

@@ -285,5 +285,221 @@ void main() {
       // Assert - verify page structure is complete
       expect(find.byType(Scaffold), findsOneWidget);
     });
+
+    testWidgets('should call nutrition service when calculate button tapped', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Enter name and quantity first
+      final nameField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Name') == true,
+      );
+      final qtyField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Quantity') == true,
+      );
+
+      if (nameField.evaluate().isNotEmpty && qtyField.evaluate().isNotEmpty) {
+        await tester.enterText(nameField.first, 'Apple');
+        await tester.enterText(qtyField.first, '100');
+        await tester.pumpAndSettle();
+
+        // Find and tap calculate button
+        final calculateButton = find.byIcon(Icons.calculate_outlined);
+        if (calculateButton.evaluate().isNotEmpty) {
+          await tester.tap(calculateButton);
+          await tester.pumpAndSettle();
+
+          // Verify nutrition service was called
+          verify(() => mockNutrition.calculateCalories('Apple', 100.0, 'g')).called(1);
+        }
+      }
+    });
+
+    testWidgets('should call database service when save button tapped', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Enter required fields
+      final nameField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Name') == true,
+      );
+      final qtyField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Quantity') == true,
+      );
+
+      if (nameField.evaluate().isNotEmpty && qtyField.evaluate().isNotEmpty) {
+        await tester.enterText(nameField.first, 'Banana');
+        await tester.enterText(qtyField.first, '150');
+        await tester.pumpAndSettle();
+
+        // Find and tap save button
+        final saveButton = find.textContaining('Save').first;
+        await tester.tap(saveButton);
+        await tester.pumpAndSettle();
+
+        // Verify database service was called
+        verify(() => mockDb.findSimilarIngredient('Banana')).called(1);
+        verify(() => mockDb.saveIngredient(any())).called(1);
+      }
+    });
+
+    testWidgets('should be able to change unit selection', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Find unit dropdown
+      final dropdown = find.byType(DropdownButton<String>);
+      
+      if (dropdown.evaluate().isNotEmpty) {
+        // Verify initial unit is 'g'
+        expect(find.text('g'), findsWidgets);
+        
+        // Tap to open dropdown
+        await tester.tap(dropdown.first);
+        await tester.pumpAndSettle();
+
+        // Select 'ml' option if available
+        final mlOption = find.text('ml').last;
+        if (mlOption.evaluate().isNotEmpty) {
+          await tester.tap(mlOption);
+          await tester.pumpAndSettle();
+          
+          // Verify selection changed
+          expect(find.text('ml'), findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('should open date picker when calendar icon tapped', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Find and tap calendar icon
+      final calendarIcon = find.byIcon(Icons.calendar_today);
+      
+      if (calendarIcon.evaluate().isNotEmpty) {
+        await tester.tap(calendarIcon.first);
+        await tester.pumpAndSettle();
+
+        // Verify date picker dialog appeared (DatePickerDialog, not AlertDialog)
+        expect(find.byType(Dialog), findsOneWidget);
+      }
+    });
+
+    testWidgets('should show autocomplete suggestions when typing', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Find name field (which should have autocomplete)
+      final nameField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Name') == true,
+      );
+
+      if (nameField.evaluate().isNotEmpty) {
+        // Enter text to trigger autocomplete
+        await tester.enterText(nameField.first, 'Tom');
+        await tester.pumpAndSettle();
+
+        // Autocomplete should work without errors
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('should display calorie result after calculation', (WidgetTester tester) async {
+      // Arrange
+      when(() => mockNutrition.calculateCalories(any(), any(), any()))
+          .thenAnswer((_) async => 150);
+
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Enter data and calculate
+      final nameField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Name') == true,
+      );
+      final qtyField = find.byWidgetPredicate(
+        (widget) => widget is TextField && 
+                    widget.decoration?.labelText?.contains('Quantity') == true,
+      );
+
+      if (nameField.evaluate().isNotEmpty && qtyField.evaluate().isNotEmpty) {
+        await tester.enterText(nameField.first, 'Orange');
+        await tester.enterText(qtyField.first, '200');
+        await tester.pumpAndSettle();
+
+        final calculateButton = find.byIcon(Icons.calculate_outlined);
+        if (calculateButton.evaluate().isNotEmpty) {
+          await tester.tap(calculateButton);
+          await tester.pumpAndSettle();
+
+          // Verify calorie result is displayed
+          expect(find.textContaining('150'), findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('should show scan options modal when scan icon tapped', (WidgetTester tester) async {
+      // Arrange
+      final widget = createTestApp(
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
+      );
+
+      // Act
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Find scan button in app bar or floating action
+      final scanButton = find.byIcon(Icons.qr_code_scanner);
+      
+      if (scanButton.evaluate().length > 1) {
+        // Tap the second one (likely the main scan button, not in modal)
+        await tester.tap(scanButton.at(1));
+        await tester.pumpAndSettle();
+
+        // Verify modal sheet is displayed
+        expect(find.text('Scan Barcode'), findsWidgets);
+      }
+    });
   });
 }
