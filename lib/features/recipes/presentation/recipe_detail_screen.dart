@@ -33,6 +33,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   // API 源相关
   String _currentApiSource = 'Spoonacular';
 
+  // Master-Detail View: 选中的食谱
+  Recipe? _selectedRecipe;
+
   @override
   void initState() {
     super.initState();
@@ -94,6 +97,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             _recipes = recipes;
             _currentPage = 0;
             _loadedFromCache = true;
+            // 在平板模式下，自动选中第一个食谱
+            _selectedRecipe = recipes.isNotEmpty ? recipes[0] : null;
             // 恢复之前选中的食材状态
             if (selectedIngredientsJson.isNotEmpty) {
               _selectedIngredients = selectedIngredientsJson.map(
@@ -219,6 +224,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           _recipes = recipes;
           _loading = false;
           _loadedFromCache = false; // 明确标记这是新搜索的结果
+          // 在平板模式下，自动选中第一个食谱
+          _selectedRecipe = recipes.isNotEmpty ? recipes[0] : null;
         });
       }
     } catch (e) {
@@ -517,6 +524,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   Widget _buildResultsArea() {
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+
     if (_errorMessage != null) {
       return Center(
         child: Padding(
@@ -577,7 +586,84 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 显示单个食谱卡片 + 翻页控件
+    // 平板模式：Master-Detail View
+    if (isTablet) {
+      return Row(
+        children: [
+          // Master: 左侧食谱列表
+          SizedBox(
+            width: 400,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu,
+                        color: Theme.of(context).primaryColor,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Found ${_recipes.length} recipes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: _recipes.length,
+                    itemBuilder: (context, index) {
+                      final recipe = _recipes[index];
+                      final isSelected = _selectedRecipe?.id == recipe.id;
+                      return _buildRecipeListItem(recipe, isSelected, isTablet);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const VerticalDivider(width: 1, thickness: 1),
+          // Detail: 右侧食谱详情
+          Expanded(
+            child: _selectedRecipe != null
+                ? RecipeInfoScreen(recipe: _selectedRecipe!)
+                : const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.touch_app, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'Select a recipe to view details',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      );
+    }
+
+    // 手机模式：显示单个食谱卡片 + 翻页控件
     return Column(
       children: [
         // 食谱卡片区域
@@ -654,16 +740,148 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  Widget _buildRecipeCard(Recipe recipe) {
+  Widget _buildRecipeListItem(Recipe recipe, bool isSelected, bool isTablet) {
     return GestureDetector(
       key: Key('recipeCard_${recipe.id}'),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RecipeInfoScreen(recipe: recipe),
+        if (isTablet) {
+          // 平板模式：更新选中的食谱
+          setState(() {
+            _selectedRecipe = recipe;
+          });
+        } else {
+          // 手机模式：导航到详情页
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecipeInfoScreen(recipe: recipe),
+            ),
+          );
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: isSelected ? 4 : 1,
+        color: isSelected
+            ? Theme.of(context).primaryColor.withOpacity(0.1)
+            : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: isSelected
+              ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+              : BorderSide.none,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 缩略图
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: recipe.image,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 80,
+                    height: 80,
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 80,
+                    height: 80,
+                    color: Colors.grey.shade300,
+                    child: const Icon(
+                      Icons.restaurant,
+                      size: 32,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 食谱信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Theme.of(context).primaryColor
+                            : Colors.black,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.green.shade600,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${recipe.usedIngredientCount}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.shopping_cart,
+                          color: Colors.orange.shade600,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${recipe.missedIngredientCount}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        );
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecipeCard(Recipe recipe) {
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+    return GestureDetector(
+      key: Key('recipeCard_${recipe.id}'),
+      onTap: () {
+        if (!isTablet) {
+          // 手机模式：导航到详情页
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecipeInfoScreen(recipe: recipe),
+            ),
+          );
+        }
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
