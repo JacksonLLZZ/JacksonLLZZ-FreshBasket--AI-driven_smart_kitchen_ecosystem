@@ -435,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          "Smart Fridge",
+          "FreshBasket",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -541,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         flex: 3,
                         child: DropdownButtonFormField<String>(
-                          value: _selectedUnit,
+                          initialValue: _selectedUnit,
                           decoration: const InputDecoration(labelText: "Unit"),
                           items: _availableUnits
                               .map(

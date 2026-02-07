@@ -85,7 +85,7 @@ class _NutriScanAppState extends State<NutriScanApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'NutriScan',
+      title: 'FreshBasket',
       theme: AppTheme.getTheme(_currentTheme),
       home: const AuthWrapper(),
     );
@@ -172,14 +172,15 @@ class _AutoLoginSplashState extends State<AutoLoginSplash> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 80,
-              color: Colors.blueAccent,
-            ),
+              Image.asset(
+              'assets/images/logo.png',
+              width: 80,
+              height: 80,             
+              ),
+
             const SizedBox(height: 24),
             const Text(
-              "NutriScan",
+              "FreshBasket",
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
@@ -235,11 +236,7 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            const Icon(
-              Icons.account_circle_outlined,
-              size: 60,
-              color: Colors.blueAccent,
-            ),
+            const SizedBox.shrink(),
             const SizedBox(height: 20),
 
             // Your uploaded widgets

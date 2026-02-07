@@ -23,21 +23,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late final DatabaseService _db;
   late final FirebaseAuth _auth;
 
-  final List<String> _allAllergens = [
-    'Gluten-Free',
-    'Peanut-Free',
-    'Tree-Nut-Free',
-    'Dairy-Free',
-    'Egg-Free',
-    'Soy-Free',
-    'Fish-Free',
-    'Shellfish-Free',
-    'Pork-Free',
-    'Vegan',
-    'Vegetarian',
-    'Low-Sugar',
-  ];
-
   final Map<String, Color> _seasonalThemes = {
     'Spring': AppTheme.springColor,
     'Summer': AppTheme.summerColor,
@@ -116,9 +101,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, snapshot) {
           final data = snapshot.data ?? {};
           final currentTheme = data['theme'] ?? 'Default';
-          final List<String> userAllergens = List<String>.from(
-            data['allergens'] ?? [],
-          );
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -141,15 +123,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // 3. Fridge Statistics
                 _buildStatsSection(_db),
-                const SizedBox(height: 32),
-
-                // 4. Dietary Profile
-                const Text(
-                  "Health Profile",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildAllergySection(userAllergens),
                 const SizedBox(height: 32),
 
                 // 5. Advanced Options
@@ -330,18 +303,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         CircleAvatar(
           radius: 35,
           backgroundColor: primaryColor.withValues(alpha: 26),
-          child: const Icon(
-            Icons.person,
-            size: 40,
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/logo.png',
+              width: 52,
+              height: 52,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
+
         const SizedBox(width: 20),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                profile['username'] ?? "Nutri User",
+                profile['username'] ?? "FreshBasket User",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -405,140 +383,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAllergySection(List<String> allergens) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (allergens.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "No allergies set.",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: allergens
-                  .map(
-                    (a) => Chip(
-                      label: Text(
-                        a,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      backgroundColor: Colors.orangeAccent,
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  )
-                  .toList(),
-            ),
-          TextButton.icon(
-            onPressed: () => _showAllergenPicker(allergens),
-            icon: const Icon(Icons.edit_note, size: 20),
-            label: const Text("Update Health Preferences"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAllergenPicker(List<String> current) {
-    List<String> temp = List.from(current);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        height: MediaQuery.of(context).size.height * 0.65,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: StatefulBuilder(
-          builder: (ctx, setModalState) => Column(
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Health & Allergies",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 8,
-                    children: _allAllergens
-                        .map(
-                          (a) => FilterChip(
-                            label: Text(a),
-                            selected: temp.contains(a),
-                            onSelected: (s) => setModalState(
-                              () => s ? temp.add(a) : temp.remove(a),
-                            ),
-                            selectedColor: Colors.orangeAccent.withValues(
-                              alpha: 55,
-                            ),
-                            checkmarkColor: Colors.orangeAccent,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await _db.updateAllergens(temp);
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: const Text(
-                    "Save Preferences",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

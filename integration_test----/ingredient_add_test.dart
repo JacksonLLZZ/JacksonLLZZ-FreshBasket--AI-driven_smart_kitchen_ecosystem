@@ -71,7 +71,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show validation message or remain on same screen
-      expect(find.text('Smart Fridge'), findsWidgets);
+      expect(find.text('FreshBasket'), findsWidgets);
     });
   });
 }

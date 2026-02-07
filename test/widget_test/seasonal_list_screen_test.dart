@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:kitchen/features/shopping_list/presentation/seasonal_list_screen.dart';
-import 'package:kitchen/features/shopping_list/domain/recommendation_service.dart';
 import 'package:kitchen/features/shopping_list/domain/seasonal_food.dart';
-import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
 import '../mock_dependencies.dart';
 

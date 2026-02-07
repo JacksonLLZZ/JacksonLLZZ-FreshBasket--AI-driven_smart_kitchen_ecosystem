@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kitchen/services/database_service.dart';
 
-
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -15,12 +14,16 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
 
   final _forgotKey = GlobalKey<FormState>();
   final _forgotEmail = TextEditingController();
+
+  bool _isLoading = false;
+  bool _obscure = true;
 
   @override
   void dispose() {
@@ -30,148 +33,148 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
-
-
-  void _showLoading() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  void _hideLoading() {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
+  void _setLoading(bool v) {
+    if (!mounted) return;
+    setState(() => _isLoading = v);
   }
 
   void _showError(String msg) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Error'),
+        title: const Text("Error"),
         content: Text(msg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          )
         ],
       ),
     );
   }
 
-    Future<void> signInWithEmail() async {
+  String? _validateEmail(String? v) {
+    final s = (v ?? "").trim();
+    if (s.isEmpty) return "Please enter your email";
+    // 简单但够用的校验
+    final ok = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(s);
+    if (!ok) return "Please enter a valid email";
+    return null;
+  }
+
+  String? _validatePwd(String? v) {
+    final s = v ?? "";
+    if (s.isEmpty) return "Please enter your password";
+    if (s.length < 6) return "Password must be at least 6 chars";
+    return null;
+  }
+
+  Future<void> signInWithEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
-    _showLoading();
+    _setLoading(true);
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _email.text.trim(),
         password: _password.text,
       );
-      if (!mounted) return;
-      _hideLoading();
-      // ❗ 不导航，交给 authStateChanges
+      // ❗不导航，交给 main.dart 的 authStateChanges()
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      _hideLoading();
-      _showError(e.message ?? 'Email login failed');
+      _showError(e.message ?? "Email login failed");
     } catch (e) {
-      if (!mounted) return;
-      _hideLoading();
       _showError(e.toString());
+    } finally {
+      _setLoading(false);
     }
-  } 
-
+  }
 
   Future<void> signInWithGoogle() async {
-    _showLoading();
+    _setLoading(true);
     try {
-      // 1️⃣ 确保干净状态（模拟器/真机都更稳）
       final googleSignIn = GoogleSignIn();
-      await googleSignIn.signOut();
+      await googleSignIn.signOut(); // 减少脏状态问题
 
-      // 2️⃣ 弹出 Google 选择账号
-      final GoogleSignInAccount? googleUser =
-          await googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // user canceled
 
-      // 用户取消
-      if (googleUser == null) {
-        if (!mounted) return;
-        _hideLoading();
-        return;
-      }
-
-      // 3️⃣ 获取 Google token
       final googleAuth = await googleUser.authentication;
-
-      // 4️⃣ 转成 Firebase credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // 5️⃣ Firebase 登录
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      // 6️⃣ Firestore profile（只在缺失时）
+      // Firestore profile（只在缺失时补齐）
       final db = DatabaseService();
       final exists = await db.userDocExists();
       if (!exists) {
         final u = FirebaseAuth.instance.currentUser!;
+        
         await db.upsertUserProfile(
-          username: u.displayName ?? 'No Name',
-          email: u.email ?? 'No Email',
-          imageUrl: u.photoURL ?? '',
+          username: (u.displayName == null || u.displayName!.trim().isEmpty)
+              ? "No Name"
+              : u.displayName!.trim(),
+          email: (u.email == null || u.email!.trim().isEmpty)
+              ? "No Email"
+              : u.email!.trim(),
+          
         );
       }
-
-      // 7️⃣ 关闭 loading（不导航）
-      if (!mounted) return;
-      _hideLoading();
+      // ❗不导航
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      _hideLoading();
-      _showError(e.message ?? 'Google login failed');
+      _showError(e.message ?? "Google login failed");
     } catch (e) {
-      if (!mounted) return;
-      _hideLoading();
       _showError(e.toString());
+    } finally {
+      _setLoading(false);
     }
   }
-
 
   void _showForgotPasswordDialog() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Forgot Password"),
+        title: const Text("Reset password"),
         content: Form(
           key: _forgotKey,
           child: TextFormField(
             controller: _forgotEmail,
+            keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
               labelText: "Email",
-              icon: Icon(Icons.email),
+              prefixIcon: Icon(Icons.email),
             ),
-            validator: (v) => (v == null || !v.contains("@")) ? "Enter a valid email" : null,
+            validator: _validateEmail,
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () async {
-              if (!_forgotKey.currentState!.validate()) return;
-              try {
-                await FirebaseAuth.instance.sendPasswordResetEmail(
-                  email: _forgotEmail.text.trim(),
-                );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Reset email sent!")),
-                );
-              } catch (e) {
-                _showError(e.toString());
-              }
-            },
+            onPressed: _isLoading ? null : () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (!_forgotKey.currentState!.validate()) return;
+                    _setLoading(true);
+                    try {
+                      await FirebaseAuth.instance.sendPasswordResetEmail(
+                        email: _forgotEmail.text.trim(),
+                      );
+                      if (!mounted) return;
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Reset email sent.")),
+                      );
+                    } catch (e) {
+                      _showError(e.toString());
+                    } finally {
+                      _setLoading(false);
+                    }
+                  },
             child: const Text("Send"),
           ),
         ],
@@ -181,71 +184,139 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 400,
-      alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  prefixIcon: Icon(Icons.email, color: Colors.deepPurple[400]),
-                  hintText: 'Enter Your Email',
-                  labelText: 'Email',
-                ),
-                controller: _email,
-                validator: (v) => (v == null || v.isEmpty) ? "Please enter your email" : null,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  prefixIcon: Icon(Icons.key, color: Colors.deepPurple[400]),
-                  hintText: 'Do not share it!',
-                  labelText: 'Password',
-                ),
-                controller: _password,
-                validator: (v) => (v == null || v.isEmpty) ? "Please enter your password" : null,
-              ),
-              const SizedBox(height: 45),
+    final cs = Theme.of(context).colorScheme;
 
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                  minimumSize: const Size(250, 50),
-                ),
-                icon: const Icon(Icons.login),
-                label: const Text("Sign In"),
-                onPressed: signInWithEmail,
-              ),
-
-              const SizedBox(height: 15),
-
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                  minimumSize: const Size(250, 50),
-                  foregroundColor: Colors.red[600],
-                ),
-                icon: const FaIcon(FontAwesomeIcons.google),
-                label: const Text("Sign In with Google"),
-                onPressed: signInWithGoogle,
-              ),
-
-              TextButton(
-                onPressed: _showForgotPasswordDialog,
-                child: const Text("Forgot Password?"),
-              ),
-            ],
+    return Stack(
+      children: [
+        // 背景
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                cs.primary.withOpacity(0.14),
+                cs.secondary.withOpacity(0.10),
+                cs.surface,
+              ],
+            ),
           ),
         ),
-      ),
+
+        Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        Image.asset(
+                          'assets/images/logo.png',
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.contain,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Text(
+                          "Welcome to FreshBasket",
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 18),
+
+                        TextFormField(
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.username, AutofillHints.email],
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            prefixIcon: const Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          validator: _validateEmail,
+                        ),
+                        const SizedBox(height: 14),
+
+                        TextFormField(
+                          controller: _password,
+                          obscureText: _obscure,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.password],
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            prefixIcon: const Icon(Icons.lock),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () => setState(() => _obscure = !_obscure),
+                              icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                            ),
+                          ),
+                          validator: _validatePwd,
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _isLoading ? null : _showForgotPasswordDialog,
+                            child: const Text("Forgot password?"),
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: FilledButton.icon(
+                            icon: const Icon(Icons.login),
+                            label: const Text("Sign in"),
+                            onPressed: _isLoading ? null : signInWithEmail,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            icon: const FaIcon(FontAwesomeIcons.google),
+                            label: const Text("Continue with Google"),
+                            onPressed: _isLoading ? null : signInWithGoogle,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+                      ],
+                      
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        if (_isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.18),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+      ],
     );
   }
 }
+
