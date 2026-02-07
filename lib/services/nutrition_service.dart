@@ -7,12 +7,15 @@ import '../features/recipes/data/recipe.dart';
 import '../core/config/api_config.dart';
 
 class NutritionService {
-  // 移除了 ApiClient (Gemini)，只保留用于 Edamam 的 Dio
-  final Dio _dio = Dio();
+  // Dio 实例 - 支持依赖注入以便于测试
+  final Dio _dio;
 
   // 百度 AI Token 缓存
   String? _baiduAccessToken;
   DateTime? _tokenExpireTime;
+
+  // 构造函数 - 允许注入 Dio 实例用于测试
+  NutritionService({Dio? dio}) : _dio = dio ?? Dio();
 
   // 常见调味料和基础食材黑名单（过滤缺失食材时使用）
   static const Set<String> _commonPantryItems = {
