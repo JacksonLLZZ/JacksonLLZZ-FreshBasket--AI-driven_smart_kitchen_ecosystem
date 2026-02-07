@@ -12,6 +12,9 @@ import 'package:kitchen/services/database_service.dart';
 import 'package:kitchen/services/nutrition_service.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart' as kitchen;
 import 'package:kitchen/features/shopping_cart/data/shopping_item.dart' as kitchen;
+import 'package:kitchen/features/shopping_list/domain/recommendation_service.dart';
+import 'package:kitchen/features/shopping_list/domain/seasonal_food.dart';
+import 'package:kitchen/core/utils/season_helper.dart';
 
 // Dio Mock
 class MockDio extends Mock implements Dio {}
@@ -42,6 +45,9 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 // DatabaseService Mock
 class MockDatabaseService extends Mock implements DatabaseService {}
 
+// Firestore Snapshots Mocks
+class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
+
 // NutritionService Mock
 class MockNutritionService extends Mock implements NutritionService {}
 
@@ -51,6 +57,10 @@ class FakeIngredient extends Fake implements kitchen.Ingredient {}
 class FakeShoppingItem extends Fake implements kitchen.ShoppingItem {}
 
 class FakeDateTime extends Fake implements DateTime {}
+
+class MockRecommendationService extends Mock implements RecommendationService {}
+
+class MockSeasonalFood extends Mock implements SeasonalFood {}
 
 // 注册 fallback values (mocktail 需要)
 void registerFallbackValues() {
@@ -62,4 +72,5 @@ void registerFallbackValues() {
   registerFallbackValue(<String>[]);
   registerFallbackValue(<kitchen.Ingredient>[]);
   registerFallbackValue(<kitchen.ShoppingItem>[]);
+  registerFallbackValue(Hemisphere.northern);
 }

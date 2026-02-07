@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kitchen/features/profile/presentation/profile_screen.dart';
 import 'package:kitchen/core/constants/test_keys.dart';
@@ -13,14 +11,19 @@ void main() {
   late MockFirebaseAuth mockAuth;
   late MockUser mockUser;
   late SharedPreferences mockPrefs;
+  late MockDatabaseService mockDb;
 
   setUpAll(() {
     registerFallbackValues();
   });
 
   setUp(() async {
+    // Initialize SharedPreferences mock
+    SharedPreferences.setMockInitialValues({});
+    
     mockAuth = MockFirebaseAuth();
     mockUser = MockUser();
+    mockDb = MockDatabaseService();
     mockPrefs = await SharedPreferences.getInstance();
     await mockPrefs.clear();
 
@@ -29,6 +32,24 @@ void main() {
     when(() => mockUser.isAnonymous).thenReturn(false);
     when(() => mockUser.email).thenReturn('test@example.com');
     when(() => mockUser.uid).thenReturn('test-user-id');
+
+    // Mock DatabaseService streams
+    final mockSnapshot = MockDocumentSnapshot();
+    when(() => mockSnapshot.exists).thenReturn(true);
+    when(() => mockSnapshot.data()).thenReturn({});
+    
+    when(() => mockDb.getUserProfileStream()).thenAnswer(
+      (_) => Stream.value(mockSnapshot),
+    );
+    when(() => mockDb.getInventoryStream()).thenAnswer(
+      (_) => Stream.value([]),
+    );
+    when(() => mockDb.updateTheme(any())).thenAnswer((_) async => {});
+    when(() => mockDb.upsertUserProfile(
+          username: any(named: 'username'),
+          email: any(named: 'email'),
+          imageUrl: any(named: 'imageUrl'),
+        )).thenAnswer((_) async => {});
   });
 
   tearDown(() async {
@@ -39,7 +60,7 @@ void main() {
     testWidgets('应该显示页面标题 "Account & Settings"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -57,7 +78,7 @@ void main() {
     testWidgets('应该显示主题选择器标题 "App Appearance"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -71,7 +92,7 @@ void main() {
     testWidgets('应该显示健康档案标题 "Health Profile"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -87,7 +108,7 @@ void main() {
       when(() => mockUser.isAnonymous).thenReturn(true);
       
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -106,7 +127,7 @@ void main() {
     testWidgets('应该显示各个季节的主题选项', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -123,7 +144,7 @@ void main() {
     testWidgets('应该能够点击季节主题进行切换', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -151,7 +172,7 @@ void main() {
       when(() => mockUser.isAnonymous).thenReturn(false);
       
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -172,7 +193,7 @@ void main() {
     testWidgets('应该显示过敏原选择列表', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act
@@ -193,7 +214,7 @@ void main() {
     testWidgets('应该显示Fridge Statistics部分', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const ProfileScreen(),
+        child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
 
       // Act

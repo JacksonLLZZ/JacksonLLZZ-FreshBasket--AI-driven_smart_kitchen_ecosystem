@@ -8,20 +8,26 @@ import '../../../core/constants/test_keys.dart';
 
 class RecipeInfoScreen extends StatefulWidget {
   final Recipe recipe;
+  final DatabaseService? databaseService;
 
-  const RecipeInfoScreen({super.key, required this.recipe});
+  const RecipeInfoScreen({
+    super.key, 
+    required this.recipe,
+    this.databaseService,
+  });
 
   @override
   State<RecipeInfoScreen> createState() => _RecipeInfoScreenState();
 }
 
 class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
   List<ShoppingItem> _cartItems = [];
 
   @override
   void initState() {
     super.initState();
+    _db = widget.databaseService ?? DatabaseService();
     _loadCartItems();
   }
 

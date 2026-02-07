@@ -8,16 +8,22 @@ import '../../shopping_cart/data/shopping_item.dart';
 import '../../../core/constants/test_keys.dart';
 
 class SeasonalListScreen extends StatefulWidget {
-  const SeasonalListScreen({super.key});
+  final DatabaseService? databaseService;
+  final RecommendationService? recommendationService;
+  
+  const SeasonalListScreen({
+    super.key, 
+    this.databaseService,
+    this.recommendationService,
+  });
 
   @override
   State<SeasonalListScreen> createState() => _SeasonalListScreenState();
 }
 
 class _SeasonalListScreenState extends State<SeasonalListScreen> {
-  late final SeasonalCatalogRepository _repo;
   late final RecommendationService _service;
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
 
   late Future<List<SeasonalFood>> _future;
   final TextEditingController _searchController = TextEditingController();
@@ -29,11 +35,16 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
   void initState() {
     super.initState();
 
-    // 关键：assetPath 和你 repo 默认一致即可；如果你想显式传参也可以
-    _repo = SeasonalCatalogRepository(
-      assetPath: 'assets/data/season_foods.json',
-    );
-    _service = RecommendationService(_repo);
+    _db = widget.databaseService ?? DatabaseService();
+
+    if (widget.recommendationService != null) {
+      _service = widget.recommendationService!;
+    } else {
+      final repo = SeasonalCatalogRepository(
+        assetPath: 'assets/data/season_foods.json',
+      );
+      _service = RecommendationService(repo);
+    }
 
     _future = _service.getSeasonalPicks(hemisphere: _hemisphere);
 

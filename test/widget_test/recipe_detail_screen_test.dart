@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kitchen/features/recipes/presentation/recipe_detail_screen.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart';
-import 'package:kitchen/services/nutrition_service.dart';
 import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
 import '../mock_dependencies.dart';
 
 void main() {
-  late MockNutritionService mockNutritionService;
+
   late SharedPreferences mockPrefs;
   late List<Ingredient> testIngredients;
 
@@ -19,7 +17,9 @@ void main() {
   });
 
   setUp(() async {
-    mockNutritionService = MockNutritionService();
+    // Initialize SharedPreferences mock
+    SharedPreferences.setMockInitialValues({});
+
     mockPrefs = await SharedPreferences.getInstance();
     await mockPrefs.clear();
 
@@ -91,7 +91,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert - 验证搜索相关的按钮
-      expect(find.textContaining('Search'), findsWidgets);
+      expect(find.textContaining('Find Recipes'), findsWidgets);
     });
 
     testWidgets('应该能够选择/取消选择食材（Spoonacular模式）', (WidgetTester tester) async {
@@ -165,10 +165,6 @@ void main() {
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
-
-      // 查找可能的翻页按钮
-      final nextButtonFinder = find.byIcon(Icons.arrow_forward);
-      final prevButtonFinder = find.byIcon(Icons.arrow_back);
 
       // Assert - 验证翻页按钮可能存在（取决于是否有数据）
       // 这里我们只验证UI不会崩溃

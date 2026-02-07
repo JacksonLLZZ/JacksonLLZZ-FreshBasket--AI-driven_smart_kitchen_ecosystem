@@ -7,16 +7,24 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../recipes/presentation/recipe_detail_screen.dart';
 
 class InventoryScreen extends StatefulWidget {
-  const InventoryScreen({super.key});
+  final DatabaseService? databaseService;
+  
+  const InventoryScreen({super.key, this.databaseService});
 
   @override
   State<InventoryScreen> createState() => _InventoryScreenState();
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
   bool _isSelectionMode = false;
   final Set<String> _selectedItems = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _db = widget.databaseService ?? DatabaseService();
+  }
 
   /// 删除单个食材
   Future<void> _deleteIngredient(BuildContext context, Ingredient item) async {

@@ -4,40 +4,20 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'package:kitchen/services/database_service.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart';
 import 'package:kitchen/features/shopping_cart/data/shopping_item.dart';
 
 void main() {
   group('DatabaseService -', () {
-    late FakeFirebaseFirestore fakeFirestore;
-    late MockFirebaseAuth mockAuth;
-    late MockUser mockUser;
+
 
     setUp(() {
-      // 创建 Mock 用户
-      mockUser = MockUser(
-        uid: 'test_user_123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-      );
 
-      // 创建 Mock Auth
-      mockAuth = MockFirebaseAuth(
-        mockUser: mockUser,
-        signedIn: true,
-      );
-
-      // 创建 Fake Firestore
-      fakeFirestore = FakeFirebaseFirestore();
     });
 
     group('Ingredient Operations', () {
       test('saveIngredient 应该保存食材到 Firestore', () async {
         // Arrange
-        final service = DatabaseService();
         final ingredient = Ingredient(
           id: 'test_ingredient_1',
           name: 'Apple',

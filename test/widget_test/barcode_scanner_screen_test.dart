@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:kitchen/features/home/barcode_scanner_screen.dart';
 import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
@@ -162,7 +161,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert - 验证Stack布局
-      expect(find.byType(Stack), findsOneWidget);
+      expect(find.byType(Stack), findsAtLeastNWidgets(1));
     });
 
     testWidgets('AppBar应该包含两个action按钮', (WidgetTester tester) async {

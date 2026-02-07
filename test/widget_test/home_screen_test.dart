@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:kitchen/features/home/home_screen.dart';
-import 'package:kitchen/services/nutrition_service.dart';
-import 'package:kitchen/services/database_service.dart';
-import 'package:kitchen/features/inventory/data/ingredient.dart';
 import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
 import '../mock_dependencies.dart';
@@ -31,106 +28,106 @@ void main() {
   });
 
   group('HomeScreen Widget Tests -', () {
-    testWidgets('应该显示页面基本结构', (WidgetTester tester) async {
+    testWidgets('should display basic page structure', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证Scaffold
+      // Assert - verify Scaffold
       expect(
         find.byKey(const Key(TestKeys.homeScreenScaffold)),
         findsOneWidget,
       );
     });
 
-    testWidgets('应该显示食材名称输入框', (WidgetTester tester) async {
+    testWidgets('should display ingredient name input field', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证输入框存在
+      // Assert - verify input field exists
       expect(find.byType(TextField), findsWidgets);
       expect(find.textContaining('Name'), findsWidgets);
     });
 
-    testWidgets('应该显示数量输入框', (WidgetTester tester) async {
+    testWidgets('should display quantity input field', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证数量相关的输入
+      // Assert - verify quantity related input
       expect(find.textContaining('Quantity'), findsWidgets);
     });
 
-    testWidgets('应该显示保存按钮', (WidgetTester tester) async {
+    testWidgets('should display save button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证保存按钮
+      // Assert - verify save button
       expect(find.textContaining('Save'), findsWidgets);
     });
 
-    testWidgets('应该显示计算卡路里按钮', (WidgetTester tester) async {
+    testWidgets('should display calculate calories button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证计算按钮
-      expect(find.textContaining('Calculate'), findsWidgets);
+      // Assert - verify calculate button (OutlinedButton with calculate icon)
+      expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
     });
 
-    testWidgets('应该显示扫描条形码按钮', (WidgetTester tester) async {
+    testWidgets('should display scan barcode button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证扫描按钮
+      // Assert - verify scan button
       final scanButtonFinder = find.byIcon(Icons.qr_code_scanner);
       expect(scanButtonFinder, findsWidgets);
     });
 
-    testWidgets('应该能够输入食材名称', (WidgetTester tester) async {
+    testWidgets('should be able to enter ingredient name', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找名称输入框并输入文本
+      // Find name input field and enter text
       final nameFieldFinder = find.byWidgetPredicate(
         (widget) => widget is TextField && 
                     widget.decoration?.labelText?.contains('Name') == true,
@@ -140,10 +137,10 @@ void main() {
         await tester.enterText(nameFieldFinder.first, 'Tomato');
         await tester.pumpAndSettle();
 
-        // Assert - 验证文本已输入
-        expect(find.text('Tomato'), findsOneWidget);
+        // Assert - verify text was entered (may appear in multiple places)
+        expect(find.text('Tomato'), findsWidgets);
       } else {
-        // 如果没有找到特定的名称字段，使用第一个TextField
+        // If specific name field not found, use first TextField
         final textFields = find.byType(TextField);
         if (textFields.evaluate().isNotEmpty) {
           await tester.enterText(textFields.first, 'Tomato');
@@ -154,17 +151,17 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够输入数量', (WidgetTester tester) async {
+    testWidgets('should be able to enter quantity', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找数量输入框
+      // Find quantity input field
       final qtyFieldFinder = find.byWidgetPredicate(
         (widget) => widget is TextField && 
                     widget.decoration?.labelText?.contains('Quantity') == true,
@@ -181,45 +178,45 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该显示单位选择器', (WidgetTester tester) async {
+    testWidgets('should display unit selector', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证单位相关的UI（可能是下拉菜单或按钮）
+      // Assert - verify unit related UI (could be dropdown or button)
       expect(find.byType(DropdownButton<String>), findsWidgets);
     });
 
-    testWidgets('应该显示过期日期选择器', (WidgetTester tester) async {
+    testWidgets('should display expiration date picker', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证日期相关的按钮或文本
+      // Assert - verify date related button or text
       expect(find.byIcon(Icons.calendar_today), findsWidgets);
     });
 
-    testWidgets('应该能够点击扫描按钮导航到扫描页面', (WidgetTester tester) async {
+    testWidgets('should navigate to scanner screen when scan button tapped', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找扫描按钮
+      // Find scan button
       final scanButton = find.byIcon(Icons.qr_code_scanner);
       
       if (scanButton.evaluate().isNotEmpty) {
@@ -227,21 +224,21 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - 验证无异常（导航可能因为缺少完整路由而失败，但不应崩溃）
+      // Assert - verify no exception (navigation might fail due to missing routes, but shouldn't crash)
       // expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够点击图库按钮', (WidgetTester tester) async {
+    testWidgets('should be able to tap gallery button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找图库按钮
+      // Find gallery button
       final galleryButton = find.byIcon(Icons.photo_library);
       
       if (galleryButton.evaluate().isNotEmpty) {
@@ -253,17 +250,17 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够点击相机按钮', (WidgetTester tester) async {
+    testWidgets('should be able to tap camera button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找相机按钮
+      // Find camera button
       final cameraButton = find.byIcon(Icons.camera_alt);
       
       if (cameraButton.evaluate().isNotEmpty) {
@@ -275,17 +272,17 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该显示卡路里计算结果区域', (WidgetTester tester) async {
+    testWidgets('should display calories calculation result area', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const HomeScreen(),
+        child: HomeScreen(databaseService: mockDb, nutritionService: mockNutrition),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证页面结构完整
+      // Assert - verify page structure is complete
       expect(find.byType(Scaffold), findsOneWidget);
     });
   });

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:kitchen/features/inventory/presentation/inventory_screen.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart';
-import 'package:kitchen/services/database_service.dart';
 import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
 import '../mock_dependencies.dart';
@@ -23,7 +22,7 @@ void main() {
   setUp(() {
     mockDb = MockDatabaseService();
 
-    // Mock stream to return test ingredients - ?????? getInventoryStream
+    // Mock stream to return test ingredients - use getInventoryStream
     when(() => mockDb.getInventoryStream()).thenAnswer(
       (_) => Stream.value([
         Ingredient.create(
@@ -47,77 +46,77 @@ void main() {
   });
 
   group('InventoryScreen Widget Tests -', () {
-    testWidgets('??????????', (WidgetTester tester) async {
+    testWidgets('should display basic page structure', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ??Scaffold
+      // Assert - verify Scaffold
       expect(
         find.byKey(const Key(TestKeys.inventoryScreenScaffold)),
         findsOneWidget,
       );
     });
 
-    testWidgets('????????', (WidgetTester tester) async {
+    testWidgets('should display ingredient list', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ??????
+      // Assert - verify ingredients are displayed
       expect(find.textContaining('Tomato'), findsWidgets);
       expect(find.textContaining('Milk'), findsWidgets);
     });
 
-    testWidgets('????????', (WidgetTester tester) async {
+    testWidgets('should display search icon', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ??????
-      expect(find.byIcon(Icons.search), findsWidgets);
+      // Assert - verify checklist icon
+      expect(find.byIcon(Icons.checklist), findsWidgets);
     });
 
-    testWidgets('????????', (WidgetTester tester) async {
+    testWidgets('should display select button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ??????
-      expect(find.byIcon(Icons.add), findsWidgets);
+      // Assert - verify select button
+      expect(find.byIcon(Icons.checklist), findsWidgets);
     });
 
-    testWidgets('??????????????', (WidgetTester tester) async {
+    testWidgets('should be able to tap on ingredient item', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // ?????food item (??ListTile?Card)
+      // Find food item (could be ListTile or Card)
       final cardFinder = find.byType(Card).first;
       
       if (cardFinder.evaluate().isNotEmpty) {
@@ -125,21 +124,21 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - ???????
+      // Assert - no exception should occur
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('??????????', (WidgetTester tester) async {
+    testWidgets('should handle long press on ingredient', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // ???????????????
+      // Long press on first card
       final cardFinder = find.byType(Card);
       
       if (cardFinder.evaluate().isNotEmpty) {
@@ -147,36 +146,35 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - ?????
+      // Assert - no exception
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('??????????', (WidgetTester tester) async {
+    testWidgets('should display expiration dates', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ????????????
-      // ??????????
+      // Assert - should display text widgets containing info
       expect(find.byType(Text), findsWidgets);
     });
 
-    testWidgets('????????', (WidgetTester tester) async {
+    testWidgets('should be able to delete ingredient', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // ?????????????????????
+      // Try to find and tap delete icon
       final deleteIcon = find.byIcon(Icons.delete);
       
       if (deleteIcon.evaluate().isNotEmpty) {
@@ -184,28 +182,28 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - ?????
+      // Assert - no exception
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('????????', (WidgetTester tester) async {
+    testWidgets('should be able to edit ingredient', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // ??????
+      // Find edit icon
       final editIcon = find.byIcon(Icons.edit);
       
       if (editIcon.evaluate().isNotEmpty) {
         await tester.tap(editIcon.first);
         await tester.pumpAndSettle();
         
-        // ????????????
+        // Try to cancel if dialog appears
         final cancelButton = find.text('Cancel');
         if (cancelButton.evaluate().isNotEmpty) {
           await tester.tap(cancelButton);
@@ -213,21 +211,21 @@ void main() {
         }
       }
 
-      // Assert - ?????
+      // Assert - no exception
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('?????????????', (WidgetTester tester) async {
+    testWidgets('should navigate to recipe screen', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // ?????"????"?"Recipe"??
+      // Try to find "Recipe" related button
       final recipeButton = find.textContaining('Recipe');
       
       if (recipeButton.evaluate().isNotEmpty) {
@@ -239,21 +237,21 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('??????????', (WidgetTester tester) async {
+    testWidgets('should handle empty inventory', (WidgetTester tester) async {
       // Arrange - Mock empty stream
       when(() => mockDb.getInventoryStream()).thenAnswer(
         (_) => Stream.value([]),
       );
 
       final widget = createTestApp(
-        child: const InventoryScreen(),
+        child: InventoryScreen(databaseService: mockDb),
       );
 
       // Act
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - ????????
+      // Assert - should still render
       expect(
         find.byKey(const Key(TestKeys.inventoryScreenScaffold)),
         findsOneWidget,

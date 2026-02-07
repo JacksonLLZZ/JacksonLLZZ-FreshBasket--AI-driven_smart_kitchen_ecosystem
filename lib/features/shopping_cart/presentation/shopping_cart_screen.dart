@@ -37,14 +37,22 @@ String _seasonMessage(String season) {
 }
 
 class ShoppingCartScreen extends StatefulWidget {
-  const ShoppingCartScreen({super.key});
+  final DatabaseService? databaseService;
+  
+  const ShoppingCartScreen({super.key, this.databaseService});
 
   @override
   State<ShoppingCartScreen> createState() => _ShoppingCartScreenState();
 }
 
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
+
+  @override
+  void initState() {
+    super.initState();
+    _db = widget.databaseService ?? DatabaseService();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +156,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (_) =>
-                                          const SeasonalListScreen(),
+                                          SeasonalListScreen(databaseService: _db),
                                     ),
                                   );
                                 },

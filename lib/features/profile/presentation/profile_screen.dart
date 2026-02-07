@@ -11,14 +11,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final DatabaseService? databaseService;
+  final FirebaseAuth? auth;
+  const ProfileScreen({super.key, this.databaseService, this.auth});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
+  late final FirebaseAuth _auth;
 
   final List<String> _allAllergens = [
     'Gluten-Free',
@@ -48,6 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _db = widget.databaseService ?? DatabaseService();
+    _auth = widget.auth ?? FirebaseAuth.instance;
     _loadApiKey();
   }
 
@@ -88,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     final bool isGuest = user?.isAnonymous ?? true;
 
     return Scaffold(
@@ -325,13 +330,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         CircleAvatar(
           radius: 35,
           backgroundColor: primaryColor.withValues(alpha: 26),
-          child: ClipOval(
-            child: Image.asset(
-              'lib/core/constants/icon/chef_profile.png',
-              width: 450,
-              height: 450,
-              fit: BoxFit.cover,
-            ),
+          child: const Icon(
+            Icons.person,
+            size: 40,
           ),
         ),
         const SizedBox(width: 20),
@@ -695,7 +696,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onPressed: () async {
           // Logic: When signing out of a REAL account, reset to Guest mode
           allowAnonymousLogin.value = true;
-          await FirebaseAuth.instance.signOut();
+          await _auth.signOut();
         },
         icon: const Icon(Icons.logout_rounded),
         label: const Text(

@@ -11,15 +11,18 @@ import 'barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final DatabaseService? databaseService;
+  final NutritionService? nutritionService;
+  
+  const HomeScreen({super.key, this.databaseService, this.nutritionService});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final NutritionService _nutrition = NutritionService();
-  final DatabaseService _db = DatabaseService();
+  late final NutritionService _nutrition;
+  late final DatabaseService _db;
   final ImagePicker _imagePicker = ImagePicker();
 
   final _nameController = TextEditingController();
@@ -38,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _nutrition = widget.nutritionService ?? NutritionService();
+    _db = widget.databaseService ?? DatabaseService();
     _loadIngredients();
   }
 
