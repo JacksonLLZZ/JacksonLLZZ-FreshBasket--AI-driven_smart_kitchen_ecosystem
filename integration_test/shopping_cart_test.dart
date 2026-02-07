@@ -40,8 +40,6 @@ void main() {
       expect(find.text('Shopping Cart'), findsOneWidget);
       
       // Empty cart message may appear
-      final emptyMessage = find.text('Your cart is empty');
-      // This is optional - cart might have items or be empty
     });
 
     testWidgets('Should navigate from cart to other screens', (WidgetTester tester) async {
