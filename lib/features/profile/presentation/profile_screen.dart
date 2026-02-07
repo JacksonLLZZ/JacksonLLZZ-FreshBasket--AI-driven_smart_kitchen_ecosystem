@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/database_service.dart';
 import '../../../core/constants/theme.dart';
+import '../../../core/constants/test_keys.dart';
 // 导入 main.dart 以访问 allowAnonymousLogin 全局变量
 import '../../../main.dart';
 import 'package:kitchen/core/constants/app_icons.dart';
@@ -91,6 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final bool isGuest = user?.isAnonymous ?? true;
 
     return Scaffold(
+      key: const Key(TestKeys.profileScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
@@ -198,6 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
+            key: const Key(TestKeys.loginButton),
             onPressed: () async {
               // Important: Break the guest loop before signing out
               allowAnonymousLogin.value = false;
@@ -599,6 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         builder: (context) => AlertDialog(
                           title: const Text('Gemini API Key'),
                           content: TextField(
+                            key: const Key(TestKeys.profileGeminiApiField),
                             controller: TextEditingController(text: _geminiApiKey),
                             decoration: const InputDecoration(
                               hintText: 'Enter your Gemini API key',
@@ -614,6 +618,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: const Text('Cancel'),
                             ),
                             TextButton(
+                              key: const Key(TestKeys.profileSaveApiButton),
                               onPressed: () {
                                 _saveApiKey(_geminiApiKey);
                                 Navigator.pop(context);

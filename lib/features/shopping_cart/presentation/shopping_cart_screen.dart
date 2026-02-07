@@ -4,6 +4,7 @@ import '../../../core/utils/season_helper.dart';
 import '../../../main.dart'; // 导入以访问 currentTheme
 import '../../../services/database_service.dart';
 import '../data/shopping_item.dart';
+import '../../../core/constants/test_keys.dart';
 
 String _seasonLabel(String season) {
   switch (season) {
@@ -48,6 +49,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.shoppingCartScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
@@ -141,6 +143,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                               width: double.infinity,
                               height: 44,
                               child: ElevatedButton.icon(
+                                key: const Key('viewSeasonalPicksButton'),
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -276,6 +279,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
+                        key: const Key('clearAllButton'),
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
@@ -378,6 +382,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                               ),
                             ),
                             IconButton(
+                              key: Key('deleteItemButton_${item.id}'),
                               icon: const Icon(Icons.delete_outline),
                               color: Colors.red.shade400,
                               onPressed: () async {

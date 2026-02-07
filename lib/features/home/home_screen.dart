@@ -6,6 +6,7 @@ import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
 import '../../../services/ingredient_list_service.dart';
+import '../../../core/constants/test_keys.dart';
 import 'barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -425,6 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
     return Scaffold(
+      key: const Key(TestKeys.homeScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
@@ -505,6 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           });
 
                           return TextField(
+                            key: const Key(TestKeys.ingredientNameField),
                             controller: controller,
                             focusNode: focusNode,
                             decoration: const InputDecoration(
@@ -521,6 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         flex: 2,
                         child: TextField(
+                          key: const Key(TestKeys.ingredientQuantityField),
                           controller: _qtyController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
@@ -584,6 +588,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: SizedBox(
                           height: 50,
                           child: ElevatedButton.icon(
+                            key: const Key(TestKeys.ingredientSaveButton),
                             onPressed: _save,
                             icon: const Icon(Icons.save_outlined),
                             label: const Text(

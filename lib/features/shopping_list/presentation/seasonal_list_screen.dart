@@ -5,6 +5,7 @@ import '../domain/recommendation_service.dart'; // 按你实际文件名改
 import '../domain/seasonal_food.dart';
 import '../../../services/database_service.dart';
 import '../../shopping_cart/data/shopping_item.dart';
+import '../../../core/constants/test_keys.dart';
 
 class SeasonalListScreen extends StatefulWidget {
   const SeasonalListScreen({super.key});
@@ -83,11 +84,16 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.seasonalListScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('Seasonal List'),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
+          IconButton(
+            key: const Key('refreshButton'),
+            icon: const Icon(Icons.refresh),
+            onPressed: _refresh,
+          ),
         ],
       ),
       body: Column(
@@ -146,6 +152,7 @@ class _SearchBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: TextField(
+        key: const Key('searchTextField'),
         controller: controller,
         decoration: InputDecoration(
           hintText: 'Search seasonal foods (e.g., tomato, milk)',
@@ -202,6 +209,7 @@ class _SeasonalFoodTile extends StatelessWidget {
                 ),
               )
             : IconButton(
+                key: Key('addToCartButton_${food.name}'),
                 icon: const Icon(Icons.add_shopping_cart),
                 onPressed: () async {
                   final item = ShoppingItem.create(
@@ -267,7 +275,11 @@ class _ErrorState extends StatelessWidget {
           children: [
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(
+              key: const Key('retryButton'),
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
           ],
         ),
       ),

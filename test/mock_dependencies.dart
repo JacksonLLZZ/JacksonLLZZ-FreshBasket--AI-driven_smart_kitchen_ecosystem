@@ -8,6 +8,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:kitchen/services/database_service.dart';
+import 'package:kitchen/services/nutrition_service.dart';
+import 'package:kitchen/features/inventory/data/ingredient.dart' as kitchen;
+import 'package:kitchen/features/shopping_cart/data/shopping_item.dart' as kitchen;
 
 // Dio Mock
 class MockDio extends Mock implements Dio {}
@@ -35,8 +39,27 @@ class MockCollectionReference<T> extends Mock
 // SharedPreferences Mock
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
+// DatabaseService Mock
+class MockDatabaseService extends Mock implements DatabaseService {}
+
+// NutritionService Mock
+class MockNutritionService extends Mock implements NutritionService {}
+
+// Fake classes for complex types that cannot be mocked
+class FakeIngredient extends Fake implements kitchen.Ingredient {}
+
+class FakeShoppingItem extends Fake implements kitchen.ShoppingItem {}
+
+class FakeDateTime extends Fake implements DateTime {}
+
 // 注册 fallback values (mocktail 需要)
 void registerFallbackValues() {
   registerFallbackValue(RequestOptions(path: ''));
   registerFallbackValue(const Duration(seconds: 1));
+  registerFallbackValue(FakeIngredient());
+  registerFallbackValue(FakeShoppingItem());
+  registerFallbackValue(DateTime.now());
+  registerFallbackValue(<String>[]);
+  registerFallbackValue(<kitchen.Ingredient>[]);
+  registerFallbackValue(<kitchen.ShoppingItem>[]);
 }

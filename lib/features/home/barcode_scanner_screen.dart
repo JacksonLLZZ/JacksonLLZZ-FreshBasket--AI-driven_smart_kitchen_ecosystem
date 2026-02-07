@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../core/constants/test_keys.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -21,6 +22,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.barcodeScannerScreenScaffold),
       appBar: AppBar(
         title: const Text('Scan Barcode'),
         actions: [

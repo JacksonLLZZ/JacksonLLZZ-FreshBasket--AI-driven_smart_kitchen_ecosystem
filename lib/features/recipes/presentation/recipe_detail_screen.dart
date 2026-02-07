@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'recipe_info_screen.dart';
+import '../../../core/constants/test_keys.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -249,6 +250,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.recipeDetailScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
@@ -390,6 +392,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton.icon(
+                        key: const Key('findRecipesButton'),
                         onPressed: _loading ? null : _searchRecipes,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -539,6 +542,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
+                key: const Key('tryAgainButton'),
                 onPressed: _searchRecipes,
                 child: const Text('Try Again'),
               ),
@@ -602,6 +606,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             children: [
               // 上一页按钮
               IconButton(
+                key: const Key('previousPageButton'),
                 onPressed: _currentPage > 0 ? _previousPage : null,
                 icon: const Icon(Icons.chevron_left),
                 iconSize: 32,
@@ -632,6 +637,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
               // 下一页按钮
               IconButton(
+                key: const Key('nextPageButton'),
                 onPressed: _currentPage < _recipes.length - 1
                     ? _nextPage
                     : null,
@@ -650,6 +656,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   Widget _buildRecipeCard(Recipe recipe) {
     return GestureDetector(
+      key: Key('recipeCard_${recipe.id}'),
       onTap: () {
         Navigator.push(
           context,
