@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import '../data/chat_message.dart';
 import '../domain/assistant_service.dart';
 
@@ -15,17 +16,22 @@ class _AssistantScreenState extends State<AssistantScreen> {
   final TextEditingController _textController = TextEditingController();
   final AssistantService _assistantService = AssistantService();
   bool _isLoading = false;
+  bool _isStreaming = false;
+  StreamSubscription<String>? _streamSubscription;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     // Add initial welcome message
-    _messages.add(ChatMessage(
-      text: "Hello! I'm your kitchen AI assistant. I can help you with recipe suggestions, ingredient analysis, meal planning, and food management. How can I help you today?",
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(
+        text:
+            "Hello! I'm your kitchen AI assistant. I can help you with recipe suggestions, ingredient analysis, meal planning, and food management. How can I help you today?",
+        isUser: false,
+        timestamp: DateTime.now(),
+      ),
+    );
     // Scroll to bottom after initial build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -45,42 +51,95 @@ class _AssistantScreenState extends State<AssistantScreen> {
   Future<void> _sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
+    // Cancel any existing subscription
+    await _cancelStreamSubscription();
+
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isUser: true,
-        timestamp: DateTime.now(),
-      ));
+      // Add user message
+      _messages.add(
+        ChatMessage(text: text, isUser: true, timestamp: DateTime.now()),
+      );
       _textController.clear();
       _isLoading = true;
+      _isStreaming = true;
+      // Add empty AI response placeholder
+      _messages.add(
+        ChatMessage(text: '', isUser: false, timestamp: DateTime.now()),
+      );
     });
 
     // Scroll to show new message
     _scrollToBottom();
 
     try {
-      final response = await _assistantService.getResponse(text);
-      setState(() {
-        _messages.add(ChatMessage(
-          text: response,
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-        _isLoading = false;
-      });
+      final responseStream = _assistantService.getResponseStream(text);
+      _streamSubscription = responseStream.listen(
+        (chunk) {
+          setState(() {
+            // Update the last message (which should be the AI response)
+            if (_messages.isNotEmpty && !_messages.last.isUser) {
+              _messages.last = ChatMessage(
+                text: _messages.last.text + chunk,
+                isUser: false,
+                timestamp: _messages.last.timestamp,
+              );
+            }
+          });
+          _scrollToBottom();
+        },
+        onError: (error) {
+          _handleStreamError(error);
+        },
+        onDone: () {
+          setState(() {
+            _isLoading = false;
+            _isStreaming = false;
+          });
+          _scrollToBottom();
+        },
+        cancelOnError: true,
+      );
     } catch (e) {
-      setState(() {
-        _messages.add(ChatMessage(
-          text: "I'm having trouble connecting right now. Please check your internet connection and API key configuration.",
+      _handleStreamError(e);
+    }
+  }
+
+  Future<void> _cancelStreamSubscription() async {
+    await _streamSubscription?.cancel();
+    _streamSubscription = null;
+  }
+
+  void _handleStreamError(dynamic error) {
+    setState(() {
+      _isLoading = false;
+      _isStreaming = false;
+
+      // Update the last message (which should be the AI response placeholder)
+      if (_messages.isNotEmpty && !_messages.last.isUser) {
+        _messages.last = ChatMessage(
+          text: _getUserFriendlyErrorMessage(error),
           isUser: false,
           timestamp: DateTime.now(),
-        ));
-        _isLoading = false;
-      });
-    }
-
-    // Scroll to show AI response
+        );
+      } else {
+        // Add error message if no AI placeholder exists
+        _messages.add(
+          ChatMessage(
+            text: _getUserFriendlyErrorMessage(error),
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+    });
     _scrollToBottom();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -168,7 +227,11 @@ class _AssistantScreenState extends State<AssistantScreen> {
               margin: const EdgeInsets.only(right: 8),
               child: CircleAvatar(
                 backgroundColor: theme.colorScheme.primary,
-                child: const Icon(Icons.smart_toy, color: Colors.white, size: 16),
+                child: const Icon(
+                  Icons.smart_toy,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             ),
           Expanded(
@@ -202,10 +265,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                 const SizedBox(height: 4),
                 Text(
                   DateFormat('HH:mm').format(message.timestamp),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               ],
             ),
@@ -221,5 +281,32 @@ class _AssistantScreenState extends State<AssistantScreen> {
         ],
       ),
     );
+  }
+
+  String _getUserFriendlyErrorMessage(dynamic error) {
+    final errorStr = error.toString();
+    final lowerErrorStr = errorStr.toLowerCase();
+
+    if (lowerErrorStr.contains('api key not configured') ||
+        lowerErrorStr.contains('gemini api key not configured')) {
+      return "Please configure the Gemini API key in Account Settings.\n\n Steps：\n1. Go to account setting page\n2. Locate Advanced Options\n3. Click Gemini API Configuration\n4. Enter your API key and save";
+    } else if (lowerErrorStr.contains('invalid api key') ||
+        lowerErrorStr.contains('api_key_invalid')) {
+      return "Invalid API key. Please check:：\n1. Whether the key was copied correctly\n2. Whether the key is enabled\n3. Whether the key has sufficient quota\n\nYou can update the API key in Profile settings.";
+    } else if (lowerErrorStr.contains('network error') ||
+        lowerErrorStr.contains('network')) {
+      return "Network connection failed. Please check:\n1. Internet Connection\n2. Firewall settings\n3. Proxy configuration\n\nPlease try again later.";
+    } else if (lowerErrorStr.contains('api quota exceeded') ||
+        lowerErrorStr.contains('quota')) {
+      return "API quota has been exceeded. Please:\n1. Check Usage\n2. reset quota\n3. Update API plan";
+    } else if (lowerErrorStr.contains('timeout') ||
+        lowerErrorStr.contains('timed out')) {
+      return "Request timed out\n1. Check network connection\n2. Check API service availability \n3. Try again later";
+    } else {
+      // 提取主要错误信息，避免显示过多技术细节
+      final parts = errorStr.split(':');
+      final lastPart = parts.isNotEmpty ? parts.last.trim() : errorStr;
+      return "The AI service is temporarily unavailable.$lastPart\n\nPlease try again later or check your network connection.";
+    }
   }
 }
