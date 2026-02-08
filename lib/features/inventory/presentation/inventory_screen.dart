@@ -2,20 +2,29 @@ import 'package:flutter/material.dart';
 import '../../../services/database_service.dart';
 import '../data/ingredient.dart';
 import 'package:kitchen/core/constants/app_icons.dart';
+import 'package:kitchen/core/constants/test_keys.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../recipes/presentation/recipe_detail_screen.dart';
 
 class InventoryScreen extends StatefulWidget {
-  const InventoryScreen({super.key});
+  final DatabaseService? databaseService;
+  
+  const InventoryScreen({super.key, this.databaseService});
 
   @override
   State<InventoryScreen> createState() => _InventoryScreenState();
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
   bool _isSelectionMode = false;
   final Set<String> _selectedItems = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _db = widget.databaseService ?? DatabaseService();
+  }
 
   /// 删除单个食材
   Future<void> _deleteIngredient(BuildContext context, Ingredient item) async {
@@ -112,6 +121,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                key: const Key(TestKeys.ingredientNameField),
                 controller: qtyController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -193,6 +203,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.inventoryScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
@@ -269,6 +280,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       ),
                     ),
                     child: ListTile(
+                      key: Key(TestKeys.listItem(TestKeys.inventoryItemTile, index)),
                       contentPadding: const EdgeInsets.all(12),
                       onTap: _isSelectionMode
                           ? () {

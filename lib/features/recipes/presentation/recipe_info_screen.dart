@@ -4,23 +4,30 @@ import '../data/recipe.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../services/database_service.dart';
 import '../../shopping_cart/data/shopping_item.dart';
+import '../../../core/constants/test_keys.dart';
 
 class RecipeInfoScreen extends StatefulWidget {
   final Recipe recipe;
+  final DatabaseService? databaseService;
 
-  const RecipeInfoScreen({super.key, required this.recipe});
+  const RecipeInfoScreen({
+    super.key, 
+    required this.recipe,
+    this.databaseService,
+  });
 
   @override
   State<RecipeInfoScreen> createState() => _RecipeInfoScreenState();
 }
 
 class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
   List<ShoppingItem> _cartItems = [];
 
   @override
   void initState() {
     super.initState();
+    _db = widget.databaseService ?? DatabaseService();
     _loadCartItems();
   }
 
@@ -43,6 +50,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.recipeInfoScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
         slivers: [
@@ -240,6 +248,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
                     ),
                     const SizedBox(height: 12),
                     InkWell(
+                      key: const Key('youtubeVideoLink'),
                       onTap: () async {
                         await Clipboard.setData(
                           ClipboardData(text: widget.recipe.youtubeUrl!),
@@ -556,8 +565,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
               ),
             )
           else
-            IconButton(
-              icon: const Icon(Icons.add_shopping_cart),
+            IconButton(              key: Key('addToCartButton_${ingredient.name}'),              icon: const Icon(Icons.add_shopping_cart),
               color: textColor,
               iconSize: 20,
               tooltip: 'Add to cart',

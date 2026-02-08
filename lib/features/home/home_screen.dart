@@ -6,19 +6,23 @@ import '../../../services/nutrition_service.dart';
 import '../../../services/database_service.dart';
 import '../inventory/data/ingredient.dart';
 import '../../../services/ingredient_list_service.dart';
+import '../../../core/constants/test_keys.dart';
 import 'barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final DatabaseService? databaseService;
+  final NutritionService? nutritionService;
+  
+  const HomeScreen({super.key, this.databaseService, this.nutritionService});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final NutritionService _nutrition = NutritionService();
-  final DatabaseService _db = DatabaseService();
+  late final NutritionService _nutrition;
+  late final DatabaseService _db;
   final ImagePicker _imagePicker = ImagePicker();
 
   final _nameController = TextEditingController();
@@ -37,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _nutrition = widget.nutritionService ?? NutritionService();
+    _db = widget.databaseService ?? DatabaseService();
     _loadIngredients();
   }
 
@@ -425,10 +431,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
     return Scaffold(
+      key: const Key(TestKeys.homeScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          "Smart Fridge",
+          "FreshBasket",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -505,6 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           });
 
                           return TextField(
+                            key: const Key(TestKeys.ingredientNameField),
                             controller: controller,
                             focusNode: focusNode,
                             decoration: const InputDecoration(
@@ -521,6 +529,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         flex: 2,
                         child: TextField(
+                          key: const Key(TestKeys.ingredientQuantityField),
                           controller: _qtyController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
@@ -532,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         flex: 3,
                         child: DropdownButtonFormField<String>(
-                          value: _selectedUnit,
+                          initialValue: _selectedUnit,
                           decoration: const InputDecoration(labelText: "Unit"),
                           items: _availableUnits
                               .map(
@@ -584,6 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: SizedBox(
                           height: 50,
                           child: ElevatedButton.icon(
+                            key: const Key(TestKeys.ingredientSaveButton),
                             onPressed: _save,
                             icon: const Icon(Icons.save_outlined),
                             label: const Text(

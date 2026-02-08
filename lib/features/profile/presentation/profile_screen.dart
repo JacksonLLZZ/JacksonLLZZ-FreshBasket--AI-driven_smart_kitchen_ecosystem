@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/database_service.dart';
 import '../../../core/constants/theme.dart';
+import '../../../core/constants/test_keys.dart';
 // 导入 main.dart 以访问 allowAnonymousLogin 全局变量
 import '../../../main.dart';
 import 'package:kitchen/core/constants/app_icons.dart';
@@ -10,29 +11,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final DatabaseService? databaseService;
+  final FirebaseAuth? auth;
+  const ProfileScreen({super.key, this.databaseService, this.auth});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final DatabaseService _db = DatabaseService();
-
-  final List<String> _allAllergens = [
-    'Gluten-Free',
-    'Peanut-Free',
-    'Tree-Nut-Free',
-    'Dairy-Free',
-    'Egg-Free',
-    'Soy-Free',
-    'Fish-Free',
-    'Shellfish-Free',
-    'Pork-Free',
-    'Vegan',
-    'Vegetarian',
-    'Low-Sugar',
-  ];
+  late final DatabaseService _db;
+  late final FirebaseAuth _auth;
 
   final Map<String, Color> _seasonalThemes = {
     'Spring': AppTheme.springColor,
@@ -47,6 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _db = widget.databaseService ?? DatabaseService();
+    _auth = widget.auth ?? FirebaseAuth.instance;
     _loadApiKey();
   }
 
@@ -97,10 +88,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     final bool isGuest = user?.isAnonymous ?? true;
 
     return Scaffold(
+      key: const Key(TestKeys.profileScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
@@ -119,9 +111,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, snapshot) {
           final data = snapshot.data ?? {};
           final currentTheme = data['theme'] ?? 'Default';
-          final List<String> userAllergens = List<String>.from(
-            data['allergens'] ?? [],
-          );
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -144,15 +133,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // 3. Fridge Statistics
                 _buildStatsSection(_db),
-                const SizedBox(height: 32),
-
-                // 4. Dietary Profile
-                const Text(
-                  "Health Profile",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildAllergySection(userAllergens),
                 const SizedBox(height: 32),
 
                 // 5. Advanced Options
@@ -208,6 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
+            key: const Key(TestKeys.loginButton),
             onPressed: () async {
               // Important: Break the guest loop before signing out
               allowAnonymousLogin.value = false;
@@ -334,20 +315,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           backgroundColor: primaryColor.withValues(alpha: 26),
           child: ClipOval(
             child: Image.asset(
-              'lib/core/constants/icon/chef_profile.png',
-              width: 450,
-              height: 450,
-              fit: BoxFit.cover,
+              'assets/images/logo.png',
+              width: 52,
+              height: 52,
+              fit: BoxFit.contain,
             ),
           ),
         ),
+
         const SizedBox(width: 20),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                profile['username'] ?? "Nutri User",
+                profile['username'] ?? "FreshBasket User",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -416,140 +398,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAllergySection(List<String> allergens) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (allergens.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "No allergies set.",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: allergens
-                  .map(
-                    (a) => Chip(
-                      label: Text(
-                        a,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      backgroundColor: Colors.orangeAccent,
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  )
-                  .toList(),
-            ),
-          TextButton.icon(
-            onPressed: () => _showAllergenPicker(allergens),
-            icon: const Icon(Icons.edit_note, size: 20),
-            label: const Text("Update Health Preferences"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAllergenPicker(List<String> current) {
-    List<String> temp = List.from(current);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        height: MediaQuery.of(context).size.height * 0.65,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: StatefulBuilder(
-          builder: (ctx, setModalState) => Column(
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Health & Allergies",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 8,
-                    children: _allAllergens
-                        .map(
-                          (a) => FilterChip(
-                            label: Text(a),
-                            selected: temp.contains(a),
-                            onSelected: (s) => setModalState(
-                              () => s ? temp.add(a) : temp.remove(a),
-                            ),
-                            selectedColor: Colors.orangeAccent.withValues(
-                              alpha: 55,
-                            ),
-                            checkmarkColor: Colors.orangeAccent,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await _db.updateAllergens(temp);
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: const Text(
-                    "Save Preferences",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAdvancedOptions() {
     return FutureBuilder<String>(
       future: _getApiSource(),
@@ -609,6 +457,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         builder: (context) => AlertDialog(
                           title: const Text('Gemini API Key'),
                           content: TextField(
+                            key: const Key(TestKeys.profileGeminiApiField),
                             controller: TextEditingController(text: _geminiApiKey),
                             decoration: const InputDecoration(
                               hintText: 'Enter your Gemini API key',
@@ -624,6 +473,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: const Text('Cancel'),
                             ),
                             TextButton(
+                              key: const Key(TestKeys.profileSaveApiButton),
                               onPressed: () {
                                 _saveApiKey(_geminiApiKey);
                                 Navigator.pop(context);
@@ -700,7 +550,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onPressed: () async {
           // Logic: When signing out of a REAL account, reset to Guest mode
           allowAnonymousLogin.value = true;
-          await FirebaseAuth.instance.signOut();
+          await _auth.signOut();
         },
         icon: const Icon(Icons.logout_rounded),
         label: const Text(

@@ -5,18 +5,25 @@ import '../domain/recommendation_service.dart'; // 按你实际文件名改
 import '../domain/seasonal_food.dart';
 import '../../../services/database_service.dart';
 import '../../shopping_cart/data/shopping_item.dart';
+import '../../../core/constants/test_keys.dart';
 
 class SeasonalListScreen extends StatefulWidget {
-  const SeasonalListScreen({super.key});
+  final DatabaseService? databaseService;
+  final RecommendationService? recommendationService;
+  
+  const SeasonalListScreen({
+    super.key, 
+    this.databaseService,
+    this.recommendationService,
+  });
 
   @override
   State<SeasonalListScreen> createState() => _SeasonalListScreenState();
 }
 
 class _SeasonalListScreenState extends State<SeasonalListScreen> {
-  late final SeasonalCatalogRepository _repo;
   late final RecommendationService _service;
-  final DatabaseService _db = DatabaseService();
+  late final DatabaseService _db;
 
   late Future<List<SeasonalFood>> _future;
   final TextEditingController _searchController = TextEditingController();
@@ -28,11 +35,16 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
   void initState() {
     super.initState();
 
-    // 关键：assetPath 和你 repo 默认一致即可；如果你想显式传参也可以
-    _repo = SeasonalCatalogRepository(
-      assetPath: 'assets/data/season_foods.json',
-    );
-    _service = RecommendationService(_repo);
+    _db = widget.databaseService ?? DatabaseService();
+
+    if (widget.recommendationService != null) {
+      _service = widget.recommendationService!;
+    } else {
+      final repo = SeasonalCatalogRepository(
+        assetPath: 'assets/data/season_foods.json',
+      );
+      _service = RecommendationService(repo);
+    }
 
     _future = _service.getSeasonalPicks(hemisphere: _hemisphere);
 
@@ -83,11 +95,16 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key(TestKeys.seasonalListScreenScaffold),
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('Seasonal List'),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
+          IconButton(
+            key: const Key('refreshButton'),
+            icon: const Icon(Icons.refresh),
+            onPressed: _refresh,
+          ),
         ],
       ),
       body: Column(
@@ -146,6 +163,7 @@ class _SearchBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: TextField(
+        key: const Key('searchTextField'),
         controller: controller,
         decoration: InputDecoration(
           hintText: 'Search seasonal foods (e.g., tomato, milk)',
@@ -202,6 +220,7 @@ class _SeasonalFoodTile extends StatelessWidget {
                 ),
               )
             : IconButton(
+                key: Key('addToCartButton_${food.name}'),
                 icon: const Icon(Icons.add_shopping_cart),
                 onPressed: () async {
                   final item = ShoppingItem.create(
@@ -267,7 +286,11 @@ class _ErrorState extends StatelessWidget {
           children: [
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(
+              key: const Key('retryButton'),
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
           ],
         ),
       ),

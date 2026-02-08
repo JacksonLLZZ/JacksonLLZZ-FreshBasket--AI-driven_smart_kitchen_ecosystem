@@ -85,7 +85,7 @@ class _NutriScanAppState extends State<NutriScanApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'NutriScan',
+      title: 'FreshBasket',
       theme: AppTheme.getTheme(_currentTheme),
       home: const AuthWrapper(),
     );
@@ -172,14 +172,15 @@ class _AutoLoginSplashState extends State<AutoLoginSplash> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 80,
-              color: Colors.blueAccent,
-            ),
+              Image.asset(
+              'assets/images/logo.png',
+              width: 80,
+              height: 80,             
+              ),
+
             const SizedBox(height: 24),
             const Text(
-              "NutriScan",
+              "FreshBasket",
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
@@ -235,11 +236,7 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            const Icon(
-              Icons.account_circle_outlined,
-              size: 60,
-              color: Colors.blueAccent,
-            ),
+            const SizedBox.shrink(),
             const SizedBox(height: 20),
 
             // Your uploaded widgets
@@ -278,37 +275,103 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    // 响应式布局：根据屏幕宽度决定使用 NavigationRail 或 BottomNavigationBar
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey[400],
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.kitchen_outlined),
-            label: "Fridge",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.smart_toy_outlined),
-            label: "AI Assistant",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: "Add Food",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            label: "Cart",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "Profile",
+      body: Row(
+        children: [
+          // 平板模式：显示侧边导航栏 (NavigationRail)
+          if (isTablet)
+            NavigationRail(
+              selectedIndex: _currentIndex < 4 ? _currentIndex : 0,
+              onDestinationSelected: (i) => setState(() => _currentIndex = i),
+              labelType: NavigationRailLabelType.selected,
+              selectedIconTheme: IconThemeData(
+                color: Theme.of(context).primaryColor,
+              ),
+              selectedLabelTextStyle: TextStyle(
+                color: Theme.of(context).primaryColor,
+              ),
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.kitchen_outlined),
+                  label: Text("Fridge"),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.smart_toy_outlined),
+                  label: Text("AI Assistant"),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.add_circle_outline),
+                  label: Text("Add Food"),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.shopping_cart_outlined),
+                  label: Text("Cart"),
+                ),
+              ],
+              trailing: Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person_outline,
+                        color: _currentIndex == 4
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[600],
+                      ),
+                      onPressed: () => setState(() => _currentIndex = 4),
+                      tooltip: 'Profile',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // 分隔线
+          if (isTablet) const VerticalDivider(thickness: 1, width: 1),
+
+          // 主内容区域
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: _pages),
           ),
         ],
       ),
+      // 手机模式：显示底部导航栏 (BottomNavigationBar)
+      bottomNavigationBar: isTablet
+          ? null
+          : BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (i) => setState(() => _currentIndex = i),
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Colors.grey[400],
+              type: BottomNavigationBarType.fixed,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.kitchen_outlined),
+                  label: "Fridge",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.smart_toy_outlined),
+                  label: "AI Assistant",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add_circle_outline),
+                  label: "Add Food",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.shopping_cart_outlined),
+                  label: "Cart",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  label: "Profile",
+                ),
+              ],
+            ),
     );
   }
 }

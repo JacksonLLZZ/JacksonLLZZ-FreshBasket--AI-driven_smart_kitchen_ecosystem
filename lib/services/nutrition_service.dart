@@ -4,31 +4,18 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../features/inventory/data/ingredient.dart';
 import '../features/recipes/data/recipe.dart';
+import '../core/config/api_config.dart';
 
 class NutritionService {
-  // 移除了 ApiClient (Gemini)，只保留用于 Edamam 的 Dio
-  final Dio _dio = Dio();
+  // Dio 实例 - 支持依赖注入以便于测试
+  final Dio _dio;
 
-  // Edamam 凭据
-  static const String _appId = 'd40c3d5b';
-  static const String _appKey = '14e8ae86c83914498144d64886f25484';
-
-  // Spoonacular API 凭据
-  static const String _spoonacularApiKey = 'cb85e29952744463a42f1e69d51a234a';
-
-  // TheMealDB API 基础 URL
-  static const String _mealDbBaseUrl =
-      'https://www.themealdb.com/api/json/v1/1';
-
-  // 百度AI凭据（需要替换为实际的API Key和Secret Key）
-  static const String _baiduApiKey = 'GyFqwrowPr1KvLxnKgbx5OAT';
-  static const String _baiduSecretKey = 'xcJuRquUcNOmT89otQUeKJwlxzr0OqRK';
+  // 百度 AI Token 缓存
   String? _baiduAccessToken;
   DateTime? _tokenExpireTime;
 
-  // 百度翻译API凭据
-  static const String _baiduTranslateAppId = '20240925002160847';
-  static const String _baiduTranslateSecretKey = 'H2BTnS1u61HgQPFZTegW';
+  // 构造函数 - 允许注入 Dio 实例用于测试
+  NutritionService({Dio? dio}) : _dio = dio ?? Dio();
 
   // 常见调味料和基础食材黑名单（过滤缺失食材时使用）
   static const Set<String> _commonPantryItems = {
@@ -97,8 +84,8 @@ class NutritionService {
       final response = await _dio.get(
         'https://api.edamam.com/api/nutrition-data',
         queryParameters: {
-          'app_id': _appId,
-          'app_key': _appKey,
+          'app_id': ApiConfig.edamamAppId,
+          'app_key': ApiConfig.edamamAppKey,
           'ingr': queryText,
         },
       );
@@ -173,7 +160,7 @@ class NutritionService {
       final response = await _dio.get(
         'https://api.spoonacular.com/recipes/findByIngredients',
         queryParameters: {
-          'apiKey': _spoonacularApiKey,
+          'apiKey': ApiConfig.spoonacularApiKey,
           'ingredients': ingredientsQuery,
           'number': 2, // 最多返回10个食谱 // TODO: 调整为用户可配置
           'ranking': 1, // 优先最大化使用现有食材
@@ -234,7 +221,7 @@ class NutritionService {
         debugPrint('Trying TheMealDB with ingredient: $variant');
 
         final filterResponse = await _dio.get(
-          '$_mealDbBaseUrl/filter.php',
+          '${ApiConfig.mealDbBaseUrl}/filter.php',
           queryParameters: {'i': variant},
         );
 
@@ -264,7 +251,7 @@ class NutritionService {
         try {
           final mealId = meal['idMeal'];
           final detailResponse = await _dio.get(
-            '$_mealDbBaseUrl/lookup.php',
+            '${ApiConfig.mealDbBaseUrl}/lookup.php',
             queryParameters: {'i': mealId},
           );
 
@@ -370,8 +357,8 @@ class NutritionService {
         'https://aip.baidubce.com/oauth/2.0/token',
         queryParameters: {
           'grant_type': 'client_credentials',
-          'client_id': _baiduApiKey,
-          'client_secret': _baiduSecretKey,
+          'client_id': ApiConfig.baiduApiKey,
+          'client_secret': ApiConfig.baiduSecretKey,
         },
       );
 
@@ -397,7 +384,7 @@ class NutritionService {
     try {
       final salt = DateTime.now().millisecondsSinceEpoch.toString();
       final sign = _generateMD5(
-        '$_baiduTranslateAppId$chineseText$salt$_baiduTranslateSecretKey',
+        '${ApiConfig.baiduTranslateAppId}$chineseText$salt${ApiConfig.baiduTranslateSecretKey}',
       );
 
       final response = await _dio.get(
@@ -406,7 +393,7 @@ class NutritionService {
           'q': chineseText,
           'from': 'zh',
           'to': 'en',
-          'appid': _baiduTranslateAppId,
+          'appid': ApiConfig.baiduTranslateAppId,
           'salt': salt,
           'sign': sign,
         },
