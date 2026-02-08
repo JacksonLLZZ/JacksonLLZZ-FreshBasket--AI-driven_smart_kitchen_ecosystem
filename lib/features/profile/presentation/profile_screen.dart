@@ -68,6 +68,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _geminiApiKey = key;
       _isApiKeyValid = key.isNotEmpty;
     });
+
+    // 显示保存成功消息
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('API key saved ${key.isNotEmpty ? 'successfully' : '(cleared)'}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _seasonIconPath(String season) {

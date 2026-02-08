@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 网络权限，允许应用访问互联网 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="kitchen"
         android:name="${applicationName}"

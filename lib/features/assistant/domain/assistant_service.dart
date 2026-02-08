@@ -7,16 +7,31 @@ class AssistantService {
     try {
       return await _geminiService.getResponse(userMessage);
     } catch (e) {
-      // Fallback to mock responses if API fails
+      // 检查错误类型，如果是 API 密钥未配置，传播错误
+      if (e.toString().contains('API key not configured')) {
+        rethrow; // 传播错误到上层
+      }
+
+      // 对于其他错误，返回包含错误信息的友好消息
       await Future.delayed(const Duration(seconds: 1));
 
-      if (userMessage.toLowerCase().contains('recipe')) {
-        return "I can suggest recipes based on your fridge inventory. Try the 'Explore Recipes' button in your Fridge screen!";
-      } else if (userMessage.toLowerCase().contains('shopping')) {
-        return "Check the seasonal recommendations in your Shopping Cart for the best ingredients to buy now.";
-      } else {
-        return "I'm your kitchen AI assistant! I can help with recipe suggestions, ingredient analysis, and meal planning.";
+      return "I'm having technical difficulties. Error: ${e.toString().split(':').last.trim()}";
+    }
+  }
+
+  Stream<String> getResponseStream(String userMessage) async* {
+    try {
+      yield* _geminiService.getResponseStream(userMessage);
+    } catch (e) {
+      // 检查错误类型，如果是 API 密钥未配置，传播错误
+      if (e.toString().contains('API key not configured')) {
+        rethrow; // 传播错误到上层
       }
+
+      // 对于其他错误，返回包含错误信息的友好消息
+      await Future.delayed(const Duration(seconds: 1));
+
+      yield "I'm having technical difficulties. Error: ${e.toString().split(':').last.trim()}";
     }
   }
 }
