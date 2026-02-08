@@ -31,17 +31,17 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
   }
-  runApp(const NutriScanApp());
+  runApp(const FreshBasketApp());
 }
 
-class NutriScanApp extends StatefulWidget {
-  const NutriScanApp({super.key});
+class FreshBasketApp extends StatefulWidget {
+  const FreshBasketApp({super.key});
 
   @override
-  State<NutriScanApp> createState() => _NutriScanAppState();
+  State<FreshBasketApp> createState() => _FreshBasketAppState();
 }
 
-class _NutriScanAppState extends State<NutriScanApp> {
+class _FreshBasketAppState extends State<FreshBasketApp> {
   String _currentTheme = 'Default';
   final DatabaseService _db = DatabaseService();
   StreamSubscription? _themeSubscription;
