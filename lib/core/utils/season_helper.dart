@@ -1,6 +1,17 @@
 enum Hemisphere { northern, southern }
 
 class SeasonHelper {
+  static String getSelectedSeasonOrSystem({
+    required String theme,
+    Hemisphere hemisphere = Hemisphere.northern,
+  }) {
+    const valid = ['Spring', 'Summer', 'Autumn', 'Winter'];
+    if (valid.contains(theme)) {
+      return theme.toLowerCase();
+    }
+    return getCurrentSeason(hemisphere: hemisphere);
+  }
+
   static String getCurrentSeason({
     Hemisphere hemisphere = Hemisphere.northern,
   }) {

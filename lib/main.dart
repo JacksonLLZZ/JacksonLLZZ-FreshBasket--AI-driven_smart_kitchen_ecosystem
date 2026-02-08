@@ -13,6 +13,8 @@ import 'features/assistant/presentation/assistant_screen.dart';
 import 'firebase_options.dart';
 import 'widgets/login/loginform_widget.dart';
 import 'widgets/login/registrationform_widget.dart';
+import 'core/notifications/notification_service.dart';
+import 'core/notifications/expiry_reminder_service.dart';
 
 /// Global state to control the authentication flow
 /// true: App will automatically log in as Guest (shows AutoLoginSplash)
@@ -30,6 +32,12 @@ void main() async {
     );
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
+  }
+  try {
+    await NotificationService.instance.init();
+    await NotificationService.instance.requestPermissions();
+  } catch (e) {
+    debugPrint("Notification initialization failed: $e");
   }
   runApp(const FreshBasketApp());
 }
@@ -66,7 +74,9 @@ class _FreshBasketAppState extends State<FreshBasketApp> {
             }
           }
         });
+        ExpiryReminderService.instance.startForUser(user.uid);
       } else {
+        ExpiryReminderService.instance.stop();
         if (mounted) {
           setState(() => _currentTheme = 'Default');
           currentTheme.value = 'Default'; // 更新全局状态

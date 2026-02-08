@@ -6,6 +6,7 @@ import '../domain/seasonal_food.dart';
 import '../../../services/database_service.dart';
 import '../../shopping_cart/data/shopping_item.dart';
 import '../../../core/constants/test_keys.dart';
+import '../../../main.dart';
 
 class SeasonalListScreen extends StatefulWidget {
   final DatabaseService? databaseService;
@@ -46,9 +47,10 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
       _service = RecommendationService(repo);
     }
 
-    _future = _service.getSeasonalPicks(hemisphere: _hemisphere);
+    _future = _buildSeasonalFuture();
 
     _searchController.addListener(_onSearchChanged);
+    currentTheme.addListener(_onThemeChanged);
 
     // 监听购物车变化
     _db.getShoppingCartStream().listen((items) {
@@ -66,27 +68,38 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
     );
   }
 
-  void _onSearchChanged() {
-    final q = _searchController.text.trim();
+  Future<List<SeasonalFood>> _buildSeasonalFuture() {
+    return _service.getSeasonalPicks(
+      hemisphere: _hemisphere,
+      theme: currentTheme.value,
+    );
+  }
+
+  void _setFutureForQuery(String q) {
     setState(() {
-      _future = q.isEmpty
-          ? _service.getSeasonalPicks(hemisphere: _hemisphere)
-          : _service.search(q);
+      _future = q.isEmpty ? _buildSeasonalFuture() : _service.search(q);
     });
   }
 
+  void _onSearchChanged() {
+    final q = _searchController.text.trim();
+    _setFutureForQuery(q);
+  }
+
+  void _onThemeChanged() {
+    final q = _searchController.text.trim();
+    _setFutureForQuery(q);
+  }
+
   Future<void> _refresh() async {
-    setState(() {
-      final q = _searchController.text.trim();
-      _future = q.isEmpty
-          ? _service.getSeasonalPicks(hemisphere: _hemisphere)
-          : _service.search(q);
-    });
+    final q = _searchController.text.trim();
+    _setFutureForQuery(q);
     await _future;
   }
 
   @override
   void dispose() {
+    currentTheme.removeListener(_onThemeChanged);
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();

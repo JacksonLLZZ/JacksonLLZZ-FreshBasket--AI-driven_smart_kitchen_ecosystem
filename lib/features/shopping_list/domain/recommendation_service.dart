@@ -9,9 +9,15 @@ class RecommendationService {
 
   Future<List<SeasonalFood>> getSeasonalPicks({
     Hemisphere hemisphere = Hemisphere.northern,
+    String? theme,
   }) async {
     final all = await repo.load();
-    final season = SeasonHelper.getCurrentSeason(hemisphere: hemisphere);
+    final season = theme == null
+        ? SeasonHelper.getCurrentSeason(hemisphere: hemisphere)
+        : SeasonHelper.getSelectedSeasonOrSystem(
+            theme: theme,
+            hemisphere: hemisphere,
+          );
 
     return all.where((item) {
       final isInSeason = item.seasons.contains(season);
