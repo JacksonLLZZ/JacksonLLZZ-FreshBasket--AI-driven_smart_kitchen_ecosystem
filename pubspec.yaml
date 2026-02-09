@@ -53,6 +53,10 @@ dependencies:
   image_picker: ^1.1.2            # 从相册/相机选择图片
   crypto: ^3.0.3                  # MD5签名生成（百度翻译API）
   google_generative_ai: ^0.4.7    # Google Gemini API integration
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  flutter_timezone:
+    path: packages/flutter_timezone
   
 dev_dependencies:
   flutter_test:

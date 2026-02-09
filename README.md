@@ -183,7 +183,7 @@
 
 ### 集合路径
 ```
-/artifacts/nutriscan-app-v1/users/{userId}/
+/artifacts/FreshBasket-app-v1/users/{userId}/
   ├── inventory/{ingredientId}         # 冰箱库存
   │   ├── name: string
   │   ├── quantity: number

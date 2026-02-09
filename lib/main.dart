@@ -13,6 +13,8 @@ import 'features/assistant/presentation/assistant_screen.dart';
 import 'firebase_options.dart';
 import 'widgets/login/loginform_widget.dart';
 import 'widgets/login/registrationform_widget.dart';
+import 'core/notifications/notification_service.dart';
+import 'core/notifications/expiry_reminder_service.dart';
 
 /// Global state to control the authentication flow
 /// true: App will automatically log in as Guest (shows AutoLoginSplash)
@@ -31,17 +33,23 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase initialization failed: $e");
   }
-  runApp(const NutriScanApp());
+  try {
+    await NotificationService.instance.init();
+    await NotificationService.instance.requestPermissions();
+  } catch (e) {
+    debugPrint("Notification initialization failed: $e");
+  }
+  runApp(const FreshBasketApp());
 }
 
-class NutriScanApp extends StatefulWidget {
-  const NutriScanApp({super.key});
+class FreshBasketApp extends StatefulWidget {
+  const FreshBasketApp({super.key});
 
   @override
-  State<NutriScanApp> createState() => _NutriScanAppState();
+  State<FreshBasketApp> createState() => _FreshBasketAppState();
 }
 
-class _NutriScanAppState extends State<NutriScanApp> {
+class _FreshBasketAppState extends State<FreshBasketApp> {
   String _currentTheme = 'Default';
   final DatabaseService _db = DatabaseService();
   StreamSubscription? _themeSubscription;
@@ -66,7 +74,9 @@ class _NutriScanAppState extends State<NutriScanApp> {
             }
           }
         });
+        ExpiryReminderService.instance.startForUser(user.uid);
       } else {
+        ExpiryReminderService.instance.stop();
         if (mounted) {
           setState(() => _currentTheme = 'Default');
           currentTheme.value = 'Default'; // Update global state

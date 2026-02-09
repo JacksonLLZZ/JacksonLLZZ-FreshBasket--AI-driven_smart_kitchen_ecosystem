@@ -6,7 +6,7 @@ import '../features/shopping_cart/data/shopping_item.dart';
 import '../core/utils/food_validator.dart';
 
 class DatabaseService {
-  static const String _appId = "nutriscan-app-v1";
+  static const String _appId = "FreshBasket-app-v1";
   FirebaseFirestore get _db => FirebaseFirestore.instance;
 
   String? get _uid => FirebaseAuth.instance.currentUser?.uid;
