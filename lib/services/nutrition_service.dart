@@ -7,17 +7,17 @@ import '../features/recipes/data/recipe.dart';
 import '../core/config/api_config.dart';
 
 class NutritionService {
-  // Dio 实例 - 支持依赖注入以便于测试
+  // Dio instance - supports dependency injection for testing
   final Dio _dio;
 
-  // 百度 AI Token 缓存
+  // Baidu AI Token cache
   String? _baiduAccessToken;
   DateTime? _tokenExpireTime;
 
-  // 构造函数 - 允许注入 Dio 实例用于测试
+  // Constructor - allows injection of Dio instance for testing
   NutritionService({Dio? dio}) : _dio = dio ?? Dio();
 
-  // 常见调味料和基础食材黑名单（过滤缺失食材时使用）
+  // Common condiments and basic ingredient blacklist (used when filtering missing ingredients)
   static const Set<String> _commonPantryItems = {
     'salt',
     'pepper',
@@ -68,7 +68,7 @@ class NutritionService {
     'red pepper flakes',
   };
 
-  /// 过滤掉常见调味料
+  /// Filter out common condiments
   static bool _isPantryItem(String ingredientName) {
     final name = ingredientName.toLowerCase().trim();
     return _commonPantryItems.any(
@@ -76,7 +76,7 @@ class NutritionService {
     );
   }
 
-  /// 1. 使用 Edamam API 计算卡路里 (用于单个食材)
+  /// 1. Use Edamam API to calculate calories (for single ingredient)
   Future<int?> calculateCalories(String name, double qty, String unit) async {
     final queryText = "$qty $unit $name";
 
@@ -107,7 +107,7 @@ class NutritionService {
     return null;
   }
 
-  /// 1.1 使用 OpenFoodFacts API 通过条形码获取产品信息
+  /// 1.1 Use OpenFoodFacts API to get product information via barcode
   Future<Map<String, dynamic>?> getProductByBarcode(String barcode) async {
     try {
       final response = await _dio.get(
@@ -119,7 +119,7 @@ class NutritionService {
         final product = response.data['product'];
         final productName = product['product_name'] ?? 'Unknown Product';
 
-        // 计算卡路里（从 kJ 转换为 kcal）
+        // Calculate calories (convert from kJ to kcal)
         int? calories;
         final nutriscoreData = product['nutriscore_data'];
         if (nutriscoreData != null &&
@@ -147,13 +147,13 @@ class NutritionService {
     return null;
   }
 
-  /// 2. 使用 Spoonacular API 根据食材列表生成食谱推荐
+  /// 2. Use Spoonacular API to generate recipe recommendations based on ingredient list
   Future<List<Recipe>> generateCombinedRecipes(List<Ingredient> items) async {
     if (items.isEmpty) {
       throw Exception("No ingredients selected.");
     }
 
-    // 将食材名称转换为逗号分隔的字符串
+    // Convert ingredient names to comma-separated string
     String ingredientsQuery = items.map((e) => e.name).join(',');
 
     try {
@@ -162,9 +162,9 @@ class NutritionService {
         queryParameters: {
           'apiKey': ApiConfig.spoonacularApiKey,
           'ingredients': ingredientsQuery,
-          'number': 2, // 最多返回10个食谱 // TODO: 调整为用户可配置
-          'ranking': 1, // 优先最大化使用现有食材
-          'ignorePantry': true, // 忽略常见调味品
+          'number': 2, // Return up to 10 recipes // TODO: Make user configurable
+          'ranking': 1, // Prioritize maximizing use of existing ingredients
+          'ignorePantry': true, // Ignore common condiments
         },
       );
 
@@ -172,13 +172,13 @@ class NutritionService {
         return [];
       }
 
-      // 解析并返回食谱列表
+      // Parse and return recipe list
       List<dynamic> recipesJson = response.data as List;
       List<Recipe> recipes = recipesJson
           .map((json) => Recipe.fromJson(json))
           .toList();
 
-      // 过滤掉缺失食材中的调味料
+      // Filter out condiments from missing ingredients
       return recipes.map((recipe) {
         final filteredMissed = recipe.missedIngredients
             .where((ing) => !_isPantryItem(ing.name))
@@ -199,24 +199,24 @@ class NutritionService {
     }
   }
 
-  /// 3. 使用 TheMealDB (Free Recipe API) 根据单个食材搜索食谱
+  /// 3. Use TheMealDB (Free Recipe API) to search recipes by single ingredient
   Future<List<Recipe>> generateRecipesFromMealDb(String ingredient) async {
     if (ingredient.isEmpty) {
       throw Exception("No ingredient provided.");
     }
 
     try {
-      // 尝试多种形式的食材名称
+      // Try multiple forms of ingredient name
       List<String> ingredientVariants = [
-        ingredient, // 原始形式
-        '${ingredient}s', // 加 s
-        '${ingredient}es', // 加 es
+        ingredient, // original form
+        '${ingredient}s', // add s
+        '${ingredient}es', // add es
       ];
 
       List<dynamic>? meals;
       String usedIngredient = ingredient;
 
-      // 依次尝试不同的变体
+      // Try different variants sequentially
       for (var variant in ingredientVariants) {
         debugPrint('Trying TheMealDB with ingredient: $variant');
 
@@ -231,20 +231,20 @@ class NutritionService {
           meals = filterResponse.data['meals'] as List;
           usedIngredient = variant;
           debugPrint('Found ${meals.length} meals with variant: $variant');
-          break; // 找到结果就停止尝试
+          break; // stop trying once result is found
         }
       }
 
-      // 如果所有变体都没有结果
+      // If no results for any variant
       if (meals == null || meals.isEmpty) {
         debugPrint('No meals found for any variant of: $ingredient');
         return [];
       }
 
-      // 限制返回数量，避免请求过多
+      // Limit number of returns to avoid too many requests
       final mealsToFetch = meals.take(2).toList();
 
-      // 步骤2: 并发获取每个菜谱的详细信息
+      // Step 2: Fetch detailed information for each recipe concurrently
       List<Recipe> recipes = [];
 
       for (var meal in mealsToFetch) {
@@ -260,12 +260,12 @@ class NutritionService {
               (detailResponse.data['meals'] as List).isNotEmpty) {
             final mealDetail = detailResponse.data['meals'][0];
 
-            // 转换为 Recipe 对象，使用找到结果的变体名称
+            // Convert to Recipe object, using variant name that found result
             final recipe = _convertMealDbToRecipe(mealDetail, usedIngredient);
             recipes.add(recipe);
           }
         } catch (e) {
-          // 单个菜谱获取失败不影响其他
+          // Failure to fetch single recipe does not affect others
           debugPrint('Failed to fetch meal details: $e');
           continue;
         }
@@ -277,7 +277,7 @@ class NutritionService {
     }
   }
 
-  /// 将 TheMealDB 的数据格式转换为 Recipe 对象
+  /// Convert TheMealDB data format to Recipe object
   Recipe _convertMealDbToRecipe(
     Map<String, dynamic> mealDetail,
     String searchedIngredient,
@@ -286,7 +286,7 @@ class NutritionService {
     final title = mealDetail['strMeal'] ?? 'Unknown Recipe';
     final image = mealDetail['strMealThumb'] ?? '';
 
-    // 提取所有食材和用量（TheMealDB 使用 strIngredient1-20 和 strMeasure1-20）
+    // Extract all ingredients and measures (TheMealDB uses strIngredient1-20 and strMeasure1-20)
     List<RecipeIngredient> allIngredients = [];
 
     for (int i = 1; i <= 20; i++) {
@@ -302,24 +302,24 @@ class NutritionService {
           RecipeIngredient(
             name: name,
             original: measure.isEmpty ? name : '$measure $name',
-            image: null, // TheMealDB 不提供食材图片
+            image: null, // TheMealDB does not provide ingredient images
           ),
         );
       }
     }
 
-    // 判断哪些是用户已有的食材（used），哪些是缺失的（missed）
+    // Determine which ingredients are already owned by user (used), which are missing (missed)
     List<RecipeIngredient> usedIngredients = [];
     List<RecipeIngredient> missedIngredients = [];
 
     for (var ingredient in allIngredients) {
-      // 简单判断：如果食材名包含搜索的关键词，则视为已有
+      // Simple judgment: if ingredient name contains search keyword, consider as owned
       if (ingredient.name.toLowerCase().contains(
         searchedIngredient.toLowerCase(),
       )) {
         usedIngredients.add(ingredient);
       } else {
-        // 过滤掉常见调味料
+        // Filter out common condiments
         if (!_isPantryItem(ingredient.name)) {
           missedIngredients.add(ingredient);
         }
@@ -334,7 +334,7 @@ class NutritionService {
       missedIngredientCount: missedIngredients.length,
       usedIngredients: usedIngredients,
       missedIngredients: missedIngredients,
-      // TheMealDB 独有信息
+      // TheMealDB unique information
       instructions: mealDetail['strInstructions'],
       category: mealDetail['strCategory'],
       area: mealDetail['strArea'],
@@ -343,9 +343,9 @@ class NutritionService {
     );
   }
 
-  // 获取百度AI Access Token
+  // Get Baidu AI Access Token
   Future<String?> _getBaiduAccessToken() async {
-    // 如果token存在且未过期，直接返回
+    // If token exists and not expired, return directly
     if (_baiduAccessToken != null &&
         _tokenExpireTime != null &&
         DateTime.now().isBefore(_tokenExpireTime!)) {
@@ -364,7 +364,7 @@ class NutritionService {
 
       if (response.statusCode == 200 && response.data['access_token'] != null) {
         _baiduAccessToken = response.data['access_token'];
-        // Token有效期通常为30天，这里设置为29天以确保安全
+        // Token validity is usually 30 days, set to 29 days here for safety
         _tokenExpireTime = DateTime.now().add(const Duration(days: 29));
         return _baiduAccessToken;
       }
@@ -374,12 +374,12 @@ class NutritionService {
     return null;
   }
 
-  // 生成MD5签名
+  // Generate MD5 signature
   String _generateMD5(String input) {
     return md5.convert(utf8.encode(input)).toString();
   }
 
-  // 使用百度翻译API将中文翻译为英文
+  // Use Baidu Translation API to translate Chinese to English
   Future<String?> _translateToEnglish(String chineseText) async {
     try {
       final salt = DateTime.now().millisecondsSinceEpoch.toString();
@@ -400,7 +400,7 @@ class NutritionService {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        // 检查是否有错误
+        // Check for errors
         if (response.data['error_code'] != null) {
           debugPrint(
             'Translation error: ${response.data['error_code']} - ${response.data['error_msg']}',
@@ -421,7 +421,7 @@ class NutritionService {
     return null;
   }
 
-  // 识别图片中的食材
+  // Identify ingredients in image
   Future<Map<String, dynamic>> recognizeIngredientFromImage(
     String base64Image,
   ) async {
@@ -441,13 +441,13 @@ class NutritionService {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         ),
         data: {
-          'image': base64Image, // Dio 会自动进行 URL 编码
-          'top_num': 20, // 获取更多结果以处理"非果蔬食材"情况
+          'image': base64Image, // Dio will automatically URL encode
+          'top_num': 20, // Get more results to handle "非果蔬食材" situation
         },
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        // 检查是否有错误信息
+        // Check for error messages
         if (response.data['error_code'] != null) {
           final errorCode = response.data['error_code'];
           final errorMsg = response.data['error_msg'] ?? 'Unknown error';
@@ -478,25 +478,25 @@ class NutritionService {
 
         final result = response.data['result'];
         if (result != null && result is List && result.isNotEmpty) {
-          // 遍历结果，跳过"非果蔬食材"
+          // Iterate through results, skip "非果蔬食材"
           for (var item in result) {
             final ingredientName = item['name'] as String?;
             final score = item['score'];
 
             if (ingredientName != null && ingredientName != '非果蔬食材') {
-              // 翻译成英文
+              // Translate to English
               final englishName = await _translateToEnglish(ingredientName);
 
               return {
                 'success': true,
-                'name': englishName ?? ingredientName, // 如果翻译失败，使用原始中文名
-                'original_name': ingredientName, // 保留原始中文名
+                'name': englishName ?? ingredientName, // If translation fails, use original Chinese name
+                'original_name': ingredientName, // Keep original Chinese name
                 'score': score,
               };
             }
           }
 
-          // 如果所有结果都是"非果蔬食材"
+          // If all results are "非果蔬食材"
           return {
             'success': false,
             'error': 'No vegetable or fruits detected in the image',

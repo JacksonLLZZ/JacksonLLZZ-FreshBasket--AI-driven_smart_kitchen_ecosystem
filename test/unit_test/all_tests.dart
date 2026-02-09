@@ -1,6 +1,6 @@
-/// 测试套件索引文件
-/// 
-/// 运行所有单元测试
+/// Test suite index file
+///
+/// Run all unit tests
 library;
 
 import 'package:flutter_test/flutter_test.dart';

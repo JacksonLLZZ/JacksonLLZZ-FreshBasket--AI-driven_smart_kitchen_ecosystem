@@ -1,4 +1,4 @@
-/// ShoppingItem 数据模型测试
+/// ShoppingItem data model test
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -29,10 +29,7 @@ void main() {
       final beforeCreate = DateTime.now();
 
       // Act
-      final item = ShoppingItem.create(
-        name: 'Milk',
-        amount: '1 liter',
-      );
+      final item = ShoppingItem.create(name: 'Milk', amount: '1 liter');
 
       final afterCreate = DateTime.now();
 
@@ -40,8 +37,14 @@ void main() {
       expect(item.name, 'Milk');
       expect(item.amount, '1 liter');
       expect(item.id, '');
-      expect(item.addedAt.isAfter(beforeCreate) || item.addedAt == beforeCreate, isTrue);
-      expect(item.addedAt.isBefore(afterCreate) || item.addedAt == afterCreate, isTrue);
+      expect(
+        item.addedAt.isAfter(beforeCreate) || item.addedAt == beforeCreate,
+        isTrue,
+      );
+      expect(
+        item.addedAt.isBefore(afterCreate) || item.addedAt == afterCreate,
+        isTrue,
+      );
     });
 
     test('应该正确转换为 Firestore 格式', () {

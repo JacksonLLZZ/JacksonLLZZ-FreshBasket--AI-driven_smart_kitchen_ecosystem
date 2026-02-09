@@ -1,6 +1,6 @@
-/// 使用 TestKeys 的 Widget 测试示例
-/// 
-/// 演示如何使用 TestKeys 常量来定位和操作 UI 元素
+/// Widget test example using TestKeys
+///
+/// Demonstrate how to use TestKeys constants to locate and manipulate UI elements
 library;
 
 import 'package:flutter/material.dart';
@@ -46,9 +46,7 @@ void main() {
             child: TextField(
               key: const Key(TestKeys.ingredientNameField),
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Ingredient Name',
-              ),
+              decoration: const InputDecoration(labelText: 'Ingredient Name'),
             ),
           ),
         ),
@@ -87,7 +85,7 @@ void main() {
       // Act
       await tester.pumpWidget(widget);
 
-      // Assert - 验证每个列表项都能通过 key 找到
+      // Assert - Verify that each list item can be found through the key.
       for (var i = 0; i < items.length; i++) {
         final key = Key(TestKeys.listItem(TestKeys.inventoryItemTile, i));
         expect(find.byKey(key), findsOneWidget);
@@ -131,17 +129,13 @@ void main() {
                 TextField(
                   key: const Key(TestKeys.ingredientNameField),
                   controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Name'),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   key: const Key(TestKeys.ingredientQuantityField),
                   controller: qtyController,
-                  decoration: const InputDecoration(
-                    labelText: 'Quantity',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Quantity'),
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
@@ -161,22 +155,22 @@ void main() {
         ),
       );
 
-      // Act - 模拟用户填写表单并保存
+      // Act - Simulate a user filling out a form and saving it.
       await tester.pumpWidget(widget);
 
-      // 输入名称
+      // Enter the name
       await tester.enterText(
         find.byKey(const Key(TestKeys.ingredientNameField)),
         'Chicken',
       );
 
-      // 输入数量
+      // Input quantity
       await tester.enterText(
         find.byKey(const Key(TestKeys.ingredientQuantityField)),
         '500',
       );
 
-      // 点击保存按钮
+      // Click the "Save" button
       await tester.tap(find.byKey(const Key(TestKeys.ingredientSaveButton)));
       await tester.pumpAndSettle();
 

@@ -8,7 +8,7 @@ import '../../recipes/presentation/recipe_detail_screen.dart';
 
 class InventoryScreen extends StatefulWidget {
   final DatabaseService? databaseService;
-  
+
   const InventoryScreen({super.key, this.databaseService});
 
   @override
@@ -26,7 +26,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     _db = widget.databaseService ?? DatabaseService();
   }
 
-  /// 删除单个食材
+  /// Delete a single ingredient
   Future<void> _deleteIngredient(BuildContext context, Ingredient item) async {
     try {
       await _db.deleteIngredient(item.id);
@@ -37,7 +37,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () async {
-                // TODO: 实现撤销功能
+                // TODO: Implement the undo function
               },
             ),
           ),
@@ -52,7 +52,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
   }
 
-  /// 切换多选模式
+  /// Switch to multiple selection mode
   void _toggleSelectionMode() {
     setState(() {
       _isSelectionMode = !_isSelectionMode;
@@ -62,7 +62,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     });
   }
 
-  /// 批量删除选中的食材
+  /// Batch delete the selected ingredients
   Future<void> _deleteSelectedItems(BuildContext context) async {
     if (_selectedItems.isEmpty) return;
 
@@ -107,7 +107,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
   }
 
-  /// 编辑食材信息（数量和过期日期）
+  /// Edit the ingredient information (quantity and expiration date)
   Future<void> _editIngredient(BuildContext context, Ingredient item) async {
     final qtyController = TextEditingController(text: item.quantity.toString());
     DateTime selectedDate = item.expirationDate;
@@ -235,27 +235,27 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ),
         ],
       ),
-      // 使用 StreamBuilder 实现实时数据更新
+      // Use StreamBuilder to achieve real-time data updates
       body: StreamBuilder<List<Ingredient>>(
         stream: _db.getInventoryStream(),
         builder: (context, snapshot) {
-          // 1. 处理加载状态
+          // 1. Handling loading status
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // 2. 处理错误
+          // 2. Handling errors
           if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
 
-          // 3. 处理空数据
+          // 3. Handle null data
           final items = snapshot.data ?? [];
           if (items.isEmpty) {
             return _buildEmptyState(context);
           }
 
-          // 4. 展示数据列表
+          // 4. Display data list
           return Stack(
             children: [
               ListView.builder(
@@ -267,7 +267,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
                   final isSelected = _selectedItems.contains(item.id);
 
-                  // 使用 Dismissible 实现滑动删除（仅在非选择模式下）
+                  // Use Dismissible to implement swipe deletion (only in non-selection mode)
                   Widget cardWidget = Card(
                     elevation: 0,
                     margin: const EdgeInsets.only(bottom: 12),
@@ -280,7 +280,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       ),
                     ),
                     child: ListTile(
-                      key: Key(TestKeys.listItem(TestKeys.inventoryItemTile, index)),
+                      key: Key(
+                        TestKeys.listItem(TestKeys.inventoryItemTile, index),
+                      ),
                       contentPadding: const EdgeInsets.all(12),
                       onTap: _isSelectionMode
                           ? () {
@@ -396,7 +398,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   );
 
-                  // 仅在非选择模式下支持滑动删除
+                  // Only supports sliding deletion in non-select mode.
                   if (!_isSelectionMode) {
                     return Dismissible(
                       key: Key(item.id),
@@ -447,7 +449,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   return cardWidget;
                 },
               ),
-              // 悬浮的探索按钮（仅在非选择模式下显示）
+              // The floating "Explore" button (displayed only when not in selection mode)
               if (!_isSelectionMode)
                 Positioned(
                   right: 16,

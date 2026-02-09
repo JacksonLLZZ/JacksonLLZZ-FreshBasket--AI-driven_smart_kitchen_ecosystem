@@ -12,7 +12,6 @@ class RegistrationForm extends StatefulWidget {
 }
 
 class _RegistrationFormState extends State<RegistrationForm> {
-  
   final _formKey = GlobalKey<FormState>();
   final _username = TextEditingController();
   final _email = TextEditingController();
@@ -44,7 +43,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
-          )
+          ),
         ],
       ),
     );
@@ -92,11 +91,11 @@ class _RegistrationFormState extends State<RegistrationForm> {
       await db.upsertUserProfile(
         username: _username.text.trim(),
         email: _email.text.trim(),
-        // 关键：给一个“肯定有效”的默认头像 URL，避免后续 Image.network("") 崩溃
-      
+
+        // Key point: Provide a default avatar URL that is "definitely valid" to prevent the subsequent Image.network("") from crashing.
       );
 
-      // ❗不导航，交给 authStateChanges
+      // ❗Without navigation, hand over to authStateChanges
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? "Registration failed");
     } catch (e) {
@@ -139,7 +138,6 @@ class _RegistrationFormState extends State<RegistrationForm> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        
                         const SizedBox(height: 12),
                         Text(
                           "Create account",
@@ -190,8 +188,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             suffixIcon: IconButton(
-                              onPressed: () => setState(() => _obscure = !_obscure),
-                              icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
+                              icon: Icon(
+                                _obscure
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
                             ),
                           ),
                           validator: _validatePwd,

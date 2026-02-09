@@ -13,7 +13,7 @@ import 'package:image_picker/image_picker.dart';
 class HomeScreen extends StatefulWidget {
   final DatabaseService? databaseService;
   final NutritionService? nutritionService;
-  
+
   const HomeScreen({super.key, this.databaseService, this.nutritionService});
 
   @override
@@ -29,14 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final _qtyController = TextEditingController();
 
   String _selectedUnit = 'g';
-  final List<String> _availableUnits = ['g', 'ml']; // 支持的单位列表
+  final List<String> _availableUnits = ['g', 'ml']; // List of supported units
   DateTime _expirationDate = DateTime.now().add(
     const Duration(days: 7),
-  ); // 默认7天
+  ); // default 7 days
 
   bool _isProcessing = false;
-  int? _calculatedCalories; // 存储计算的卡路里结果
-  List<String> _ingredientsList = []; // 食材列表
+  int? _calculatedCalories; // The calorie result of the storage and calculation
+  List<String> _ingredientsList = []; // List of ingredients
 
   @override
   void initState() {
@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      // 创建食材对象
+      // Create a food ingredient object
       final ingredient = Ingredient.create(
         name: name,
         qty: qty,
@@ -118,11 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
         expirationDate: _expirationDate,
       );
 
-      // 检查是否存在相似食材
+      // Check for the presence of similar ingredients
       final existing = await _db.findSimilarIngredient(ingredient.name);
 
       if (existing != null && mounted) {
-        // 对比过期时间（只比较日期部分，忽略时分秒）
+        // Compare the expiration time (only compare the date part, ignoring the hours, minutes, and seconds)
         final existingDate = DateTime(
           existing.expirationDate.year,
           existing.expirationDate.month,
@@ -135,14 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
         );
 
         if (existingDate == newDate) {
-          // 过期时间一致，自动合并
+          // The expiration times are the same, so they will be automatically merged.
           await _db.mergeIngredient(existing, ingredient.quantity);
           if (mounted) {
             _showMsg("Merged with existing item");
             _clearForm();
           }
         } else {
-          // 过期时间不一致，添加为新条目
+          // Expiry times are inconsistent. Add as a new entry.
           await _db.saveIngredient(ingredient);
           if (mounted) {
             _showMsg("Saved to your inventory");
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  // 显示扫描选项菜单
+  // Display the scanning options menu
   void _showScanOptions() {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                   if (barcode != null && mounted) {
-                    // 显示加载提示
+                    // Display loading prompt
                     scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Searching product...'),
@@ -223,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
 
-                    // 调用 OpenFoodFacts API 获取产品信息
+                    // Call the OpenFoodFacts API to obtain product information
                     final productInfo = await _nutrition.getProductByBarcode(
                       barcode,
                     );
@@ -231,15 +231,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (productInfo != null && mounted) {
                       final foodName = productInfo['product_name'] ?? 'Unknown';
 
-                      // 自动填充到 food name 栏
+                      // Automatically fill in the "food name" column
                       setState(() {
                         _nameController.text = foodName;
                       });
 
-                      // 复制到剪贴板
+                      // Copy to clipboard
                       await Clipboard.setData(ClipboardData(text: foodName));
 
-                      // 显示底部消息框
+                      // Display the bottom message box
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
                           content: Row(
@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     source: ImageSource.gallery,
                   );
                   if (image != null && mounted) {
-                    // 显示加载提示
+                    // Display loading prompt
                     scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Recognizing ingredient...'),
@@ -317,28 +317,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
 
                     try {
-                      // 读取图片并转换为base64
+                      // Read the image and convert it to base64
                       final bytes = await File(image.path).readAsBytes();
                       final base64Image = base64Encode(bytes);
 
-                      // 调用百度AI识别API
+                      // Call the Baidu AI recognition API
                       final result = await _nutrition
                           .recognizeIngredientFromImage(base64Image);
 
                       if (result['success'] == true && mounted) {
                         final ingredientName = result['name'] as String;
 
-                        // 自动填充到 food name 栏
+                        // Automatically fill in the "food name" column
                         setState(() {
                           _nameController.text = ingredientName;
                         });
 
-                        // 复制到剪贴板
+                        // Copy to clipboard
                         await Clipboard.setData(
                           ClipboardData(text: ingredientName),
                         );
 
-                        // 显示成功消息
+                        // Display the success message
                         scaffoldMessenger.showSnackBar(
                           SnackBar(
                             content: Row(
@@ -496,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     fieldViewBuilder:
                         (context, controller, focusNode, onFieldSubmitted) {
-                          // 将_nameController的值同步到Autocomplete的controller
+                          // Synchronize the value of _nameController to the controller of Autocomplete
                           if (_nameController.text != controller.text) {
                             controller.text = _nameController.text;
                             controller.selection = TextSelection.fromPosition(
@@ -504,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           }
 
-                          // 同步两个controller
+                          // Synchronize two controllers
                           controller.addListener(() {
                             if (_nameController.text != controller.text) {
                               _nameController.text = controller.text;
@@ -559,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // 过期日期选择器
+                  // Expiry Date Selector
                   InkWell(
                     onTap: () async {
                       final picked = await showDatePicker(
@@ -584,10 +584,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // 按钮横向并排
+                  // Buttons are placed side by side horizontally.
                   Row(
                     children: [
-                      // 保存按钮（左侧，更大）
+                      // Save button (on the left, larger)
                       Expanded(
                         flex: 3,
                         child: SizedBox(
@@ -611,7 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // 计算卡路里按钮（右侧，仅图标）
+                      // Calorie Calculation Button (on the right, just the icon)
                       SizedBox(
                         width: 50,
                         height: 50,
@@ -641,7 +641,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 30),
 
-            // 显示卡路里结果 - 占满宽度
+            // Display calorie results - Fill the width
             if (_calculatedCalories != null)
               SizedBox(
                 width: double.infinity,

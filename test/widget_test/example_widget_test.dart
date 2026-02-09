@@ -1,4 +1,4 @@
-/// Widget 测试示例
+/// Widget test example
 library;
 
 import 'package:flutter/material.dart';
@@ -12,11 +12,7 @@ void main() {
       // Arrange
       const testText = 'Hello Kitchen App';
       final widget = createTestApp(
-        child: const Scaffold(
-          body: Center(
-            child: Text(testText),
-          ),
-        ),
+        child: const Scaffold(body: Center(child: Text(testText))),
       );
 
       // Act
@@ -59,14 +55,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 初始状态
+      // Assert - Initial state
       expect(find.text('Counter: 0'), findsOneWidget);
 
-      // Act - 点击按钮
+      // Act - Click the button
       await tester.tap(find.text('Increment'));
       await tester.pumpAndSettle();
 
-      // Assert - 验证状态更新
+      // Assert - Verify status update
       expect(find.text('Counter: 1'), findsOneWidget);
     });
 
@@ -74,9 +70,7 @@ void main() {
       // Arrange
       final widget = createTestApp(
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Kitchen App - Home'),
-          ),
+          appBar: AppBar(title: const Text('Kitchen App - Home')),
           body: const Center(
             child: Text('Welcome to our Kitchen Management System'),
           ),

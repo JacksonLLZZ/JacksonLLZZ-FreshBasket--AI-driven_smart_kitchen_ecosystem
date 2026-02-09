@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kitchen/core/utils/season_helper.dart';
-import '../../recipes/data/seasonal_catalog_repository.dart'; // 按你实际文件名改
-import '../domain/recommendation_service.dart'; // 按你实际文件名改
+import '../../recipes/data/seasonal_catalog_repository.dart';
+import '../domain/recommendation_service.dart';
 import '../domain/seasonal_food.dart';
 import '../../../services/database_service.dart';
 import '../../shopping_cart/data/shopping_item.dart';
@@ -10,9 +10,9 @@ import '../../../core/constants/test_keys.dart';
 class SeasonalListScreen extends StatefulWidget {
   final DatabaseService? databaseService;
   final RecommendationService? recommendationService;
-  
+
   const SeasonalListScreen({
-    super.key, 
+    super.key,
     this.databaseService,
     this.recommendationService,
   });
@@ -50,7 +50,7 @@ class _SeasonalListScreenState extends State<SeasonalListScreen> {
 
     _searchController.addListener(_onSearchChanged);
 
-    // 监听购物车变化
+    // Monitor changes in the shopping cart
     _db.getShoppingCartStream().listen((items) {
       if (mounted) {
         setState(() {

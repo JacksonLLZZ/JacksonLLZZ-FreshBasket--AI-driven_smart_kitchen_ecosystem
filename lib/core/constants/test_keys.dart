@@ -1,6 +1,6 @@
-/// 测试用的 Key 常量
+/// Test Key Constants
 /// 
-/// 用于 Widget 测试时定位和操作 UI 元素
+/// Used to locate and manipulate UI elements during widget testing
 class TestKeys {
   TestKeys._();
 
@@ -102,9 +102,9 @@ class TestKeys {
 
   // ==================== Helper Methods ====================
   
-  /// 为列表项生成索引 key
+  /// Generate index key for list items
   static String listItem(String prefix, int index) => '${prefix}_$index';
   
-  /// 为带 ID 的项生成 key
+  /// Generate key for items with ID
   static String itemWithId(String prefix, String id) => '${prefix}_$id';
 }

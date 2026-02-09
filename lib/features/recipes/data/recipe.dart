@@ -26,13 +26,13 @@ class Recipe {
   final int missedIngredientCount;
   final List<RecipeIngredient> usedIngredients;
   final List<RecipeIngredient> missedIngredients;
-  
-  // TheMealDB 独有字段（Spoonacular 为 null）
-  final String? instructions;  // 烹饪步骤说明
-  final String? category;      // 分类（如 Chicken, Dessert）
-  final String? area;          // 地区（如 Japanese, Italian）
-  final String? tags;          // 标签（逗号分隔）
-  final String? youtubeUrl;    // YouTube 视频链接
+
+  // TheMealDB Unique field（Spoonacular is null）
+  final String? instructions; // Cooking instructions
+  final String? category; // Classification（such as Chicken, Dessert）
+  final String? area; // district（such as Japanese, Italian）
+  final String? tags; // sign（Comma-separated）
+  final String? youtubeUrl; // YouTube video link
 
   Recipe({
     required this.id,

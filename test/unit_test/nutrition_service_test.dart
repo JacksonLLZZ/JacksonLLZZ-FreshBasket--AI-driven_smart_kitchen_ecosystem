@@ -1,6 +1,6 @@
-/// NutritionService 单元测试
-/// 
-/// 使用 mocktail 模拟 HTTP 请求，不调用真实 API
+/// NutritionService unit test
+///
+/// Use mocktail to simulate HTTP requests without calling the actual API.
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,13 +15,13 @@ void main() {
   late NutritionService nutritionService;
 
   setUpAll(() {
-    // 注册 fallback values
+    // Register fallback values
     registerFallbackValues();
   });
 
   setUp(() {
     mockDio = MockDio();
-    // 使用 mock的 Dio 创建服务实例
+    // Create a service instance using the mock version of Dio
     nutritionService = NutritionService(dio: mockDio);
   });
 
@@ -41,23 +41,21 @@ void main() {
                 {
                   'food': 'apple',
                   'nutrients': {
-                    'ENERC_KCAL': {
-                      'quantity': expectedCalories.toDouble(),
-                    }
+                    'ENERC_KCAL': {'quantity': expectedCalories.toDouble()},
                   },
-                }
-              ]
-            }
+                },
+              ],
+            },
           ],
         },
         statusCode: 200,
         requestOptions: RequestOptions(path: ''),
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       // Act
       final result = await nutritionService.calculateCalories(
@@ -68,10 +66,12 @@ void main() {
 
       // Assert
       expect(result, expectedCalories);
-      verify(() => mockDio.get(
-            'https://api.edamam.com/api/nutrition-data',
-            queryParameters: any(named: 'queryParameters'),
-          )).called(1);
+      verify(
+        () => mockDio.get(
+          'https://api.edamam.com/api/nutrition-data',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).called(1);
     });
 
     test('API 返回空数据时应该返回 null', () async {
@@ -86,10 +86,10 @@ void main() {
         requestOptions: RequestOptions(path: ''),
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       // Act
       final result = await nutritionService.calculateCalories(
@@ -108,13 +108,15 @@ void main() {
       const testQty = 1.0;
       const testUnit = 'unit';
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenThrow(DioException(
-        requestOptions: RequestOptions(path: ''),
-        error: 'Network error',
-      ));
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          error: 'Network error',
+        ),
+      );
 
       // Act
       final result = await nutritionService.calculateCalories(
@@ -139,10 +141,10 @@ void main() {
         requestOptions: RequestOptions(path: ''),
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       // Act
       final result = await nutritionService.calculateCalories(
@@ -158,8 +160,8 @@ void main() {
 
   group('NutritionService - 百度翻译', () {
     test('翻译成功时应该返回英文文本', () async {
-      // 这个测试演示如何测试翻译功能
-      // 由于翻译是私有方法，我们通过公开方法间接测试
+      // This test demonstrates how to test the translation function.
+      // Since the translation is a private method, we test it indirectly through public methods.
       expect(nutritionService, isNotNull);
     });
   });

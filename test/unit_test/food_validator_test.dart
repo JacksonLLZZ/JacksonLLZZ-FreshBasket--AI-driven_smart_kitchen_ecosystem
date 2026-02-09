@@ -1,4 +1,4 @@
-/// FoodValidator 工具类测试
+/// FoodValidator Tool testing
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -33,15 +33,30 @@ void main() {
         // Act & Assert
         expect(FoodValidator.isSimilarName('red   apple', 'red apple'), isTrue);
         expect(FoodValidator.isSimilarName('green  bean', 'greenbean'), isTrue);
-        expect(FoodValidator.isSimilarName('sweet    potato', 'sweetpotato'), isTrue);
+        expect(
+          FoodValidator.isSimilarName('sweet    potato', 'sweetpotato'),
+          isTrue,
+        );
       });
 
       test('应该组合处理：忽略大小写和空格', () {
         // Act & Assert
-        expect(FoodValidator.isSimilarName('  Red Apple  ', 'red apple'), isTrue);
-        expect(FoodValidator.isSimilarName('GREEN   BEAN', 'green bean'), isTrue);
-        expect(FoodValidator.isSimilarName('Sweet Potato', 'sweetpotato'), isTrue);
-        expect(FoodValidator.isSimilarName('  CHERRY   TOMATO  ', 'cherrytomato'), isTrue);
+        expect(
+          FoodValidator.isSimilarName('  Red Apple  ', 'red apple'),
+          isTrue,
+        );
+        expect(
+          FoodValidator.isSimilarName('GREEN   BEAN', 'green bean'),
+          isTrue,
+        );
+        expect(
+          FoodValidator.isSimilarName('Sweet Potato', 'sweetpotato'),
+          isTrue,
+        );
+        expect(
+          FoodValidator.isSimilarName('  CHERRY   TOMATO  ', 'cherrytomato'),
+          isTrue,
+        );
       });
 
       test('应该区分不同的名称', () {
@@ -97,8 +112,9 @@ void main() {
         // Act & Assert
         const long1 = 'This is a very long ingredient name with many words';
         const long2 = 'THIS IS A VERY LONG INGREDIENT NAME WITH MANY WORDS';
-        const long3 = 'this  is  a  very  long  ingredient  name  with  many  words';
-        
+        const long3 =
+            'this  is  a  very  long  ingredient  name  with  many  words';
+
         expect(FoodValidator.isSimilarName(long1, long2), isTrue);
         expect(FoodValidator.isSimilarName(long1, long3), isTrue);
       });

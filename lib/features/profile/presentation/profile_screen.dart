@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../services/database_service.dart';
 import '../../../core/constants/theme.dart';
 import '../../../core/constants/test_keys.dart';
-// 导入 main.dart 以访问 allowAnonymousLogin 全局变量
+// import main.dart to access allowAnonymousLogin
 import '../../../main.dart';
 import 'package:kitchen/core/constants/app_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -60,11 +60,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isApiKeyValid = key.isNotEmpty;
     });
 
-    // 显示保存成功消息
+    // Display the success message of the save operation
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('API key saved ${key.isNotEmpty ? 'successfully' : '(cleared)'}'),
+          content: Text(
+            'API key saved ${key.isNotEmpty ? 'successfully' : '(cleared)'}',
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -449,8 +451,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     leading: const Icon(Icons.smart_toy_outlined),
                     title: const Text('Gemini API Configuration'),
                     subtitle: _isApiKeyValid
-                        ? const Text('API key is configured ✓', style: TextStyle(color: Colors.green))
-                        : const Text('API key not configured', style: TextStyle(color: Colors.orange)),
+                        ? const Text(
+                            'API key is configured ✓',
+                            style: TextStyle(color: Colors.green),
+                          )
+                        : const Text(
+                            'API key not configured',
+                            style: TextStyle(color: Colors.orange),
+                          ),
                     onTap: () {
                       showDialog(
                         context: context,
@@ -458,7 +466,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           title: const Text('Gemini API Key'),
                           content: TextField(
                             key: const Key(TestKeys.profileGeminiApiField),
-                            controller: TextEditingController(text: _geminiApiKey),
+                            controller: TextEditingController(
+                              text: _geminiApiKey,
+                            ),
                             decoration: const InputDecoration(
                               hintText: 'Enter your Gemini API key',
                               border: OutlineInputBorder(),

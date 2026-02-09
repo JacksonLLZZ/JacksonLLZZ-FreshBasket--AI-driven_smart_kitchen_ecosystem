@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 
-/// 食材列表服务 - 从CSV文件加载标准食材名称
+/// Ingredient list service - Load standard ingredient names from CSV file
 class IngredientListService {
   static List<String>? _cachedIngredients;
 
-  /// 加载食材列表（从assets/data/ingredients_list.csv）
+  /// Load ingredient list (from assets/data/ingredients_list.csv)
   static Future<List<String>> loadIngredients() async {
     if (_cachedIngredients != null) {
       return _cachedIngredients!;
@@ -16,7 +16,7 @@ class IngredientListService {
       );
       final lines = csvString.split('\n');
 
-      // 跳过第一行标题（IngredientName）
+      // Skip first header line (IngredientName)
       _cachedIngredients = lines
           .skip(1)
           .map((line) => line.trim())
@@ -30,7 +30,7 @@ class IngredientListService {
     }
   }
 
-  /// 根据输入文本过滤匹配的食材
+  /// Filter matching ingredients based on input text
   static List<String> filterIngredients(
     List<String> allIngredients,
     String query,
@@ -42,24 +42,24 @@ class IngredientListService {
         .where((ingredient) => ingredient.toLowerCase().contains(lowerQuery))
         .toList();
 
-    // 智能排序：完全匹配 > 开头匹配 > 包含匹配，同级别按字母排序
+    // Smart sorting: exact match > prefix match > contains match, same level alphabetical order
     matches.sort((a, b) {
       final aLower = a.toLowerCase();
       final bLower = b.toLowerCase();
 
-      // 1. 完全匹配优先（忽略大小写）
+      // 1. Exact match priority (case insensitive)
       final aExact = aLower == lowerQuery;
       final bExact = bLower == lowerQuery;
       if (aExact && !bExact) return -1;
       if (!aExact && bExact) return 1;
 
-      // 2. 以查询词开头的优先
+      // 2. Prefix match priority
       final aStarts = aLower.startsWith(lowerQuery);
       final bStarts = bLower.startsWith(lowerQuery);
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
 
-      // 3. 同级别内按字母排序
+      // 3. Alphabetical order within same level
       return a.compareTo(b);
     });
 

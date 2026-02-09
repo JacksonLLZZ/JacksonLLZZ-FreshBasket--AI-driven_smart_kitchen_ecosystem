@@ -14,7 +14,6 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -48,7 +47,7 @@ class _LoginFormState extends State<LoginForm> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
-          )
+          ),
         ],
       ),
     );
@@ -57,7 +56,7 @@ class _LoginFormState extends State<LoginForm> {
   String? _validateEmail(String? v) {
     final s = (v ?? "").trim();
     if (s.isEmpty) return "Please enter your email";
-    // 简单但够用的校验
+    // Simple but sufficient verification
     final ok = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(s);
     if (!ok) return "Please enter a valid email";
     return null;
@@ -79,7 +78,7 @@ class _LoginFormState extends State<LoginForm> {
         email: _email.text.trim(),
         password: _password.text,
       );
-      // ❗不导航，交给 main.dart 的 authStateChanges()
+      // ❗Without navigation, hand over to main.dart——authStateChanges()
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? "Email login failed");
     } catch (e) {
@@ -93,7 +92,7 @@ class _LoginFormState extends State<LoginForm> {
     _setLoading(true);
     try {
       final googleSignIn = GoogleSignIn();
-      await googleSignIn.signOut(); // 减少脏状态问题
+      await googleSignIn.signOut(); // Reduce the problem of dirtiness
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) return; // user canceled
@@ -106,12 +105,12 @@ class _LoginFormState extends State<LoginForm> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      // Firestore profile（只在缺失时补齐）
+      // Firestore profile（Only fill in the blanks when they are missing.）
       final db = DatabaseService();
       final exists = await db.userDocExists();
       if (!exists) {
         final u = FirebaseAuth.instance.currentUser!;
-        
+
         await db.upsertUserProfile(
           username: (u.displayName == null || u.displayName!.trim().isEmpty)
               ? "No Name"
@@ -119,10 +118,9 @@ class _LoginFormState extends State<LoginForm> {
           email: (u.email == null || u.email!.trim().isEmpty)
               ? "No Email"
               : u.email!.trim(),
-          
         );
       }
-      // ❗不导航
+      //
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? "Google login failed");
     } catch (e) {
@@ -188,7 +186,7 @@ class _LoginFormState extends State<LoginForm> {
 
     return Stack(
       children: [
-        // 背景
+        // background
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -217,7 +215,6 @@ class _LoginFormState extends State<LoginForm> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-
                         Image.asset(
                           'assets/images/logo.png',
                           width: 64,
@@ -237,7 +234,10 @@ class _LoginFormState extends State<LoginForm> {
                           controller: _email,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.username, AutofillHints.email],
+                          autofillHints: const [
+                            AutofillHints.username,
+                            AutofillHints.email,
+                          ],
                           decoration: InputDecoration(
                             labelText: "Email",
                             prefixIcon: const Icon(Icons.email),
@@ -261,8 +261,13 @@ class _LoginFormState extends State<LoginForm> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             suffixIcon: IconButton(
-                              onPressed: () => setState(() => _obscure = !_obscure),
-                              icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
+                              icon: Icon(
+                                _obscure
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
                             ),
                           ),
                           validator: _validatePwd,
@@ -271,7 +276,9 @@ class _LoginFormState extends State<LoginForm> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: _isLoading ? null : _showForgotPasswordDialog,
+                            onPressed: _isLoading
+                                ? null
+                                : _showForgotPasswordDialog,
                             child: const Text("Forgot password?"),
                           ),
                         ),
@@ -301,7 +308,6 @@ class _LoginFormState extends State<LoginForm> {
 
                         const SizedBox(height: 10),
                       ],
-                      
                     ),
                   ),
                 ),
@@ -319,4 +325,3 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
-

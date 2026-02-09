@@ -1,4 +1,4 @@
-/// Ingredient 数据模型测试
+/// Ingredient data model test
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -43,11 +43,7 @@ void main() {
 
     test('工厂方法应该使用默认过期日期', () {
       // Arrange & Act
-      final ingredient = Ingredient.create(
-        name: 'Bread',
-        qty: 1,
-        unit: 'loaf',
-      );
+      final ingredient = Ingredient.create(name: 'Bread', qty: 1, unit: 'loaf');
 
       // Assert
       final now = DateTime.now();

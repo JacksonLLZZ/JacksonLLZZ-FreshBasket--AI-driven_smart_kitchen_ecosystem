@@ -1,6 +1,6 @@
-/// Mock 类定义
-/// 
-/// 使用 mocktail 创建所有需要 mock 的依赖
+/// Mock class definition
+///
+/// Create all the dependencies that require mock using mocktail
 library;
 
 import 'package:dio/dio.dart';
@@ -11,7 +11,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:kitchen/services/database_service.dart';
 import 'package:kitchen/services/nutrition_service.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart' as kitchen;
-import 'package:kitchen/features/shopping_cart/data/shopping_item.dart' as kitchen;
+import 'package:kitchen/features/shopping_cart/data/shopping_item.dart'
+    as kitchen;
 import 'package:kitchen/features/shopping_list/domain/recommendation_service.dart';
 import 'package:kitchen/features/shopping_list/domain/seasonal_food.dart';
 import 'package:kitchen/core/utils/season_helper.dart';
@@ -33,7 +34,7 @@ class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 class MockCollectionReference<T> extends Mock
     implements CollectionReference<T> {}
 
-// 注意：以下类是 sealed，不应该被 mock。如果需要测试这些类型，请使用 Fake 或者 stub
+// Note: The following classes are sealed and should not be mocked. If you need to test these types, please use Fake or stub instead.
 // class MockDocumentReference<T> extends Mock implements DocumentReference<T> {}
 // class MockDocumentSnapshot<T> extends Mock implements DocumentSnapshot<T> {}
 // class MockQuerySnapshot<T> extends Mock implements QuerySnapshot<T> {}
@@ -46,7 +47,8 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 class MockDatabaseService extends Mock implements DatabaseService {}
 
 // Firestore Snapshots Mocks
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {}
 
 // NutritionService Mock
 class MockNutritionService extends Mock implements NutritionService {}
@@ -62,7 +64,7 @@ class MockRecommendationService extends Mock implements RecommendationService {}
 
 class MockSeasonalFood extends Mock implements SeasonalFood {}
 
-// 注册 fallback values (mocktail 需要)
+// sign in fallback values (mocktail needs)
 void registerFallbackValues() {
   registerFallbackValue(RequestOptions(path: ''));
   registerFallbackValue(const Duration(seconds: 1));

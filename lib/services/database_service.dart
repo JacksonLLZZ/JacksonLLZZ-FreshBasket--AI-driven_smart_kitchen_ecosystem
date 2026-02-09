@@ -81,7 +81,7 @@ class DatabaseService {
         }, SetOptions(merge: true));
   }
 
-  // 新增：更新用户过敏原/饮食偏好
+  // New: Update user allergens/dietary preferences
   Future<void> updateAllergens(List<String> allergens) async {
     final uid = _uid;
     if (uid == null) return;
@@ -108,7 +108,7 @@ class DatabaseService {
     return doc.data();
   }
 
-  // --- 食材库存逻辑 (保持不变) ---
+  // --- Ingredient inventory logic (unchanged) ---
 
   Future<void> saveIngredient(Ingredient item) async {
     final uid = _uid;
@@ -153,7 +153,7 @@ class DatabaseService {
         });
   }
 
-  /// 检查是否存在相似的食材
+  /// Check if similar ingredient exists
   Future<Ingredient?> findSimilarIngredient(String name) async {
     final uid = _uid;
     if (uid == null) return null;
@@ -188,7 +188,7 @@ class DatabaseService {
     return null;
   }
 
-  /// 合并食材数量(更新现有条目)
+  /// Merge ingredient quantity (update existing entry)
   Future<void> mergeIngredient(
     Ingredient existing,
     double additionalQty,
@@ -216,7 +216,7 @@ class DatabaseService {
     }
   }
 
-  /// 删除指定食材
+  /// Delete specified ingredient
   Future<void> deleteIngredient(String ingredientId) async {
     final uid = _uid;
     if (uid == null) return;
@@ -236,7 +236,7 @@ class DatabaseService {
     }
   }
 
-  /// 批量删除过期食材
+  /// Batch delete expired ingredients
   Future<int> deleteExpiredIngredients() async {
     final uid = _uid;
     if (uid == null) return 0;
@@ -265,7 +265,7 @@ class DatabaseService {
     }
   }
 
-  /// 更新食材过期日期
+  /// Update ingredient expiration date
   Future<void> updateExpirationDate(
     String ingredientId,
     DateTime newDate,
@@ -291,7 +291,7 @@ class DatabaseService {
     }
   }
 
-  /// 更新食材信息（数量和过期日期）
+  /// Update ingredient information (quantity and expiration date)
   Future<void> updateIngredient(
     String ingredientId,
     double quantity,
@@ -319,7 +319,7 @@ class DatabaseService {
     }
   }
 
-  /// 批量删除食材
+  /// Batch delete ingredients
   Future<void> deleteMultipleIngredients(List<String> ingredientIds) async {
     final uid = _uid;
     if (uid == null) return;
@@ -345,7 +345,7 @@ class DatabaseService {
 
   // ==================== Shopping Cart Methods ====================
 
-  /// 添加商品到购物车
+  /// Add item to shopping cart
   Future<void> addToShoppingCart(ShoppingItem item) async {
     final uid = _uid;
     if (uid == null) return;
@@ -364,7 +364,7 @@ class DatabaseService {
     }
   }
 
-  /// 获取购物车商品流
+  /// Get shopping cart item stream
   Stream<List<ShoppingItem>> getShoppingCartStream() {
     final uid = _uid;
     if (uid == null) return const Stream.empty();
@@ -384,7 +384,7 @@ class DatabaseService {
         });
   }
 
-  /// 从购物车删除商品
+  /// Remove item from shopping cart
   Future<void> removeFromShoppingCart(String itemId) async {
     final uid = _uid;
     if (uid == null) return;
@@ -404,7 +404,7 @@ class DatabaseService {
     }
   }
 
-  /// 清空购物车
+  /// Clear shopping cart
   Future<void> clearShoppingCart() async {
     final uid = _uid;
     if (uid == null) return;

@@ -1,4 +1,4 @@
-/// Recipe 和 RecipeIngredient 数据模型测试
+/// Recipe 和 RecipeIngredient data model test
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -39,10 +39,7 @@ void main() {
 
     test('应该处理缺失的 image 字段', () {
       // Arrange
-      final json = {
-        'name': 'garlic',
-        'original': '3 cloves garlic',
-      };
+      final json = {'name': 'garlic', 'original': '3 cloves garlic'};
 
       // Act
       final ingredient = RecipeIngredient.fromJson(json);
@@ -156,7 +153,10 @@ void main() {
       // Assert
       expect(recipe.id, 999);
       expect(recipe.title, 'Japanese Teriyaki');
-      expect(recipe.instructions, 'Step 1: Cook rice. Step 2: Prepare sauce...');
+      expect(
+        recipe.instructions,
+        'Step 1: Cook rice. Step 2: Prepare sauce...',
+      );
       expect(recipe.category, 'Chicken');
       expect(recipe.area, 'Japanese');
       expect(recipe.tags, 'Sweet,Savory');
@@ -165,10 +165,7 @@ void main() {
 
     test('应该处理缺失的字段', () {
       // Arrange
-      final json = {
-        'id': 111,
-        'title': 'Simple Recipe',
-      };
+      final json = {'id': 111, 'title': 'Simple Recipe'};
 
       // Act
       final recipe = Recipe.fromJson(json);
@@ -192,9 +189,7 @@ void main() {
         image: 'test.jpg',
         usedIngredientCount: 2,
         missedIngredientCount: 1,
-        usedIngredients: [
-          RecipeIngredient(name: 'egg', original: '2 eggs'),
-        ],
+        usedIngredients: [RecipeIngredient(name: 'egg', original: '2 eggs')],
         missedIngredients: [],
         instructions: 'Mix and cook',
         category: 'Breakfast',
@@ -230,7 +225,11 @@ void main() {
         usedIngredientCount: 3,
         missedIngredientCount: 2,
         usedIngredients: [
-          RecipeIngredient(name: 'flour', original: '200g flour', image: 'flour.jpg'),
+          RecipeIngredient(
+            name: 'flour',
+            original: '200g flour',
+            image: 'flour.jpg',
+          ),
         ],
         missedIngredients: [
           RecipeIngredient(name: 'sugar', original: '100g sugar'),
@@ -251,9 +250,18 @@ void main() {
       expect(reconstructed.title, original.title);
       expect(reconstructed.image, original.image);
       expect(reconstructed.usedIngredientCount, original.usedIngredientCount);
-      expect(reconstructed.missedIngredientCount, original.missedIngredientCount);
-      expect(reconstructed.usedIngredients.length, original.usedIngredients.length);
-      expect(reconstructed.missedIngredients.length, original.missedIngredients.length);
+      expect(
+        reconstructed.missedIngredientCount,
+        original.missedIngredientCount,
+      );
+      expect(
+        reconstructed.usedIngredients.length,
+        original.usedIngredients.length,
+      );
+      expect(
+        reconstructed.missedIngredients.length,
+        original.missedIngredients.length,
+      );
       expect(reconstructed.instructions, original.instructions);
       expect(reconstructed.category, original.category);
       expect(reconstructed.area, original.area);

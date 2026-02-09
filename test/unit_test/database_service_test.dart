@@ -1,6 +1,6 @@
-/// DatabaseService 单元测试
-/// 
-/// 使用 fake_cloud_firestore 模拟 Firestore 数据库
+/// DatabaseService unit test
+///
+/// Use fake_cloud_firestore to simulate the Firestore database
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -9,11 +9,7 @@ import 'package:kitchen/features/shopping_cart/data/shopping_item.dart';
 
 void main() {
   group('DatabaseService -', () {
-
-
-    setUp(() {
-
-    });
+    setUp(() {});
 
     group('Ingredient Operations', () {
       test('saveIngredient 应该保存食材到 Firestore', () async {
@@ -26,11 +22,11 @@ void main() {
           expirationDate: DateTime(2026, 12, 31),
         );
 
-        // 注意: 由于 DatabaseService 使用 FirebaseAuth.instance，
-        // 在真实测试中需要使用依赖注入或者其他方式来 mock
-        // 这里我们测试逻辑结构和数据转换
+        // Note: Since DatabaseService uses FirebaseAuth.instance，
+        // In real tests, dependency injection or other methods need to be used to mock.
+        // Here we test the logical structure and data conversion.
 
-        // Assert - 验证 ingredient 数据的完整性
+        // Assert - Verify the completeness of the ingredient data
         expect(ingredient.id, isNotEmpty);
         expect(ingredient.name, 'Apple');
         expect(ingredient.quantity, 5);
@@ -46,7 +42,7 @@ void main() {
           expirationDate: DateTime(2026, 2, 15),
         );
 
-        // Act - 验证数据属性
+        // Act - Verify data attributes
         expect(ingredient.name, 'Tomato');
         expect(ingredient.quantity, 3.5);
         expect(ingredient.unit, 'kg');
@@ -59,10 +55,7 @@ void main() {
     group('Shopping Cart Operations', () {
       test('ShoppingItem 应该正确创建', () {
         // Arrange & Act
-        final item = ShoppingItem.create(
-          name: 'Milk',
-          amount: '1 liter',
-        );
+        final item = ShoppingItem.create(name: 'Milk', amount: '1 liter');
 
         // Assert
         expect(item.name, 'Milk');
@@ -198,10 +191,7 @@ void main() {
 
       test('购物车项目的数量描述应该不为空', () {
         // Arrange
-        final item = ShoppingItem.create(
-          name: 'Eggs',
-          amount: '12 pieces',
-        );
+        final item = ShoppingItem.create(name: 'Eggs', amount: '12 pieces');
 
         // Assert
         expect(item.amount, isNotEmpty);

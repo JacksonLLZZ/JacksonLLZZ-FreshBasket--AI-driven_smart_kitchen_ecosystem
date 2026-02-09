@@ -20,7 +20,7 @@ void main() {
   setUp(() async {
     // Initialize SharedPreferences mock
     SharedPreferences.setMockInitialValues({});
-    
+
     mockAuth = MockFirebaseAuth();
     mockUser = MockUser();
     mockDb = MockDatabaseService();
@@ -37,19 +37,19 @@ void main() {
     final mockSnapshot = MockDocumentSnapshot();
     when(() => mockSnapshot.exists).thenReturn(true);
     when(() => mockSnapshot.data()).thenReturn({});
-    
-    when(() => mockDb.getUserProfileStream()).thenAnswer(
-      (_) => Stream.value(mockSnapshot),
-    );
-    when(() => mockDb.getInventoryStream()).thenAnswer(
-      (_) => Stream.value([]),
-    );
+
+    when(
+      () => mockDb.getUserProfileStream(),
+    ).thenAnswer((_) => Stream.value(mockSnapshot));
+    when(() => mockDb.getInventoryStream()).thenAnswer((_) => Stream.value([]));
     when(() => mockDb.updateTheme(any())).thenAnswer((_) async => {});
-    when(() => mockDb.upsertUserProfile(
-          username: any(named: 'username'),
-          email: any(named: 'email'),
-          imageUrl: any(named: 'imageUrl'),
-        )).thenAnswer((_) async => {});
+    when(
+      () => mockDb.upsertUserProfile(
+        username: any(named: 'username'),
+        email: any(named: 'email'),
+        imageUrl: any(named: 'imageUrl'),
+      ),
+    ).thenAnswer((_) async => {});
   });
 
   tearDown(() async {
@@ -67,7 +67,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证标题
+      // Assert - Verify the title
       expect(find.text('Account & Settings'), findsOneWidget);
       expect(
         find.byKey(const Key(TestKeys.profileScreenScaffold)),
@@ -85,7 +85,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证主题选择器部分
+      // Assert - Verify the theme selector section
       expect(find.text('App Appearance'), findsOneWidget);
     });
 
@@ -99,14 +99,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证健康档案部分
+      // Assert - Verification of health records section
       expect(find.text('Health Profile'), findsOneWidget);
     });
 
     testWidgets('游客模式应该显示登录按钮', (WidgetTester tester) async {
-      // Arrange - 设置为游客模式
+      // Arrange - Set to tourist mode
       when(() => mockUser.isAnonymous).thenReturn(true);
-      
+
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
@@ -115,12 +115,9 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证游客模式卡片和登录按钮
+      // Assert - Verify the tourist mode card and the login button
       expect(find.text('Guest Mode'), findsOneWidget);
-      expect(
-        find.byKey(const Key(TestKeys.loginButton)),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key(TestKeys.loginButton)), findsOneWidget);
       expect(find.text('Sign In / Register'), findsOneWidget);
     });
 
@@ -134,7 +131,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - 验证四个季节选项都存在（通过查找包含季节名称的文本）
+      // Assert - Verify that all four seasons options are present (by searching for text containing the names of the seasons)
       expect(find.text('Spring'), findsAtLeastNWidgets(1));
       expect(find.text('Summer'), findsAtLeastNWidgets(1));
       expect(find.text('Autumn'), findsAtLeastNWidgets(1));
@@ -151,26 +148,26 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 查找春季主题图标
+      // Search for spring-themed icons
       final springThemeFinder = find.ancestor(
         of: find.text('Spring'),
         matching: find.byType(GestureDetector),
       );
 
-      // 点击春季主题
+      // Click on the spring theme
       if (springThemeFinder.evaluate().isNotEmpty) {
         await tester.tap(springThemeFinder.first);
         await tester.pumpAndSettle();
       }
 
-      // Assert - 验证可以交互（无异常抛出即成功）
+      // Assert - Verification can be interactive (success is achieved without any exception being thrown)
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('登录用户应该显示退出登录按钮', (WidgetTester tester) async {
-      // Arrange - 确保是登录用户
+      // Arrange - Ensure that it is a logged-in user
       when(() => mockUser.isAnonymous).thenReturn(false);
-      
+
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
       );
@@ -179,14 +176,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 向下滚动以查看退出按钮
+      // Scroll down to view the exit button
       await tester.drag(
         find.byType(SingleChildScrollView),
         const Offset(0, -500),
       );
       await tester.pumpAndSettle();
 
-      // Assert - 验证退出按钮存在
+      // Assert - Verify the existence of the exit button
       expect(find.textContaining('Sign Out'), findsWidgets);
     });
 
@@ -200,14 +197,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 向下滚动查看健康档案部分
+      // Scroll down to view the health record section
       await tester.drag(
         find.byType(SingleChildScrollView),
         const Offset(0, -300),
       );
       await tester.pumpAndSettle();
 
-      // Assert - 验证Health Profile标题存在
+      // Assert - Verify the existence of the "Health Profile" title
       expect(find.text('Health Profile'), findsOneWidget);
     });
 
@@ -221,14 +218,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // 向下滚动
+      // Scroll down
       await tester.drag(
         find.byType(SingleChildScrollView),
         const Offset(0, -200),
       );
       await tester.pumpAndSettle();
 
-      // Assert - 验证统计部分的某些文本
+      // Assert - Some texts in the verification statistics section
       final statsFinder = find.textContaining('Fridge');
       expect(statsFinder, findsWidgets);
     });

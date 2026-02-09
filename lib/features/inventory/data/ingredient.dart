@@ -15,10 +15,10 @@ class Ingredient {
     required this.expirationDate,
   });
 
-  // 获取是否过期
+  // Check if it has expired
   bool get isExpired => DateTime.now().isAfter(expirationDate);
 
-  // 工厂方法：创建新的食材对象
+  // Factory Method: Creating new ingredient objects
   factory Ingredient.create({
     required String name,
     required double qty,

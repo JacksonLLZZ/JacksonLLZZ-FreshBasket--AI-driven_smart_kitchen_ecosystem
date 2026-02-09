@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ShoppingItem {
   final String id;
   final String name;
-  final String amount; // 例如 "2 cups", "100g", etc.
+  final String amount; // such as "2 cups", "100g", etc.
   final DateTime addedAt;
 
   ShoppingItem({
@@ -13,7 +13,7 @@ class ShoppingItem {
     required this.addedAt,
   });
 
-  // 从 Firestore 创建
+  // From Firestore
   factory ShoppingItem.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return ShoppingItem(
@@ -24,7 +24,7 @@ class ShoppingItem {
     );
   }
 
-  // 转换为 Firestore 格式
+  // Convert to Firestore format
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
@@ -33,11 +33,8 @@ class ShoppingItem {
     };
   }
 
-  // 创建新的购物车项
-  factory ShoppingItem.create({
-    required String name,
-    required String amount,
-  }) {
+  // Create a new shopping cart item
+  factory ShoppingItem.create({required String name, required String amount}) {
     return ShoppingItem(
       id: '',
       name: name,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shopping_list/presentation/seasonal_list_screen.dart';
 import '../../../core/utils/season_helper.dart';
-import '../../../main.dart'; // 导入以访问 currentTheme
+import '../../../main.dart'; // Import to access currentTheme
 import '../../../services/database_service.dart';
 import '../data/shopping_item.dart';
 import '../../../core/constants/test_keys.dart';
@@ -38,7 +38,7 @@ String _seasonMessage(String season) {
 
 class ShoppingCartScreen extends StatefulWidget {
   final DatabaseService? databaseService;
-  
+
   const ShoppingCartScreen({super.key, this.databaseService});
 
   @override
@@ -74,10 +74,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
             ValueListenableBuilder<String>(
               valueListenable: currentTheme,
               builder: (context, userTheme, child) {
-                // 从全局主题状态获取季节
+                // Obtain the season from the overall theme status
                 String season;
 
-                // 用户主题优先（Spring/Summer/Autumn/Winter）
+                // User priority in theme（Spring/Summer/Autumn/Winter）
                 if (userTheme != 'Default' &&
                     [
                       'Spring',
@@ -87,7 +87,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     ].contains(userTheme)) {
                   season = userTheme.toLowerCase();
                 } else {
-                  // 回退到实际季节
+                  // Return to the actual season
                   season = SeasonHelper.getCurrentSeason(
                     hemisphere: Hemisphere.northern,
                   );
@@ -155,8 +155,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          SeasonalListScreen(databaseService: _db),
+                                      builder: (_) => SeasonalListScreen(
+                                        databaseService: _db,
+                                      ),
                                     ),
                                   );
                                 },
@@ -199,7 +200,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 购物车商品列表
+            // Shopping cart item list
             const Text(
               "Shopping List",
               style: TextStyle(
@@ -283,7 +284,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
                 return Column(
                   children: [
-                    // 清空按钮
+                    // Clear button
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
@@ -333,7 +334,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // 商品列表
+                    // List of Products
                     ...items.map((item) {
                       final theme = Theme.of(context);
                       return Container(

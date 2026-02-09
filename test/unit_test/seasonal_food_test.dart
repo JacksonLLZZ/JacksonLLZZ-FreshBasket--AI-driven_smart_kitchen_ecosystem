@@ -1,4 +1,4 @@
-/// SeasonalFood 数据模型测试
+/// SeasonalFood data model test
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -119,7 +119,10 @@ void main() {
 
       // Assert
       expect(food.seasons.length, 4);
-      expect(food.seasons, containsAll(['spring', 'summer', 'autumn', 'winter']));
+      expect(
+        food.seasons,
+        containsAll(['spring', 'summer', 'autumn', 'winter']),
+      );
     });
 
     test('应该处理空别名列表', () {
@@ -142,7 +145,7 @@ void main() {
     });
 
     test('应该处理不同类型的 shelf life days', () {
-      // Arrange - 测试 int
+      // Arrange - test int
       final jsonInt = {
         'id': 'test_001',
         'name': 'Test',
@@ -153,7 +156,7 @@ void main() {
         'tags': [],
       };
 
-      // Arrange - 测试 double
+      // Arrange - test double
       final jsonDouble = {
         'id': 'test_002',
         'name': 'Test2',

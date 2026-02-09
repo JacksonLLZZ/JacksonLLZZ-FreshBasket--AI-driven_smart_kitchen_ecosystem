@@ -1,4 +1,4 @@
-/// IngredientListService 工具类测试
+/// IngredientListService Tool testing
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -150,10 +150,7 @@ void main() {
 
       test('应该处理空的食材列表', () {
         // Act
-        final result = IngredientListService.filterIngredients(
-          [],
-          'apple',
-        );
+        final result = IngredientListService.filterIngredients([], 'apple');
 
         // Assert
         expect(result, isEmpty);
@@ -162,10 +159,10 @@ void main() {
       test('排序优先级：完全匹配 > 开头匹配 > 包含匹配', () {
         // Arrange
         final ingredients = [
-          'Pineapple',      // 包含 apple
-          'Apple',          // 完全匹配 apple
-          'Applesauce',     // 开头匹配 apple
-          'Green Apple',    // 包含 apple
+          'Pineapple', // contain apple
+          'Apple', // Perfect match apple
+          'Applesauce', // head matching apple
+          'Green Apple', // contain apple
         ];
 
         // Act
@@ -176,20 +173,19 @@ void main() {
 
         // Assert
         expect(result.length, 4);
-        expect(result[0].toLowerCase(), 'apple'); // 完全匹配第一
-        expect(result[1], 'Applesauce');          // 开头匹配第二
-        // Green Apple 和 Pineapple 都是包含匹配，按字母排序
+        expect(result[0].toLowerCase(), 'apple'); // Perfect match first
+        expect(
+          result[1],
+          'Applesauce',
+        ); // The beginning matches the second one.
+        // Green Apple and Pineapple are both included in the match and are sorted alphabetically.
         expect(result[2], 'Green Apple');
         expect(result[3], 'Pineapple');
       });
 
       test('应该处理带空格的查询', () {
         // Arrange
-        final ingredients = [
-          'Red Apple',
-          'Green Apple',
-          'Apple',
-        ];
+        final ingredients = ['Red Apple', 'Green Apple', 'Apple'];
 
         // Act
         final result = IngredientListService.filterIngredients(
@@ -210,8 +206,8 @@ void main() {
         );
 
         // Assert
-        // 结果应该保持原始列表中的大小写
-        expect(result, contains('Apple')); // 不是 'apple'
+        // The result should maintain the capitalization as it is in the original list.
+        expect(result, contains('Apple')); // not 'apple'
         expect(result, contains('Applesauce'));
         expect(result, contains('Pineapple'));
       });

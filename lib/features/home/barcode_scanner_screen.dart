@@ -62,9 +62,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               final List<Barcode> barcodes = capture.barcodes;
               for (final barcode in barcodes) {
                 if (barcode.rawValue != null) {
-                  // 停止相机
+                  // Stop the camera
                   await controller.stop();
-                  // 返回扫描结果
+                  // Return the scanning results
                   if (mounted) {
                     Navigator.pop(context, barcode.rawValue);
                   }
@@ -73,7 +73,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               }
             },
           ),
-          // 扫描框指示器
+          // Scanning frame indicator
           Center(
             child: Container(
               width: 250,
@@ -84,7 +84,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               ),
             ),
           ),
-          // 提示文字
+          // Instructional Text
           Positioned(
             bottom: 100,
             left: 0,

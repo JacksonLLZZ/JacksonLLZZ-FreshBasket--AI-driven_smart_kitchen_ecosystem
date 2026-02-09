@@ -62,14 +62,14 @@ class _NutriScanAppState extends State<NutriScanApp> {
             final themeName = data?['theme'] ?? 'Default';
             if (mounted && _currentTheme != themeName) {
               setState(() => _currentTheme = themeName);
-              currentTheme.value = themeName; // 更新全局状态
+              currentTheme.value = themeName; // Update global state
             }
           }
         });
       } else {
         if (mounted) {
           setState(() => _currentTheme = 'Default');
-          currentTheme.value = 'Default'; // 更新全局状态
+          currentTheme.value = 'Default'; // Update global state
         }
       }
     });
@@ -275,13 +275,13 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    // 响应式布局：根据屏幕宽度决定使用 NavigationRail 或 BottomNavigationBar
+    // Responsive layout: Use NavigationRail or BottomNavigationBar based on screen width
     final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Scaffold(
       body: Row(
         children: [
-          // 平板模式：显示侧边导航栏 (NavigationRail)
+          // Tablet mode: Show sidebar navigation (NavigationRail)
           if (isTablet)
             NavigationRail(
               selectedIndex: _currentIndex < 4 ? _currentIndex : 0,
@@ -331,16 +331,16 @@ class _MainNavigationState extends State<MainNavigation> {
               ),
             ),
 
-          // 分隔线
+          // Divider
           if (isTablet) const VerticalDivider(thickness: 1, width: 1),
 
-          // 主内容区域
+          // Main content area
           Expanded(
             child: IndexedStack(index: _currentIndex, children: _pages),
           ),
         ],
       ),
-      // 手机模式：显示底部导航栏 (BottomNavigationBar)
+      // Mobile mode: Show bottom navigation bar (BottomNavigationBar)
       bottomNavigationBar: isTablet
           ? null
           : BottomNavigationBar(
