@@ -8,7 +8,7 @@ import '../test_helpers.dart';
 
 void main() {
   group('Widget Test Examples -', () {
-    testWidgets('应该显示简单的文本 Widget', (WidgetTester tester) async {
+    testWidgets('should display simple text widget', (WidgetTester tester) async {
       // Arrange
       const testText = 'Hello Kitchen App';
       final widget = createTestApp(
@@ -23,7 +23,7 @@ void main() {
       expect(find.text(testText), findsOneWidget);
     });
 
-    testWidgets('应该响应按钮点击', (WidgetTester tester) async {
+    testWidgets('should respond to button click', (WidgetTester tester) async {
       // Arrange
       int counter = 0;
       final widget = createTestApp(
@@ -66,7 +66,7 @@ void main() {
       expect(find.text('Counter: 1'), findsOneWidget);
     });
 
-    testWidgets('应该能找到包含特定文本的 Widget', (WidgetTester tester) async {
+    testWidgets('should be able to find widget containing specific text', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: Scaffold(
@@ -86,7 +86,7 @@ void main() {
       expect(findTextContaining('Management'), findsOneWidget);
     });
 
-    testWidgets('应该能测试表单输入', (WidgetTester tester) async {
+    testWidgets('should be able to test form input', (WidgetTester tester) async {
       // Arrange
       final controller = TextEditingController();
       final widget = createTestApp(

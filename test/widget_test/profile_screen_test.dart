@@ -57,7 +57,7 @@ void main() {
   });
 
   group('ProfileScreen Widget Tests -', () {
-    testWidgets('应该显示页面标题 "Account & Settings"', (WidgetTester tester) async {
+    testWidgets('should display page title "Account & Settings"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -75,7 +75,7 @@ void main() {
       );
     });
 
-    testWidgets('应该显示主题选择器标题 "App Appearance"', (WidgetTester tester) async {
+    testWidgets('should display theme selector title "App Appearance"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -89,7 +89,7 @@ void main() {
       expect(find.text('App Appearance'), findsOneWidget);
     });
 
-    testWidgets('应该显示健康档案标题 "Health Profile"', (WidgetTester tester) async {
+    testWidgets('should display health profile title "Health Profile"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -99,11 +99,11 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - Verification of health records section
+      // Assert - Verify health profile section
       expect(find.text('Health Profile'), findsOneWidget);
     });
 
-    testWidgets('游客模式应该显示登录按钮', (WidgetTester tester) async {
+    testWidgets('guest mode should display login button', (WidgetTester tester) async {
       // Arrange - Set to tourist mode
       when(() => mockUser.isAnonymous).thenReturn(true);
 
@@ -121,7 +121,7 @@ void main() {
       expect(find.text('Sign In / Register'), findsOneWidget);
     });
 
-    testWidgets('应该显示各个季节的主题选项', (WidgetTester tester) async {
+    testWidgets('should display theme options for each season', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -138,7 +138,7 @@ void main() {
       expect(find.text('Winter'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('应该能够点击季节主题进行切换', (WidgetTester tester) async {
+    testWidgets('should be able to click season theme to switch', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -160,11 +160,11 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - Verification can be interactive (success is achieved without any exception being thrown)
+      // Assert - Verify interaction works (success if no exception thrown)
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('登录用户应该显示退出登录按钮', (WidgetTester tester) async {
+    testWidgets('logged in user should display sign out button', (WidgetTester tester) async {
       // Arrange - Ensure that it is a logged-in user
       when(() => mockUser.isAnonymous).thenReturn(false);
 
@@ -187,7 +187,7 @@ void main() {
       expect(find.textContaining('Sign Out'), findsWidgets);
     });
 
-    testWidgets('应该显示过敏原选择列表', (WidgetTester tester) async {
+    testWidgets('should display allergen selection list', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -208,7 +208,7 @@ void main() {
       expect(find.text('Health Profile'), findsOneWidget);
     });
 
-    testWidgets('应该显示Fridge Statistics部分', (WidgetTester tester) async {
+    testWidgets('should display Fridge Statistics section', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: ProfileScreen(databaseService: mockDb, auth: mockAuth),
@@ -225,7 +225,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert - Some texts in the verification statistics section
+      // Assert - Verify statistics section text
       final statsFinder = find.textContaining('Fridge');
       expect(statsFinder, findsWidgets);
     });

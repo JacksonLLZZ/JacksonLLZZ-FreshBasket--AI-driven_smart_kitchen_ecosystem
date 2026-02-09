@@ -21,19 +21,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   List<Recipe> _recipes = [];
   bool _loading = false;
   String? _errorMessage;
-  bool _loadedFromCache = false; // 是否从缓存加载
-  double _cacheOpacity = 0.0; // 缓存提示的透明度
+  bool _loadedFromCache = false; //
+  double _cacheOpacity = 0.0; //
 
-  // 分页相关
-  int _currentPage = 0; // 当前页码（0-9代表第1-10个食谱）
+  // Page numbering related
+  int _currentPage =
+      0; // Current page number (0-9 represent the 1st to 10th recipes)
 
-  // 用于跟踪选中的食材
+  // Used for tracking the selected ingredients
   Map<String, bool> _selectedIngredients = {};
 
-  // API 源相关
+  // API Source Related
   String _currentApiSource = 'Spoonacular';
 
-  // Master-Detail View: 选中的食谱
+  // Master-Detail View: The selected recipe
   Recipe? _selectedRecipe;
 
   @override
@@ -43,18 +44,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   Future<void> _initializeScreen() async {
-    // 读取当前 API 源
+    // Read the current API source
     final prefs = await SharedPreferences.getInstance();
     final apiSource = prefs.getString('api_source') ?? 'Spoonacular';
 
-    // 根据 API 源初始化食材选择状态
+    // Initialize the ingredient selection status based on the API source.
     if (apiSource == 'Free') {
-      // Free Recipe API: 默认全不选
+      // Free Recipe API: Default Select none of the options
       _selectedIngredients = {
         for (var ingredient in widget.ingredients) ingredient.id: false,
       };
     } else {
-      // Spoonacular API: 默认全选
+      // Spoonacular API: Default: Select All
       _selectedIngredients = {
         for (var ingredient in widget.ingredients) ingredient.id: true,
       };
@@ -64,17 +65,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       _currentApiSource = apiSource;
     });
 
-    // 自动加载缓存（如果存在）
+    // Automatic loading of cache (if present)
     await _autoLoadCache();
   }
 
-  // 生成缓存key（基于 API 源和所有食材ID）
+  // Generate cache key (based on API source and all ingredient IDs)
   String _getCacheKey() {
     final allIds = widget.ingredients.map((e) => e.id).toList()..sort();
     return 'recipes_cache_${_currentApiSource}_${allIds.join('_')}';
   }
 
-  // 自动加载缓存（如果存在）
+  // Automatically load cache (if present)
   Future<void> _autoLoadCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -82,7 +83,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       final cachedData = prefs.getString(cacheKey);
 
       if (cachedData != null) {
-        // 发现缓存，自动加载
+        // Cache found, automatically loaded
         final Map<String, dynamic> cacheMap = json.decode(cachedData);
         final List<dynamic> recipesJson = cacheMap['recipes'];
         final Map<String, dynamic> selectedIngredientsJson =
@@ -97,9 +98,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             _recipes = recipes;
             _currentPage = 0;
             _loadedFromCache = true;
-            // 在平板模式下，自动选中第一个食谱
+            // In tablet mode, automatically select the first recipe
             _selectedRecipe = recipes.isNotEmpty ? recipes[0] : null;
-            // 恢复之前选中的食材状态
+            // Restore previously selected ingredient states
             if (selectedIngredientsJson.isNotEmpty) {
               _selectedIngredients = selectedIngredientsJson.map(
                 (key, value) => MapEntry(key, value as bool),
@@ -107,7 +108,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             }
           });
 
-          // 渐入动画
+          // Fade-in animation
           Future.delayed(const Duration(milliseconds: 100), () {
             if (mounted) {
               setState(() {
@@ -116,7 +117,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             }
           });
 
-          // 2秒后开始渐出
+          // Start fading out after 2 seconds
           Future.delayed(const Duration(milliseconds: 3000), () {
             if (mounted) {
               setState(() {
@@ -125,7 +126,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             }
           });
 
-          // 2.5秒后完全隐藏
+          // Completely hide after 2.5 seconds
           Future.delayed(const Duration(milliseconds: 3500), () {
             if (mounted) {
               setState(() {
@@ -135,21 +136,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           });
         }
       }
-      // 如果没有缓存，保持空状态，不做任何处理
+      // If no cache, keep empty state, do nothing
     } catch (e) {
       debugPrint('Error loading cache: $e');
-      // 如果加载缓存失败，静默处理，保持空状态
+      // If cache loading fails, handle silently, keep empty state
     }
   }
 
-  // 保存到缓存
+  // Save to cache
   Future<void> _saveToCache(List<Recipe> recipes) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = _getCacheKey();
       final jsonList = recipes.map((recipe) => recipe.toJson()).toList();
 
-      // 同时保存食谱和选中的食材状态
+      // Save both recipes and selected ingredient states
       final cacheData = {
         'recipes': jsonList,
         'selectedIngredients': _selectedIngredients,
@@ -161,14 +162,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
   }
 
-  // 获取选中的食材列表
+  // Get selected ingredients list
   List<Ingredient> get _getSelectedIngredients {
     return widget.ingredients
         .where((ing) => _selectedIngredients[ing.id] == true)
         .toList();
   }
 
-  // 搜索食谱
+  // Search recipes
   Future<void> _searchRecipes() async {
     final selectedIngredients = _getSelectedIngredients;
 
@@ -183,16 +184,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       _loading = true;
       _errorMessage = null;
       _recipes = [];
-      _currentPage = 0; // 重置页码
+      _currentPage = 0; // Reset page number
       _loadedFromCache = false;
     });
 
     try {
       List<Recipe> recipes;
 
-      // 根据 API 源调用不同的接口
+      // Call different APIs based on API source
       if (_currentApiSource == 'Free') {
-        // 使用 TheMealDB API - 只支持单个食材
+        // Use TheMealDB API - only supports single ingredient
         if (selectedIngredients.length != 1) {
           throw Exception('Free Recipe API only supports ONE ingredient');
         }
@@ -201,11 +202,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         debugPrint('Using Free Recipe API with ingredient: $ingredient');
         recipes = await _service.generateRecipesFromMealDb(ingredient);
       } else if (_currentApiSource == 'Gemini') {
-        // TODO: 调用 Gemini API
+        // TODO: Call Gemini API
         debugPrint('Using Gemini API - Placeholder');
         recipes = await _service.generateCombinedRecipes(selectedIngredients);
       } else {
-        // Spoonacular API（默认）
+        // Spoonacular API (default)
         debugPrint('Using Spoonacular API');
         recipes = await _service.generateCombinedRecipes(selectedIngredients);
       }
@@ -217,14 +218,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           _errorMessage = 'No recipes found for the selected ingredients.';
         });
       } else {
-        // 先保存到缓存
+        // First save to cache
         await _saveToCache(recipes);
-        // 然后更新 UI
+        // Then update UI
         setState(() {
           _recipes = recipes;
           _loading = false;
-          _loadedFromCache = false; // 明确标记这是新搜索的结果
-          // 在平板模式下，自动选中第一个食谱
+          _loadedFromCache = false; // Clearly mark this as new search result
+          // In tablet mode, automatically select the first recipe
           _selectedRecipe = recipes.isNotEmpty ? recipes[0] : null;
         });
       }
@@ -236,7 +237,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
   }
 
-  // 上一页
+  // Previous page
   void _previousPage() {
     if (_currentPage > 0) {
       setState(() {
@@ -245,7 +246,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
   }
 
-  // 下一页
+  // Next page
   void _nextPage() {
     if (_currentPage < _recipes.length - 1) {
       setState(() {
@@ -268,10 +269,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ),
       body: Stack(
         children: [
-          // 主要内容区域
+          // Main content area
           Column(
             children: [
-              // 食材选择区域
+              // Ingredient selection area
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -306,7 +307,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // API 源提示（如果是 Free Recipe API）
+                    // API source hint (if using Free Recipe API)
                     if (_currentApiSource == 'Free') ...[
                       Container(
                         padding: const EdgeInsets.all(8),
@@ -341,7 +342,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       spacing: 8,
                       runSpacing: 8,
                       children: () {
-                        // 按名称去重，相同名称只保留第一个
+                        // Deduplicate by name, keep only the first occurrence for same name
                         final uniqueIngredients = <String, Ingredient>{};
                         for (var ingredient in widget.ingredients) {
                           if (!uniqueIngredients.containsKey(ingredient.name)) {
@@ -355,7 +356,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             label: Text(ingredient.name),
                             selected: isSelected,
                             onSelected: (selected) {
-                              // Free Recipe API 限制：最多只能选择一个
+                              // Free Recipe API limit: only one ingredient can be selected
                               if (_currentApiSource == 'Free' && selected) {
                                 final selectedCount = _selectedIngredients
                                     .values
@@ -432,12 +433,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
 
-              // 结果展示区域
+              // Results display area
               Expanded(child: _buildResultsArea()),
             ],
           ),
 
-          // 顶部缓存提示（悬浮层）
+          // Top cache hint (floating layer)
           if (_loadedFromCache)
             Positioned(
               top: 0,
@@ -586,11 +587,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 平板模式：Master-Detail View
+    // Tablet mode: Master-Detail View
     if (isTablet) {
       return Row(
         children: [
-          // Master: 左侧食谱列表
+          // Master: Left recipe list
           SizedBox(
             width: 400,
             child: Column(
@@ -641,7 +642,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
           ),
           const VerticalDivider(width: 1, thickness: 1),
-          // Detail: 右侧食谱详情
+          // Detail: Right recipe details
           Expanded(
             child: _selectedRecipe != null
                 ? RecipeInfoScreen(recipe: _selectedRecipe!)
@@ -663,10 +664,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       );
     }
 
-    // 手机模式：显示单个食谱卡片 + 翻页控件
+    // Mobile mode: display single recipe card + page controls
     return Column(
       children: [
-        // 食谱卡片区域
+        // Recipe card area
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -674,7 +675,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           ),
         ),
 
-        // 翻页控件
+        // Page controls
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
@@ -690,7 +691,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 上一页按钮
+              // Previous page button
               IconButton(
                 key: const Key('previousPageButton'),
                 onPressed: _currentPage > 0 ? _previousPage : null,
@@ -701,7 +702,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     : Colors.grey,
               ),
 
-              // 页码指示器
+              // Page number indicator
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -721,7 +722,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
 
-              // 下一页按钮
+              // Next page button
               IconButton(
                 key: const Key('nextPageButton'),
                 onPressed: _currentPage < _recipes.length - 1
@@ -745,12 +746,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       key: Key('recipeCard_${recipe.id}'),
       onTap: () {
         if (isTablet) {
-          // 平板模式：更新选中的食谱
+          // Tablet mode: update selected recipe
           setState(() {
             _selectedRecipe = recipe;
           });
         } else {
-          // 手机模式：导航到详情页
+          // Mobile mode: navigate to detail page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -776,7 +777,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 缩略图
+              // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: CachedNetworkImage(
@@ -809,7 +810,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // 食谱信息
+              // Recipe information
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -874,7 +875,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       key: Key('recipeCard_${recipe.id}'),
       onTap: () {
         if (!isTablet) {
-          // 手机模式：导航到详情页
+          // Mobile mode: navigate to detail page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -890,7 +891,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 食谱图片
+            // Recipe image
             ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
@@ -917,13 +918,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
             ),
 
-            // 食谱信息
+            // Recipe information
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 标题
+                  // Title
                   Text(
                     recipe.title,
                     style: const TextStyle(
@@ -933,7 +934,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // 使用的食材
+                  // Used ingredients
                   if (recipe.usedIngredients.isNotEmpty) ...[
                     Row(
                       children: [
@@ -968,7 +969,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ),
                   ],
 
-                  // 缺少的食材
+                  // Missing ingredients
                   if (recipe.missedIngredients.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Row(

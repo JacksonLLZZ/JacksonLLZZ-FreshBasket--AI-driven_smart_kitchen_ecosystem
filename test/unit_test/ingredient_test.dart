@@ -6,7 +6,7 @@ import 'package:kitchen/features/inventory/data/ingredient.dart';
 
 void main() {
   group('Ingredient Model -', () {
-    test('应该正确创建 Ingredient 实例', () {
+    test('Ingredient instances should be created correctly', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: '1',
@@ -24,7 +24,7 @@ void main() {
       expect(ingredient.expirationDate, DateTime(2026, 12, 31));
     });
 
-    test('应该通过工厂方法创建 Ingredient', () {
+    test('Ingredient should be created via a factory method', () {
       // Arrange & Act
       final ingredient = Ingredient.create(
         name: 'Milk',
@@ -41,7 +41,7 @@ void main() {
       expect(ingredient.id, isNotEmpty);
     });
 
-    test('工厂方法应该使用默认过期日期', () {
+    test('Factory methods should use a default expiration date', () {
       // Arrange & Act
       final ingredient = Ingredient.create(name: 'Bread', qty: 1, unit: 'loaf');
 
@@ -49,12 +49,12 @@ void main() {
       final now = DateTime.now();
       final expectedDate = now.add(const Duration(days: 7));
       expect(ingredient.expirationDate.isAfter(now), isTrue);
-      // 允许一些时间差异（1天内）
+      // Allow some time differences (within 1 day)
       final difference = ingredient.expirationDate.difference(expectedDate);
       expect(difference.inHours.abs(), lessThan(24));
     });
 
-    test('应该正确判断是否过期', () {
+    test('Expiration should be correctly determined', () {
       // Arrange
       final expiredIngredient = Ingredient(
         id: '3',
@@ -77,7 +77,7 @@ void main() {
       expect(freshIngredient.isExpired, isFalse);
     });
 
-    test('应该正确判断今天过期的食材', () {
+    test('Today expired ingredients should be judged correctly', () {
       // Arrange
       final todayIngredient = Ingredient(
         id: '5',
@@ -91,7 +91,7 @@ void main() {
       expect(todayIngredient.isExpired, isTrue);
     });
 
-    test('quantity 应该支持小数', () {
+    test('quantity should support decimal numbers', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: '6',

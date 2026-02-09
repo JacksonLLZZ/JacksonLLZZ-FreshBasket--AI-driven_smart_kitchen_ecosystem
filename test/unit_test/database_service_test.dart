@@ -12,48 +12,54 @@ void main() {
     setUp(() {});
 
     group('Ingredient Operations', () {
-      test('saveIngredient 应该保存食材到 Firestore', () async {
-        // Arrange
-        final ingredient = Ingredient(
-          id: 'test_ingredient_1',
-          name: 'Apple',
-          quantity: 5,
-          unit: 'pieces',
-          expirationDate: DateTime(2026, 12, 31),
-        );
+      test(
+        '"saveIngredient" should save the ingredients to Firestore.',
+        () async {
+          // Arrange
+          final ingredient = Ingredient(
+            id: 'test_ingredient_1',
+            name: 'Apple',
+            quantity: 5,
+            unit: 'pieces',
+            expirationDate: DateTime(2026, 12, 31),
+          );
 
-        // Note: Since DatabaseService uses FirebaseAuth.instance，
-        // In real tests, dependency injection or other methods need to be used to mock.
-        // Here we test the logical structure and data conversion.
+          // Note: Since DatabaseService uses FirebaseAuth.instance，
+          // In real tests, dependency injection or other methods need to be used to mock.
+          // Here we test the logical structure and data conversion.
 
-        // Assert - Verify the completeness of the ingredient data
-        expect(ingredient.id, isNotEmpty);
-        expect(ingredient.name, 'Apple');
-        expect(ingredient.quantity, 5);
-      });
+          // Assert - Verify the completeness of the ingredient data
+          expect(ingredient.id, isNotEmpty);
+          expect(ingredient.name, 'Apple');
+          expect(ingredient.quantity, 5);
+        },
+      );
 
-      test('Ingredient 应该正确转换为 Firestore 格式', () {
-        // Arrange
-        final ingredient = Ingredient(
-          id: 'test_id',
-          name: 'Tomato',
-          quantity: 3.5,
-          unit: 'kg',
-          expirationDate: DateTime(2026, 2, 15),
-        );
+      test(
+        'The term "Ingredient" should be correctly converted to the Firestore format.',
+        () {
+          // Arrange
+          final ingredient = Ingredient(
+            id: 'test_id',
+            name: 'Tomato',
+            quantity: 3.5,
+            unit: 'kg',
+            expirationDate: DateTime(2026, 2, 15),
+          );
 
-        // Act - Verify data attributes
-        expect(ingredient.name, 'Tomato');
-        expect(ingredient.quantity, 3.5);
-        expect(ingredient.unit, 'kg');
-        expect(ingredient.expirationDate.year, 2026);
-        expect(ingredient.expirationDate.month, 2);
-        expect(ingredient.expirationDate.day, 15);
-      });
+          // Act - Verify data attributes
+          expect(ingredient.name, 'Tomato');
+          expect(ingredient.quantity, 3.5);
+          expect(ingredient.unit, 'kg');
+          expect(ingredient.expirationDate.year, 2026);
+          expect(ingredient.expirationDate.month, 2);
+          expect(ingredient.expirationDate.day, 15);
+        },
+      );
     });
 
     group('Shopping Cart Operations', () {
-      test('ShoppingItem 应该正确创建', () {
+      test('The ShoppingItem should be correctly created', () {
         // Arrange & Act
         final item = ShoppingItem.create(name: 'Milk', amount: '1 liter');
 
@@ -63,38 +69,41 @@ void main() {
         expect(item.addedAt, isNotNull);
       });
 
-      test('ShoppingItem 应该正确转换为 Firestore 格式', () {
-        // Arrange
-        final item = ShoppingItem(
-          id: 'item_1',
-          name: 'Bread',
-          amount: '2 loaves',
-          addedAt: DateTime(2026, 2, 7),
-        );
+      test(
+        'The "ShoppingItem" should be correctly converted to the Firestore format.',
+        () {
+          // Arrange
+          final item = ShoppingItem(
+            id: 'item_1',
+            name: 'Bread',
+            amount: '2 loaves',
+            addedAt: DateTime(2026, 2, 7),
+          );
 
-        // Act
-        final firestoreData = item.toFirestore();
+          // Act
+          final firestoreData = item.toFirestore();
 
-        // Assert
-        expect(firestoreData['name'], 'Bread');
-        expect(firestoreData['amount'], '2 loaves');
-        expect(firestoreData['addedAt'], isNotNull);
-      });
+          // Assert
+          expect(firestoreData['name'], 'Bread');
+          expect(firestoreData['amount'], '2 loaves');
+          expect(firestoreData['addedAt'], isNotNull);
+        },
+      );
     });
 
     group('User Profile Operations', () {
-      test('更新过敏原列表应该包含正确的数据', () {
+      test('Updating the allergen list should include accurate data.', () {
         // Arrange
         final allergens = ['Gluten-Free', 'Dairy-Free', 'Nut-Free'];
 
-        // Assert - 验证列表结构
+        // Assert - Verify the list structure
         expect(allergens.length, 3);
         expect(allergens, contains('Gluten-Free'));
         expect(allergens, contains('Dairy-Free'));
         expect(allergens, contains('Nut-Free'));
       });
 
-      test('主题名称应该是有效的字符串', () {
+      test('The title of the topic should be a valid string.', () {
         // Arrange
         const validThemes = ['Default', 'Spring', 'Summer', 'Autumn', 'Winter'];
 
@@ -107,7 +116,7 @@ void main() {
     });
 
     group('Stream Operations', () {
-      test('空列表流应该返回空列表', () async {
+      test('The empty list stream should return an empty list.', () async {
         // Arrange
         final emptyStream = Stream<List<Ingredient>>.value([]);
 
@@ -118,7 +127,7 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('食材流应该发出正确的数据', () async {
+      test('The food flow should send out the correct data.', () async {
         // Arrange
         final ingredients = [
           Ingredient(
@@ -150,7 +159,7 @@ void main() {
     });
 
     group('Data Validation', () {
-      test('食材名称不应该为空', () {
+      test('The name of the ingredient should not be left blank.', () {
         // Arrange
         final ingredient = Ingredient.create(
           name: 'Valid Name',
@@ -162,7 +171,7 @@ void main() {
         expect(ingredient.name, isNotEmpty);
       });
 
-      test('食材数量应该是正数', () {
+      test('The quantity of the ingredients should be a positive number.', () {
         // Arrange
         final ingredient = Ingredient.create(
           name: 'Apple',
@@ -174,7 +183,7 @@ void main() {
         expect(ingredient.quantity, greaterThan(0));
       });
 
-      test('过期日期应该是有效的日期', () {
+      test('The expiration date should be a valid date.', () {
         // Arrange
         final ingredient = Ingredient.create(
           name: 'Milk',
@@ -189,17 +198,20 @@ void main() {
         expect(ingredient.expirationDate.day, 15);
       });
 
-      test('购物车项目的数量描述应该不为空', () {
-        // Arrange
-        final item = ShoppingItem.create(name: 'Eggs', amount: '12 pieces');
+      test(
+        'The quantity description of the shopping cart items should not be empty.',
+        () {
+          // Arrange
+          final item = ShoppingItem.create(name: 'Eggs', amount: '12 pieces');
 
-        // Assert
-        expect(item.amount, isNotEmpty);
-      });
+          // Assert
+          expect(item.amount, isNotEmpty);
+        },
+      );
     });
 
     group('Edge Cases', () {
-      test('应该处理小数数量', () {
+      test('The issue of handling decimal quantities should be addressed.', () {
         // Arrange
         final ingredient = Ingredient(
           id: 'test',
@@ -214,7 +226,7 @@ void main() {
         expect(ingredient.quantity, isA<double>());
       });
 
-      test('应该处理很大的数量', () {
+      test('A large quantity should be dealt with.', () {
         // Arrange
         final ingredient = Ingredient(
           id: 'test',
@@ -228,19 +240,22 @@ void main() {
         expect(ingredient.quantity, 10000);
       });
 
-      test('应该处理特殊字符的食材名称', () {
-        // Arrange
-        final ingredient = Ingredient.create(
-          name: 'Jalapeño Pepper',
-          qty: 3,
-          unit: 'pieces',
-        );
+      test(
+        'The names of ingredients that contain special characters should be handled.',
+        () {
+          // Arrange
+          final ingredient = Ingredient.create(
+            name: 'Jalapeño Pepper',
+            qty: 3,
+            unit: 'pieces',
+          );
 
-        // Assert
-        expect(ingredient.name, 'Jalapeño Pepper');
-      });
+          // Assert
+          expect(ingredient.name, 'Jalapeño Pepper');
+        },
+      );
 
-      test('应该处理长的食材名称', () {
+      test('Long food item names should be dealt with.', () {
         // Arrange
         const longName = 'Extra Virgin Cold Pressed Organic Olive Oil';
         final ingredient = Ingredient.create(

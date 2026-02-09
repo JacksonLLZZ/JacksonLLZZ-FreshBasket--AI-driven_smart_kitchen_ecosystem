@@ -26,55 +26,60 @@ void main() {
   });
 
   group('NutritionService - calculateCalories', () {
-    test('成功获取卡路里信息时应该返回正确的值', () async {
-      // Arrange
-      const testName = 'apple';
-      const testQty = 1.0;
-      const testUnit = 'medium';
-      const expectedCalories = 95;
+    test(
+      'The correct value should be returned when the calorie information is retrieved successfully',
+      () async {
+        // Arrange
+        const testName = 'apple';
+        const testQty = 1.0;
+        const testUnit = 'medium';
+        const expectedCalories = 95;
 
-      final mockResponse = Response(
-        data: {
-          'ingredients': [
-            {
-              'parsed': [
-                {
-                  'food': 'apple',
-                  'nutrients': {
-                    'ENERC_KCAL': {'quantity': expectedCalories.toDouble()},
+        final mockResponse = Response(
+          data: {
+            'ingredients': [
+              {
+                'parsed': [
+                  {
+                    'food': 'apple',
+                    'nutrients': {
+                      'ENERC_KCAL': {'quantity': expectedCalories.toDouble()},
+                    },
                   },
-                },
-              ],
-            },
-          ],
-        },
-        statusCode: 200,
-        requestOptions: RequestOptions(path: ''),
-      );
+                ],
+              },
+            ],
+          },
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ''),
+        );
 
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockDio.get(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
-      // Act
-      final result = await nutritionService.calculateCalories(
-        testName,
-        testQty,
-        testUnit,
-      );
+        // Act
+        final result = await nutritionService.calculateCalories(
+          testName,
+          testQty,
+          testUnit,
+        );
 
-      // Assert
-      expect(result, expectedCalories);
-      verify(
-        () => mockDio.get(
-          'https://api.edamam.com/api/nutrition-data',
-          queryParameters: any(named: 'queryParameters'),
-        ),
-      ).called(1);
-    });
+        // Assert
+        expect(result, expectedCalories);
+        verify(
+          () => mockDio.get(
+            'https://api.edamam.com/api/nutrition-data',
+            queryParameters: any(named: 'queryParameters'),
+          ),
+        ).called(1);
+      },
+    );
 
-    test('API 返回空数据时应该返回 null', () async {
+    test('The API should return null if it returns empty data', () async {
       // Arrange
       const testName = 'unknown';
       const testQty = 1.0;
@@ -102,7 +107,7 @@ void main() {
       expect(result, isNull);
     });
 
-    test('API 调用失败时应该返回 null', () async {
+    test('An API call should return null if it fails', () async {
       // Arrange
       const testName = 'apple';
       const testQty = 1.0;
@@ -129,7 +134,7 @@ void main() {
       expect(result, isNull);
     });
 
-    test('API 返回 404 时应该返回 null', () async {
+    test('If the API returns 404, it should return null', () async {
       // Arrange
       const testName = 'nonexistent';
       const testQty = 1.0;
@@ -158,16 +163,19 @@ void main() {
     });
   });
 
-  group('NutritionService - 百度翻译', () {
-    test('翻译成功时应该返回英文文本', () async {
-      // This test demonstrates how to test the translation function.
-      // Since the translation is a private method, we test it indirectly through public methods.
-      expect(nutritionService, isNotNull);
-    });
+  group('NutritionService - Baidu Translation', () {
+    test(
+      'The English text should be returned when the translation is successful',
+      () async {
+        // This test demonstrates how to test the translation function.
+        // Since the translation is a private method, we test it indirectly through public methods.
+        expect(nutritionService, isNotNull);
+      },
+    );
   });
 
-  group('NutritionService - 依赖注入', () {
-    test('应该接受自定义的 Dio 实例', () {
+  group('NutritionService - Dependency Injection', () {
+    test('Custom Dio instances should be accepted', () {
       // Arrange
       final customDio = MockDio();
 
@@ -178,7 +186,7 @@ void main() {
       expect(service, isNotNull);
     });
 
-    test('没有提供 Dio 时应该使用默认实例', () {
+    test('The default instance should be used when Dio is not provided', () {
       // Act
       final service = NutritionService();
 

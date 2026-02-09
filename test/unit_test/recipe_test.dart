@@ -6,7 +6,7 @@ import 'package:kitchen/features/recipes/data/recipe.dart';
 
 void main() {
   group('RecipeIngredient Model -', () {
-    test('应该正确创建 RecipeIngredient 实例', () {
+    test('The RecipeIngredient instance should be created correctly', () {
       // Arrange & Act
       final ingredient = RecipeIngredient(
         name: 'tomato',
@@ -20,7 +20,7 @@ void main() {
       expect(ingredient.image, 'tomato.jpg');
     });
 
-    test('应该从 JSON 正确解析', () {
+    test('Should be parsed correctly from JSON', () {
       // Arrange
       final json = {
         'name': 'onion',
@@ -37,7 +37,7 @@ void main() {
       expect(ingredient.image, 'onion.png');
     });
 
-    test('应该处理缺失的 image 字段', () {
+    test('The missing image field should be handled', () {
       // Arrange
       final json = {'name': 'garlic', 'original': '3 cloves garlic'};
 
@@ -50,7 +50,7 @@ void main() {
       expect(ingredient.image, isNull);
     });
 
-    test('应该正确转换为 JSON', () {
+    test('Should be properly converted to JSON', () {
       // Arrange
       final ingredient = RecipeIngredient(
         name: 'salt',
@@ -69,7 +69,7 @@ void main() {
   });
 
   group('Recipe Model -', () {
-    test('应该正确创建 Recipe 实例', () {
+    test('The Recipe instance should be created correctly', () {
       // Arrange & Act
       final recipe = Recipe(
         id: 12345,
@@ -98,7 +98,7 @@ void main() {
       expect(recipe.category, isNull);
     });
 
-    test('应该从 JSON 正确解析（Spoonacular 格式）', () {
+    test('Should be properly parsed from JSON (Spoonacular format)', () {
       // Arrange
       final json = {
         'id': 678,
@@ -130,7 +130,7 @@ void main() {
       expect(recipe.missedIngredients[0].name, 'coconut milk');
     });
 
-    test('应该从 JSON 正确解析（TheMealDB 格式）', () {
+    test('Should be parsed correctly from JSON (TheMealDB format)', () {
       // Arrange
       final json = {
         'id': 999,
@@ -163,7 +163,7 @@ void main() {
       expect(recipe.youtubeUrl, 'https://youtube.com/watch?v=abc123');
     });
 
-    test('应该处理缺失的字段', () {
+    test('Missing fields should be handled', () {
       // Arrange
       final json = {'id': 111, 'title': 'Simple Recipe'};
 
@@ -181,7 +181,7 @@ void main() {
       expect(recipe.instructions, isNull);
     });
 
-    test('应该正确转换为 JSON', () {
+    test('Should be properly converted to JSON', () {
       // Arrange
       final recipe = Recipe(
         id: 555,
@@ -216,7 +216,7 @@ void main() {
       expect(json['youtubeUrl'], isNull);
     });
 
-    test('toJson 和 fromJson 应该是可逆的', () {
+    test('toJson and fromJson should be reversible', () {
       // Arrange
       final original = Recipe(
         id: 777,

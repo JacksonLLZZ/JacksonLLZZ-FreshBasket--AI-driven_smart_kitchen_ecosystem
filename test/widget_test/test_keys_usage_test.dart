@@ -10,8 +10,8 @@ import 'package:kitchen/core/constants/test_keys.dart';
 import '../test_helpers.dart';
 
 void main() {
-  group('使用 TestKeys 的测试示例 -', () {
-    testWidgets('应该能通过 key 找到并操作按钮', (WidgetTester tester) async {
+  group('TestKeys usage test examples -', () {
+    testWidgets('should be able to find and operate button via key', (WidgetTester tester) async {
       // Arrange
       bool buttonPressed = false;
       final widget = createTestApp(
@@ -37,7 +37,7 @@ void main() {
       expect(buttonPressed, isTrue);
     });
 
-    testWidgets('应该能通过 key 找到并输入文本到 TextField', (WidgetTester tester) async {
+    testWidgets('should be able to find and enter text into TextField via key', (WidgetTester tester) async {
       // Arrange
       final controller = TextEditingController();
       final widget = createTestApp(
@@ -65,7 +65,7 @@ void main() {
       expect(find.text('Apple'), findsOneWidget);
     });
 
-    testWidgets('应该能通过索引 key 找到列表项', (WidgetTester tester) async {
+    testWidgets('should be able to find list item via index key', (WidgetTester tester) async {
       // Arrange
       final items = ['Apple', 'Banana', 'Orange'];
       final widget = createTestApp(
@@ -92,7 +92,7 @@ void main() {
       }
     });
 
-    testWidgets('应该能通过 ID key 找到特定项', (WidgetTester tester) async {
+    testWidgets('should be able to find specific item via ID key', (WidgetTester tester) async {
       // Arrange
       const itemId = 'item_123';
       final widget = createTestApp(
@@ -114,7 +114,7 @@ void main() {
       expect(find.byKey(key), findsOneWidget);
     });
 
-    testWidgets('应该能组合使用多个 keys 进行复杂交互', (WidgetTester tester) async {
+    testWidgets('should be able to combine multiple keys for complex interaction', (WidgetTester tester) async {
       // Arrange
       final nameController = TextEditingController();
       final qtyController = TextEditingController();

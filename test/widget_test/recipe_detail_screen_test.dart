@@ -47,7 +47,7 @@ void main() {
   });
 
   group('RecipeDetailScreen Widget Tests -', () {
-    testWidgets('应该显示页面基本结构', (WidgetTester tester) async {
+    testWidgets('should display basic page structure', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -64,7 +64,7 @@ void main() {
       );
     });
 
-    testWidgets('应该显示食材列表', (WidgetTester tester) async {
+    testWidgets('should display ingredient list', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -79,7 +79,7 @@ void main() {
       expect(find.textContaining('Pasta'), findsWidgets);
     });
 
-    testWidgets('应该显示搜索按钮', (WidgetTester tester) async {
+    testWidgets('should display search button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -93,7 +93,7 @@ void main() {
       expect(find.textContaining('Find Recipes'), findsWidgets);
     });
 
-    testWidgets('应该能够选择/取消选择食材（Spoonacular模式）', (WidgetTester tester) async {
+    testWidgets('should be able to select/deselect ingredients (Spoonacular mode)', (WidgetTester tester) async {
       // Arrange - In the Spoonacular mode, all options are selected by default.
       await mockPrefs.setString('api_source', 'Spoonacular');
 
@@ -114,11 +114,11 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - Verification shows no abnormalities.
+      // Assert - Verify no exceptions occur
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Free API模式应该显示不同的UI', (WidgetTester tester) async {
+    testWidgets('Free API mode should display different UI', (WidgetTester tester) async {
       // Arrange - Set to Free API mode
       await mockPrefs.setString('api_source', 'Free');
 
@@ -130,14 +130,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - The verification page can be rendered normally.
+      // Assert - Verify page renders normally
       expect(
         find.byKey(const Key(TestKeys.recipeDetailScreenScaffold)),
         findsOneWidget,
       );
     });
 
-    testWidgets('应该显示缓存提示（如果有缓存）', (WidgetTester tester) async {
+    testWidgets('should display cache hint (if cached)', (WidgetTester tester) async {
       // Arrange - Store some cached data first
       final cacheKey =
           'recipes_cache_Spoonacular_${testIngredients.map((e) => e.id).toList()
@@ -161,7 +161,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够切换页面（如果有多个食谱）', (WidgetTester tester) async {
+    testWidgets('should be able to switch pages (if multiple recipes)', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -171,12 +171,12 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - Verify that the page-turning button may exist (depending on whether there is data)
+      // Assert - Verify page navigation button may exist (if data available)
       // Here, we only verify that the UI will not crash.
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('空食材列表应该正常处理', (WidgetTester tester) async {
+    testWidgets('empty ingredient list should be handled properly', (WidgetTester tester) async {
       // Arrange - Empty ingredient list
       final widget = createTestApp(
         child: const RecipeDetailScreen(ingredients: []),
@@ -186,14 +186,14 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - The verification will not crash.
+      // Assert - Verify no crash occurs
       expect(
         find.byKey(const Key(TestKeys.recipeDetailScreenScaffold)),
         findsOneWidget,
       );
     });
 
-    testWidgets('应该显示API源指示器', (WidgetTester tester) async {
+    testWidgets('should display API source indicator', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -208,7 +208,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够刷新食谱列表', (WidgetTester tester) async {
+    testWidgets('should be able to refresh recipe list', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -230,7 +230,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该显示选中食材的数量', (WidgetTester tester) async {
+    testWidgets('should display count of selected ingredients', (WidgetTester tester) async {
       // Arrange
       await mockPrefs.setString('api_source', 'Spoonacular');
 
@@ -246,7 +246,7 @@ void main() {
       expect(find.textContaining('2/2'), findsWidgets);
     });
 
-    testWidgets('应该能够点击FilterChip切换选择', (WidgetTester tester) async {
+    testWidgets('should be able to click FilterChip to toggle selection', (WidgetTester tester) async {
       // Arrange
       await mockPrefs.setString('api_source', 'Spoonacular');
 
@@ -258,7 +258,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // search FilterChip
+      // find FilterChip
       final chipFinder = find.byType(FilterChip);
 
       if (chipFinder.evaluate().isNotEmpty) {
@@ -278,7 +278,7 @@ void main() {
       }
     });
 
-    testWidgets('Free API模式应该限制只能选择一个食材', (WidgetTester tester) async {
+    testWidgets('Free API mode should restrict to selecting only one ingredient', (WidgetTester tester) async {
       // Arrange - Set to Free API mode
       await mockPrefs.setString('api_source', 'Free');
 
@@ -290,7 +290,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // In the free mode, all options are defaulted to be unselected.
+      // In free mode, all options are unselected by default.
       expect(find.textContaining('0/2'), findsWidgets);
 
       // Click on the first ingredient
@@ -299,17 +299,17 @@ void main() {
         await tester.tap(chipFinder.first);
         await tester.pumpAndSettle();
 
-        // Verification has selected 1 item.
+        // Verify 1 item selected
         expect(find.textContaining('1/2'), findsWidgets);
 
         // Try to select the second ingredient (which should be restricted)
         await tester.tap(chipFinder.at(1));
         await tester.pumpAndSettle();
 
-        // The verification is still only for one selection.
+        // Verify still only one selection
         expect(find.textContaining('1/2'), findsWidgets);
 
-        // The verification displayed a warning snackbar.
+        // Verify warning snackbar displayed
         expect(
           find.text('Free Recipe API only allows ONE main ingredient'),
           findsOneWidget,
@@ -317,7 +317,7 @@ void main() {
       }
     });
 
-    testWidgets('Free API模式应该显示提示信息', (WidgetTester tester) async {
+    testWidgets('Free API mode should display hint message', (WidgetTester tester) async {
       // Arrange - Set to Free API mode
       await mockPrefs.setString('api_source', 'Free');
 
@@ -336,7 +336,7 @@ void main() {
       );
     });
 
-    testWidgets('应该显示Find Recipes按钮', (WidgetTester tester) async {
+    testWidgets('should display Find Recipes button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -357,7 +357,7 @@ void main() {
       expect(find.byIcon(Icons.search), findsWidgets);
     });
 
-    testWidgets('未选择任何食材时点击搜索应显示提示', (WidgetTester tester) async {
+    testWidgets('clicking search without selecting ingredients should show hint', (WidgetTester tester) async {
       // Arrange - In the free mode, no ingredients are selected by default.
       await mockPrefs.setString('api_source', 'Free');
 
@@ -374,14 +374,14 @@ void main() {
       await tester.tap(findButton);
       await tester.pumpAndSettle();
 
-      // Assert - Verification display prompt
+      // Assert - Verify hint displayed
       expect(
         find.text('Please select at least one ingredient'),
         findsOneWidget,
       );
     });
 
-    testWidgets('应该显示翻页按钮', (WidgetTester tester) async {
+    testWidgets('should display page navigation buttons', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -391,12 +391,12 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - The page-turning button may only be displayed when there are results.
+      // Assert - Page navigation buttons may only appear when results exist
       // This merely verifies that the page does not crash.
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该显示正确的过滤图标', (WidgetTester tester) async {
+    testWidgets('should display correct filter icon', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -410,7 +410,7 @@ void main() {
       expect(find.byIcon(Icons.kitchen), findsWidgets);
     });
 
-    testWidgets('应该正确去重相同名称的食材', (WidgetTester tester) async {
+    testWidgets('should properly deduplicate ingredients with same name', (WidgetTester tester) async {
       // Arrange - Create a list of ingredients with duplicate names
       final duplicateIngredients = [
         Ingredient.create(
@@ -446,7 +446,7 @@ void main() {
       expect(chips.evaluate().length, equals(2));
     });
 
-    testWidgets('应该显示初始的空状态提示', (WidgetTester tester) async {
+    testWidgets('should display initial empty state hint', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(
         child: RecipeDetailScreen(ingredients: testIngredients),
@@ -456,7 +456,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - Verification of empty state prompt text
+      // Assert - Verify empty state text
       expect(find.text('Ready to discover recipes?'), findsOneWidget);
       expect(
         find.text('Select ingredients and tap "Find Recipes"'),

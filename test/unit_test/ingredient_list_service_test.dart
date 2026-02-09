@@ -22,7 +22,7 @@ void main() {
         'Potato',
       ];
 
-      test('空查询应该返回空列表', () {
+      test('The empty query should return an empty list.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
@@ -33,21 +33,24 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('应该返回包含查询字符串的所有食材', () {
-        // Act
-        final result = IngredientListService.filterIngredients(
-          testIngredients,
-          'apple',
-        );
+      test(
+        'All the ingredients should be returned along with the query string.',
+        () {
+          // Act
+          final result = IngredientListService.filterIngredients(
+            testIngredients,
+            'apple',
+          );
 
-        // Assert
-        expect(result.length, 3); // Apple, Applesauce, Pineapple
-        expect(result, contains('Apple'));
-        expect(result, contains('Applesauce'));
-        expect(result, contains('Pineapple'));
-      });
+          // Assert
+          expect(result.length, 3); // Apple, Applesauce, Pineapple
+          expect(result, contains('Apple'));
+          expect(result, contains('Applesauce'));
+          expect(result, contains('Pineapple'));
+        },
+      );
 
-      test('应该忽略大小写', () {
+      test('The capitalization should be ignored.', () {
         // Act
         final lowerResult = IngredientListService.filterIngredients(
           testIngredients,
@@ -67,7 +70,7 @@ void main() {
         expect(lowerResult, mixedResult);
       });
 
-      test('完全匹配应该排在第一位', () {
+      test('A perfect match should be ranked first.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
@@ -79,39 +82,42 @@ void main() {
         expect(result.first.toLowerCase(), 'apple');
       });
 
-      test('以查询词开头的应该优先于其他匹配', () {
-        // Act
-        final result = IngredientListService.filterIngredients(
-          testIngredients,
-          'ap',
-        );
+      test(
+        'Queries that start with the search term should take precedence over other matches.',
+        () {
+          // Act
+          final result = IngredientListService.filterIngredients(
+            testIngredients,
+            'ap',
+          );
 
-        // Assert
-        // Apple, Applesauce, Apricot 应该排在 Grape, Grapefruit, Pineapple 前面
-        final appleIndex = result.indexOf('Apple');
-        final apricotIndex = result.indexOf('Apricot');
-        final grapeIndex = result.indexOf('Grape');
-        final pineappleIndex = result.indexOf('Pineapple');
+          // Assert
+          // Apple, Applesauce, Apricot should be placed before Grape, Grapefruit, Pineapple.
+          final appleIndex = result.indexOf('Apple');
+          final apricotIndex = result.indexOf('Apricot');
+          final grapeIndex = result.indexOf('Grape');
+          final pineappleIndex = result.indexOf('Pineapple');
 
-        expect(appleIndex, lessThan(grapeIndex));
-        expect(appleIndex, lessThan(pineappleIndex));
-        expect(apricotIndex, lessThan(grapeIndex));
-      });
+          expect(appleIndex, lessThan(grapeIndex));
+          expect(appleIndex, lessThan(pineappleIndex));
+          expect(apricotIndex, lessThan(grapeIndex));
+        },
+      );
 
-      test('同级别内应该按字母排序', () {
+      test('Within the same category, it should be sorted alphabetically.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
           'berry',
         );
 
-        // Assert - Blueberry 和 Strawberry 都包含 berry
+        // Assert - Both Blueberry and Strawberry contain the word "berry"
         expect(result.length, 2);
-        expect(result[0], 'Blueberry'); // B 在 S 前面
+        expect(result[0], 'Blueberry'); // B is in front of S
         expect(result[1], 'Strawberry');
       });
 
-      test('应该处理部分匹配', () {
+      test('The partial matching should be handled.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
@@ -123,7 +129,7 @@ void main() {
         expect(result, contains('Potato'));
       });
 
-      test('没有匹配时应该返回空列表', () {
+      test('When there is no match, an empty list should be returned.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
@@ -134,7 +140,7 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('应该处理单字符查询', () {
+      test('Single-character queries should be processed', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,
@@ -148,7 +154,7 @@ void main() {
         expect(result, contains('Grape'));
       });
 
-      test('应该处理空的食材列表', () {
+      test('An empty list of ingredients should be handled', () {
         // Act
         final result = IngredientListService.filterIngredients([], 'apple');
 
@@ -156,34 +162,37 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('排序优先级：完全匹配 > 开头匹配 > 包含匹配', () {
-        // Arrange
-        final ingredients = [
-          'Pineapple', // contain apple
-          'Apple', // Perfect match apple
-          'Applesauce', // head matching apple
-          'Green Apple', // contain apple
-        ];
+      test(
+        'Sort precedence: full matches > beginning matches > including matches',
+        () {
+          // Arrange
+          final ingredients = [
+            'Pineapple', // contain apple
+            'Apple', // Perfect match apple
+            'Applesauce', // head matching apple
+            'Green Apple', // contain apple
+          ];
 
-        // Act
-        final result = IngredientListService.filterIngredients(
-          ingredients,
-          'apple',
-        );
+          // Act
+          final result = IngredientListService.filterIngredients(
+            ingredients,
+            'apple',
+          );
 
-        // Assert
-        expect(result.length, 4);
-        expect(result[0].toLowerCase(), 'apple'); // Perfect match first
-        expect(
-          result[1],
-          'Applesauce',
-        ); // The beginning matches the second one.
-        // Green Apple and Pineapple are both included in the match and are sorted alphabetically.
-        expect(result[2], 'Green Apple');
-        expect(result[3], 'Pineapple');
-      });
+          // Assert
+          expect(result.length, 4);
+          expect(result[0].toLowerCase(), 'apple'); // Perfect match first
+          expect(
+            result[1],
+            'Applesauce',
+          ); // The beginning matches the second one.
+          // Green Apple and Pineapple are both included in the match and are sorted alphabetically.
+          expect(result[2], 'Green Apple');
+          expect(result[3], 'Pineapple');
+        },
+      );
 
-      test('应该处理带空格的查询', () {
+      test('Queries with Spaces should be processed', () {
         // Arrange
         final ingredients = ['Red Apple', 'Green Apple', 'Apple'];
 
@@ -198,7 +207,7 @@ void main() {
         expect(result[0], 'Red Apple');
       });
 
-      test('应该保持原始大小写', () {
+      test('The original case should be kept.', () {
         // Act
         final result = IngredientListService.filterIngredients(
           testIngredients,

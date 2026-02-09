@@ -8,7 +8,7 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 
 void main() {
   group('ShoppingItem Model -', () {
-    test('应该正确创建 ShoppingItem 实例', () {
+    test('The ShoppingItem instance should be created correctly', () {
       // Arrange & Act
       final item = ShoppingItem(
         id: '1',
@@ -24,7 +24,7 @@ void main() {
       expect(item.addedAt, DateTime(2026, 2, 7));
     });
 
-    test('应该通过 create 工厂方法创建实例', () {
+    test('The instance should be created using the create factory method', () {
       // Arrange
       final beforeCreate = DateTime.now();
 
@@ -47,7 +47,7 @@ void main() {
       );
     });
 
-    test('应该正确转换为 Firestore 格式', () {
+    test('Should properly convert to Firestore format', () {
       // Arrange
       final item = ShoppingItem(
         id: '1',
@@ -69,30 +69,33 @@ void main() {
       );
     });
 
-    test('应该从 Firestore DocumentSnapshot 创建实例', () async {
-      // Arrange
-      final fakeFirestore = FakeFirebaseFirestore();
-      final testDate = DateTime(2026, 2, 7, 15, 45);
+    test(
+      'The instance should be created from the Firestore DocumentSnapshot',
+      () async {
+        // Arrange
+        final fakeFirestore = FakeFirebaseFirestore();
+        final testDate = DateTime(2026, 2, 7, 15, 45);
 
-      await fakeFirestore.collection('test').doc('item1').set({
-        'name': 'Cheese',
-        'amount': '200g',
-        'addedAt': Timestamp.fromDate(testDate),
-      });
+        await fakeFirestore.collection('test').doc('item1').set({
+          'name': 'Cheese',
+          'amount': '200g',
+          'addedAt': Timestamp.fromDate(testDate),
+        });
 
-      final doc = await fakeFirestore.collection('test').doc('item1').get();
+        final doc = await fakeFirestore.collection('test').doc('item1').get();
 
-      // Act
-      final item = ShoppingItem.fromFirestore(doc);
+        // Act
+        final item = ShoppingItem.fromFirestore(doc);
 
-      // Assert
-      expect(item.id, 'item1');
-      expect(item.name, 'Cheese');
-      expect(item.amount, '200g');
-      expect(item.addedAt, testDate);
-    });
+        // Assert
+        expect(item.id, 'item1');
+        expect(item.name, 'Cheese');
+        expect(item.amount, '200g');
+        expect(item.addedAt, testDate);
+      },
+    );
 
-    test('fromFirestore 应该处理缺失字段', () async {
+    test('fromFirestore should handle missing fields', () async {
       // Arrange
       final fakeFirestore = FakeFirebaseFirestore();
 
@@ -110,13 +113,13 @@ void main() {
       expect(item.name, 'Apple');
       expect(item.amount, '');
       expect(item.addedAt, isNotNull);
-      // addedAt 应该是当前时间
+      // addedAt It should be the current time
       final now = DateTime.now();
       final diff = now.difference(item.addedAt);
       expect(diff.inSeconds.abs(), lessThan(5));
     });
 
-    test('fromFirestore 应该处理空字符串字段', () async {
+    test('fromFirestore should handle empty string fields', () async {
       // Arrange
       final fakeFirestore = FakeFirebaseFirestore();
 

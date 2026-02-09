@@ -7,7 +7,7 @@ import 'package:kitchen/core/utils/season_helper.dart';
 void main() {
   group('SeasonHelper -', () {
     group('getCurrentSeason - Northern Hemisphere', () {
-      test('应该在 3-5 月返回 spring', () {
+      test('You should return to spring in March-May', () {
         // Since we cannot control DateTime.now() during the test, we need to conduct the test through extension.
         // Here we test the logic: In March, April, and May, it should return to spring.
         // During the actual tests, we can verify the existence of the method and its basic functions.
@@ -22,7 +22,7 @@ void main() {
         expect(['spring', 'summer', 'autumn', 'winter'], contains(season));
       });
 
-      test('应该返回有效的季节名称', () {
+      test('Valid season names should be returned', () {
         // Act
         final season = SeasonHelper.getCurrentSeason(
           hemisphere: Hemisphere.northern,
@@ -32,7 +32,7 @@ void main() {
         expect(season, isIn(['spring', 'summer', 'autumn', 'winter']));
       });
 
-      test('默认应该使用北半球', () {
+      test('By default, the northern hemisphere should be used', () {
         // Act
         final seasonDefault = SeasonHelper.getCurrentSeason();
         final seasonNorthern = SeasonHelper.getCurrentSeason(
@@ -45,7 +45,7 @@ void main() {
     });
 
     group('getCurrentSeason - Southern Hemisphere', () {
-      test('应该返回与北半球相反的季节', () {
+      test('Should return to the opposite season of the northern hemisphere', () {
         // Act
         final northernSeason = SeasonHelper.getCurrentSeason(
           hemisphere: Hemisphere.northern,
@@ -64,7 +64,7 @@ void main() {
         expect(southernSeason, expectedSouthern);
       });
 
-      test('应该返回有效的季节名称', () {
+      test('Valid season names should be returned', () {
         // Act
         final season = SeasonHelper.getCurrentSeason(
           hemisphere: Hemisphere.southern,
@@ -76,7 +76,7 @@ void main() {
     });
 
     group('Hemisphere enum', () {
-      test('应该有两个值', () {
+      test('There should be two values', () {
         // Act
         final values = Hemisphere.values;
 
@@ -88,25 +88,28 @@ void main() {
     });
 
     group('Season logic validation', () {
-      test('北半球和南半球的季节应该相差 6 个月概念', () {
-        // This test verifies the consistency of the overall logic.
-        // No matter what season it is currently, the seasons in the two hemispheres should be opposite to each other.
+      test(
+        'The seasons in the northern and southern hemispheres should differ by six months',
+        () {
+          // This test verifies the consistency of the overall logic.
+          // No matter what season it is currently, the seasons in the two hemispheres should be opposite to each other.
 
-        // Act
-        final northern = SeasonHelper.getCurrentSeason(
-          hemisphere: Hemisphere.northern,
-        );
-        final southern = SeasonHelper.getCurrentSeason(
-          hemisphere: Hemisphere.southern,
-        );
+          // Act
+          final northern = SeasonHelper.getCurrentSeason(
+            hemisphere: Hemisphere.northern,
+          );
+          final southern = SeasonHelper.getCurrentSeason(
+            hemisphere: Hemisphere.southern,
+          );
 
-        // Assert - They should not be the same (unless in boundary cases)
-        // In most cases, they should be different.
-        if (northern == 'spring') expect(southern, 'autumn');
-        if (northern == 'summer') expect(southern, 'winter');
-        if (northern == 'autumn') expect(southern, 'spring');
-        if (northern == 'winter') expect(southern, 'summer');
-      });
+          // Assert - They should not be the same (unless in boundary cases)
+          // In most cases, they should be different.
+          if (northern == 'spring') expect(southern, 'autumn');
+          if (northern == 'summer') expect(southern, 'winter');
+          if (northern == 'autumn') expect(southern, 'spring');
+          if (northern == 'winter') expect(southern, 'summer');
+        },
+      );
     });
   });
 }

@@ -11,7 +11,7 @@ void main() {
   });
 
   group('BarcodeScannerScreen Widget Tests -', () {
-    testWidgets('应该显示页面标题 "Scan Barcode"', (WidgetTester tester) async {
+    testWidgets('should display page title "Scan Barcode"', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -27,7 +27,7 @@ void main() {
       );
     });
 
-    testWidgets('应该显示闪光灯切换按钮', (WidgetTester tester) async {
+    testWidgets('should display flash toggle button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -35,7 +35,7 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - Verify the flash button（flash_on or flash_off）
+      // Assert - Verify the flash button (flash_on or flash_off)
       final flashOnIcon = find.byIcon(Icons.flash_on);
       final flashOffIcon = find.byIcon(Icons.flash_off);
 
@@ -45,7 +45,7 @@ void main() {
       );
     });
 
-    testWidgets('应该显示切换摄像头按钮', (WidgetTester tester) async {
+    testWidgets('should display camera switch button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -57,7 +57,7 @@ void main() {
       expect(find.byIcon(Icons.cameraswitch), findsOneWidget);
     });
 
-    testWidgets('应该显示扫描框指示器', (WidgetTester tester) async {
+    testWidgets('should display scanning frame indicator', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -72,7 +72,7 @@ void main() {
       expect(containerFinder, findsWidgets);
     });
 
-    testWidgets('应该显示提示文字', (WidgetTester tester) async {
+    testWidgets('should display prompt text', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -80,11 +80,11 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      // Assert - Verification prompt text
+      // Assert - Verify prompt text
       expect(find.text('Align barcode within the frame'), findsOneWidget);
     });
 
-    testWidgets('应该能够点击闪光灯按钮', (WidgetTester tester) async {
+    testWidgets('should be able to click flash button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -100,11 +100,11 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Assert - Verification shows no abnormalities.
+      // Assert - Verify no exceptions occur
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该能够点击切换摄像头按钮', (WidgetTester tester) async {
+    testWidgets('should be able to click camera switch button', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -117,11 +117,11 @@ void main() {
       await tester.tap(switchButton);
       await tester.pump();
 
-      // Assert - Verification shows no abnormalities.
+      // Assert - Verify no exceptions occur
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('应该显示MobileScanner组件', (WidgetTester tester) async {
+    testWidgets('should display MobileScanner component', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -134,7 +134,7 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('应该使用Stack布局', (WidgetTester tester) async {
+    testWidgets('should use Stack layout', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -146,7 +146,7 @@ void main() {
       expect(find.byType(Stack), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('AppBar应该包含两个action按钮', (WidgetTester tester) async {
+    testWidgets('AppBar should contain two action buttons', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 
@@ -158,11 +158,11 @@ void main() {
       final appBarFinder = find.byType(AppBar);
       expect(appBarFinder, findsOneWidget);
 
-      // There should be at least 2 IconButton (for the flash and switching cameras)
+      // There should be at least 2 IconButtons (for flash and camera switch)
       expect(find.byType(IconButton), findsAtLeastNWidgets(2));
     });
 
-    testWidgets('提示文字应该在底部', (WidgetTester tester) async {
+    testWidgets('prompt text should be at bottom', (WidgetTester tester) async {
       // Arrange
       final widget = createTestApp(child: const BarcodeScannerScreen());
 

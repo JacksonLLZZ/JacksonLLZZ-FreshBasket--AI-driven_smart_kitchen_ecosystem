@@ -5,8 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kitchen/features/inventory/data/ingredient.dart';
 
 void main() {
-  group('Ingredient - 边界案例和特殊场景 -', () {
-    test('应该处理零数量', () {
+  group('Ingredient - Boundary cases and special scenarios -', () {
+    test('The zero quantity should be dealt with.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -20,7 +20,7 @@ void main() {
       expect(ingredient.quantity, 0);
     });
 
-    test('应该处理超长过期时间', () {
+    test('The excessively long expiration time should be dealt with.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -35,7 +35,7 @@ void main() {
       expect(ingredient.isExpired, isFalse);
     });
 
-    test('应该处理历史过期日期', () {
+    test('The historical expiration dates should be handled.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -53,7 +53,7 @@ void main() {
       expect(daysSinceExpired, greaterThan(9000)); // More than 25 years
     });
 
-    test('应该处理闰年日期', () {
+    test('The dates for leap years should be handled.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -68,7 +68,7 @@ void main() {
       expect(ingredient.expirationDate.day, 29);
     });
 
-    test('应该处理午夜时分的过期时间', () {
+    test('The expired time at midnight should be dealt with.', () {
       // Arrange
       final midnight = DateTime(2026, 6, 15, 0, 0, 0);
 
@@ -87,33 +87,36 @@ void main() {
       expect(ingredient.expirationDate.second, 0);
     });
 
-    test('应该处理跨时区的日期比较', () {
-      // Arrange
-      final date1 = DateTime.utc(2026, 6, 15, 12, 0);
-      final date2 = DateTime(2026, 6, 15, 12, 0); // Local time zone
+    test(
+      'The comparison of dates across different time zones should be handled.',
+      () {
+        // Arrange
+        final date1 = DateTime.utc(2026, 6, 15, 12, 0);
+        final date2 = DateTime(2026, 6, 15, 12, 0); // Local time zone
 
-      final ingredient1 = Ingredient(
-        id: 'test1',
-        name: 'UTC Item',
-        quantity: 1,
-        unit: 'piece',
-        expirationDate: date1,
-      );
+        final ingredient1 = Ingredient(
+          id: 'test1',
+          name: 'UTC Item',
+          quantity: 1,
+          unit: 'piece',
+          expirationDate: date1,
+        );
 
-      final ingredient2 = Ingredient(
-        id: 'test2',
-        name: 'Local Item',
-        quantity: 1,
-        unit: 'piece',
-        expirationDate: date2,
-      );
+        final ingredient2 = Ingredient(
+          id: 'test2',
+          name: 'Local Item',
+          quantity: 1,
+          unit: 'piece',
+          expirationDate: date2,
+        );
 
-      // Assert - The two dates should be different (unless in the UTC time zone)
-      expect(ingredient1.expirationDate, isNotNull);
-      expect(ingredient2.expirationDate, isNotNull);
-    });
+        // Assert - The two dates should be different (unless in the UTC time zone)
+        expect(ingredient1.expirationDate, isNotNull);
+        expect(ingredient2.expirationDate, isNotNull);
+      },
+    );
 
-    test('应该正确处理微秒级时间', () {
+    test('The microsecond-level time should be handled correctly.', () {
       // Arrange
       final preciseTime = DateTime(2026, 6, 15, 12, 30, 45, 123, 456);
 
@@ -131,7 +134,7 @@ void main() {
       expect(ingredient.expirationDate.microsecond, 456);
     });
 
-    test('ID 应该是唯一的', () {
+    test('ID should be unique.', () {
       // Arrange & Act
       final ingredient1 = Ingredient.create(
         name: 'Item 1',
@@ -151,24 +154,27 @@ void main() {
       expect(ingredient2.id, isNotEmpty);
     });
 
-    test('大量创建时 ID 应该尽可能唯一', () {
-      // Arrange & Act
-      final ids = <String>{};
-      for (int i = 0; i < 100; i++) {
-        final ingredient = Ingredient.create(
-          name: 'Item $i',
-          qty: 1,
-          unit: 'piece',
-        );
-        ids.add(ingredient.id);
-      }
+    test(
+      'When creating a large number of items, the IDs should be as unique as possible.',
+      () {
+        // Arrange & Act
+        final ids = <String>{};
+        for (int i = 0; i < 100; i++) {
+          final ingredient = Ingredient.create(
+            name: 'Item $i',
+            qty: 1,
+            unit: 'piece',
+          );
+          ids.add(ingredient.id);
+        }
 
-      // Assert - More than 80% of the IDs should be unique.
-      // Due to the use of timestamps, there may be some repetitions.
-      expect(ids.length, greaterThan(75));
-    });
+        // Assert - More than 80% of the IDs should be unique.
+        // Due to the use of timestamps, there may be some repetitions.
+        expect(ids.length, greaterThan(75));
+      },
+    );
 
-    test('应该处理极小的数量', () {
+    test('The quantity should be kept extremely small.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -183,7 +189,7 @@ void main() {
       expect(ingredient.quantity, greaterThan(0));
     });
 
-    test('应该处理极大的数量', () {
+    test('The quantity should be handled in a large scale.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -197,22 +203,25 @@ void main() {
       expect(ingredient.quantity, 999999.99);
     });
 
-    test('应该处理负数数量（虽然逻辑上不合理）', () {
-      // Arrange & Act
-      final ingredient = Ingredient(
-        id: 'test',
-        name: 'Negative',
-        quantity: -5,
-        unit: 'piece',
-        expirationDate: DateTime(2026, 12, 31),
-      );
+    test(
+      'The negative quantity should be dealt with (although it is logically unreasonable)',
+      () {
+        // Arrange & Act
+        final ingredient = Ingredient(
+          id: 'test',
+          name: 'Negative',
+          quantity: -5,
+          unit: 'piece',
+          expirationDate: DateTime(2026, 12, 31),
+        );
 
-      // Assert - The system should be able to store, even if it is not logically reasonable from a business perspective.
-      expect(ingredient.quantity, -5);
-      expect(ingredient.quantity, lessThan(0));
-    });
+        // Assert - The system should be able to store, even if it is not logically reasonable from a business perspective.
+        expect(ingredient.quantity, -5);
+        expect(ingredient.quantity, lessThan(0));
+      },
+    );
 
-    test('应该处理空单位字符串', () {
+    test('The empty unit string should be handled.', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
@@ -226,21 +235,21 @@ void main() {
       expect(ingredient.unit, isEmpty);
     });
 
-    test('应该处理特殊字符作为单位', () {
+    test('Special characters should be handled as units', () {
       // Arrange & Act
       final ingredient = Ingredient(
         id: 'test',
         name: 'Special Unit',
         quantity: 5,
-        unit: '个/件',
+        unit: 'piece / item',
         expirationDate: DateTime(2026, 12, 31),
       );
 
       // Assert
-      expect(ingredient.unit, '个/件');
+      expect(ingredient.unit, 'piece / item');
     });
 
-    test('倒计时天数计算 - 即将过期', () {
+    test('Countdown days calculation - About to expire', () {
       // Arrange
       final soonExpiry = DateTime.now().add(const Duration(days: 3));
       final ingredient = Ingredient(
@@ -264,7 +273,7 @@ void main() {
       ); // Take into account the time difference
     });
 
-    test('今天是过期日当天 - 边界测试', () {
+    test('Today is the expiration date day - boundary test', () {
       // Arrange
       final today = DateTime.now();
       final todayMidnight = DateTime(today.year, today.month, today.day);
@@ -282,17 +291,20 @@ void main() {
       expect(ingredient.isExpired, isTrue);
     });
 
-    test('同一时刻创建的食材应该尽可能有不同 ID', () {
-      // Arrange & Act - 在极短时间内创建多个
-      final ingredients = List.generate(
-        10,
-        (index) =>
-            Ingredient.create(name: 'Item $index', qty: 1, unit: 'piece'),
-      );
+    test(
+      'The ingredients created at the same time should have as many different IDs as possible.',
+      () {
+        // Arrange & Act - Create multiple in a very short period of time
+        final ingredients = List.generate(
+          10,
+          (index) =>
+              Ingredient.create(name: 'Item $index', qty: 1, unit: 'piece'),
+        );
 
-      // Assert - Most IDs should be unique (over 90%).
-      final ids = ingredients.map((e) => e.id).toSet();
-      expect(ids.length, greaterThanOrEqualTo(9));
-    });
+        // Assert - Most IDs should be unique (over 90%).
+        final ids = ingredients.map((e) => e.id).toSet();
+        expect(ids.length, greaterThanOrEqualTo(9));
+      },
+    );
   });
 }

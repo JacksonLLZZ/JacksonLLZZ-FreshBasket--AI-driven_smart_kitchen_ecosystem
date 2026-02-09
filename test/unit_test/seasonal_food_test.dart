@@ -6,7 +6,7 @@ import 'package:kitchen/features/shopping_list/domain/seasonal_food.dart';
 
 void main() {
   group('SeasonalFood Model -', () {
-    test('应该正确创建 SeasonalFood 实例', () {
+    test('The SeasonalFood instance should be created correctly', () {
       // Arrange & Act
       const food = SeasonalFood(
         id: 'apple_001',
@@ -28,7 +28,7 @@ void main() {
       expect(food.tags, ['fresh', 'vitamin-c']);
     });
 
-    test('应该从 JSON 正确解析', () {
+    test('Should be parsed correctly from JSON', () {
       // Arrange
       final json = {
         'id': 'tomato_001',
@@ -53,7 +53,7 @@ void main() {
       expect(food.tags, ['red', 'juicy']);
     });
 
-    test('应该从 JSON 字符串解析列表', () {
+    test('The list should be parsed from a JSON string', () {
       // Arrange
       const jsonString = '''
       [
@@ -91,7 +91,7 @@ void main() {
       expect(foods[1].seasons, ['spring', 'summer']);
     });
 
-    test('应该处理空列表 JSON', () {
+    test('Empty list JSON should be handled', () {
       // Arrange
       const jsonString = '[]';
 
@@ -102,7 +102,7 @@ void main() {
       expect(foods, isEmpty);
     });
 
-    test('应该处理多季节食材', () {
+    test('Multi-season ingredients should be handled', () {
       // Arrange
       final json = {
         'id': 'lettuce_001',
@@ -125,7 +125,7 @@ void main() {
       );
     });
 
-    test('应该处理空别名列表', () {
+    test('An empty alias list should be handled', () {
       // Arrange
       final json = {
         'id': 'potato_001',
@@ -144,7 +144,7 @@ void main() {
       expect(food.aliases, isEmpty);
     });
 
-    test('应该处理不同类型的 shelf life days', () {
+    test('Different types of shelf life days should be handled', () {
       // Arrange - test int
       final jsonInt = {
         'id': 'test_001',
@@ -176,7 +176,7 @@ void main() {
       expect(food2.defaultShelfLifeDays, 25);
     });
 
-    test('应该正确处理包含特殊字符的名称', () {
+    test('Names containing special characters should be handled correctly', () {
       // Arrange
       final json = {
         'id': 'special_001',

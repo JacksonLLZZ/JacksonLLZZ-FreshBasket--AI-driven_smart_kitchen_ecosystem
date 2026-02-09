@@ -54,7 +54,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
         slivers: [
-          // 顶部图片与标题
+          // Top image and title
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
@@ -98,14 +98,14 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
             ),
           ),
 
-          // 内容区域
+          // Content area
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 统计信息卡片
+                  // Statistics card
                   Card(
                     elevation: 2,
                     shape: RoundedRectangleBorder(
@@ -142,7 +142,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
 
                   const SizedBox(height: 24),
 
-                  // 显示地区标签（TheMealDB 独有）
+                  // Display region tags (TheMealDB exclusive)
                   if (widget.recipe.area != null ||
                       widget.recipe.category != null) ...[
                     Wrap(
@@ -169,7 +169,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
                     const SizedBox(height: 24),
                   ],
 
-                  // 使用的食材
+                  // Used ingredients
                   if (widget.recipe.usedIngredients.isNotEmpty) ...[
                     _buildSectionTitle(
                       context,
@@ -188,7 +188,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
                     const SizedBox(height: 24),
                   ],
 
-                  // 缺少的食材
+                  // Missing ingredients
                   if (widget.recipe.missedIngredients.isNotEmpty) ...[
                     _buildSectionTitle(
                       context,
@@ -206,7 +206,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
                     ),
                   ],
 
-                  // 烹饪说明（TheMealDB 独有）
+                  // Cooking instructions (TheMealDB exclusive)
                   if (widget.recipe.instructions != null &&
                       widget.recipe.instructions!.isNotEmpty) ...[
                     const SizedBox(height: 24),
@@ -236,7 +236,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
                     ),
                   ],
 
-                  // YouTube 视频链接（TheMealDB 独有）
+                  // YouTube video link (TheMealDB exclusive)
                   if (widget.recipe.youtubeUrl != null &&
                       widget.recipe.youtubeUrl!.isNotEmpty) ...[
                     const SizedBox(height: 24),
@@ -329,7 +329,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
     );
   }
 
-  // 构建标签
+  // Build tag
   Widget _buildTag(IconData icon, String label, MaterialColor color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -356,7 +356,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
     );
   }
 
-  // 从逗号分隔的字符串构建标签列表
+  // Build tag list from comma-separated string
   List<Widget> _buildTagsFromString(String tagsString) {
     final tags = tagsString
         .split(',')
@@ -432,7 +432,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
       ),
       child: Row(
         children: [
-          // 食材图片（如果有）
+          // Ingredient image (if available)
           if (ingredient.image != null) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -461,7 +461,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
             ),
             const SizedBox(width: 12),
           ],
-          // 食材信息
+          // Ingredient information
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +504,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
       ),
       child: Row(
         children: [
-          // 食材图片（如果有）
+          // Ingredient image (if available)
           if (ingredient.image != null) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -533,7 +533,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
             ),
             const SizedBox(width: 12),
           ],
-          // 食材信息
+          // Ingredient information
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +554,7 @@ class _RecipeInfoScreenState extends State<RecipeInfoScreen> {
               ],
             ),
           ),
-          // 购物车按钮或已添加标记
+          // Shopping cart button or added marker
           if (inCart)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
