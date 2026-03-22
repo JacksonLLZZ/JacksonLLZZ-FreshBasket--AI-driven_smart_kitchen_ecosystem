@@ -1,1 +1,0 @@
-# Smart Kitchen Management App
