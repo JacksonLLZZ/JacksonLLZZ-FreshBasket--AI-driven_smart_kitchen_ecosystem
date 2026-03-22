@@ -57,9 +57,7 @@ FreshBasket follows a feature-driven architecture, separating presentation, doma
 3.  Configure APIs: Add your API keys in `lib/core/config/api_config.dart`. (Note: Configure your Gemini API key directly inside the app's Profile -\> Advanced Options).
 4.  Run the app: `flutter run`
 
------
-
-\<h2 id="中文版"\>🇨🇳 中文版\</h2\>
+--------**中文版**
 
 ### 📖 项目简介
 
