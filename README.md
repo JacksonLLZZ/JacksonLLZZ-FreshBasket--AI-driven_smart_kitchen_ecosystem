@@ -1,7 +1,3 @@
-这是一份为您量身定制的 GitHub README 模板，包含中英文双语版本。结构上分为项目简介、产品设计（核心功能）、技术方案（架构与API）以及运行指南，力求逻辑清晰、专业度高。
-
------
-
 # FreshBasket 🥗
 
 > Smart Kitchen & Pantry Management Assistant / 智能厨房与食材管理助手
@@ -122,12 +118,7 @@ FreshBasket follows a feature-driven architecture, separating presentation, doma
       * **大语言模型**：Google Generative AI (Gemini API，支持流式输出响应)
 
 ### 🚀 运行指南
+1.  配置 API 密钥：在 `lib/core/config/api_config.dart` 文件中填入相应的第三方 API Key。（注：Gemini 的 API Key 可直接在 App 内部的 Profile -\> Advanced Options 中配置）。
+2.  需要提前下载Android Studio软件并配置好安卓模拟器
+3.  本项目配置的有手机和平板两种模式
 
-1.  克隆项目：`git clone https://github.com/yourusername/FreshBasket.git`
-2.  获取依赖：`flutter pub get`
-3.  配置 API 密钥：在 `lib/core/config/api_config.dart` 文件中填入相应的第三方 API Key。（注：Gemini 的 API Key 可直接在 App 内部的 Profile -\> Advanced Options 中配置）。
-4.  运行应用：`flutter run`
-
------
-
-*Made with ❤️ using Flutter & Firebase*
