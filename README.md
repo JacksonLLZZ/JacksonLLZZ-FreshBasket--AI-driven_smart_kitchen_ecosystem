@@ -1,13 +1,6 @@
 # FreshBasket 🥗
 
 > Smart Kitchen & Pantry Management Assistant / 智能厨房与食材管理助手
-
-[English](https://www.google.com/search?q=%23english) | [中文版](https://www.google.com/search?q=%23%E4%B8%AD%E6%96%87%E7%89%88)
-
------
-
-\<h2 id="english"\>🇺🇸 English\</h2\>
-
 ### 📖 Introduction
 
 **FreshBasket** is a cross-platform smart kitchen assistant built with Flutter. It helps users easily manage their fridge inventory, track ingredient expiration dates, discover recipes based on what they already have, and interact with an AI culinary assistant. Whether you want to reduce food waste or find cooking inspiration, FreshBasket is your ultimate digital sous-chef.
