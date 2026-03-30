@@ -63,6 +63,8 @@ FreshBasket follows a feature-driven architecture, separating presentation, doma
 
 **FreshBasket** 是一款基于 Flutter 开发的跨平台智能厨房助手。它旨在帮助用户轻松管理冰箱库存、追踪食材保质期、根据现有食材智能推荐菜谱，并提供强大的 AI 烹饪问答服务。无论是为了减少食物浪费，还是寻找烹饪灵感，FreshBasket 都是您得力的数字化厨师长。
 
+**PRD内容可见DIMA_DD.PDF文档（包含测试内容）**
+
 ### ✨ 产品设计与核心功能
 
 产品的交互逻辑围绕用户在厨房的日常生命周期设计：**采购 -\> 管理 -\> 烹饪 -\> 规划**。
