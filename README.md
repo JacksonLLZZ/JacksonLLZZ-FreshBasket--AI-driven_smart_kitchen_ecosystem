@@ -66,7 +66,7 @@ FreshBasket follows a feature-driven architecture, separating presentation, doma
 ### ✨ 产品设计与核心功能
 
 产品的交互逻辑围绕用户在厨房的日常生命周期设计：**采购 -\> 管理 -\> 烹饪 -\> 规划**。
-
+<img width="4079" height="2538" alt="Product_Architecture" src="https://github.com/user-attachments/assets/08790798-fc89-48a8-be31-0fb1f47312c9" />
 1.  **智能库存管理（Fridge）**
       * 记录食材数量、单位及过期时间。
       * 自动计算保质期，并针对 3 天内过期的食材发送本地 Push 通知提醒。
@@ -94,6 +94,7 @@ FreshBasket follows a feature-driven architecture, separating presentation, doma
 ### 🛠 技术方案与架构设计
 
 项目采用按功能模块划分（Feature-first）的目录架构，严格分离 UI 层、数据层与业务逻辑层。
+<img width="1178" height="975" alt="Frame 1" src="https://github.com/user-attachments/assets/393079b3-b816-4b1e-9ed3-0924b0b8656d" />
 
   * **前端框架**：Flutter (Dart)
   * **后端服务 / BaaS**：Firebase
